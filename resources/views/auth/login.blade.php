@@ -19,7 +19,7 @@
                                     Email / Username
                                     <span class="text-tomato">*</span>
                                 </label>
-                                <div class="input-container w-full rounded-lg bg-white border-lightgray border-solid border-[1px] box-border h-11 overflow-hidden flex flex-row items-center py-2.5 px-4 text-gray-200 font-outfit">
+                                <div class="input-container w-full shadow-[0px_1px_2px_rgba(16,_24,_40,_0.05)] rounded-lg bg-white border-lightgray border-solid border-[1px] box-border h-11 overflow-hidden flex flex-row items-center py-2.5 px-4 text-gray-200 font-outfit">
                                     <x-text-input id="email" name="email" type="text" placeholder="Enter your email or username" required autofocus autocomplete="username" class="flex-1 relative leading-5 bg-transparent border-none" />
                                 </div>
                                 @error('email')
@@ -35,7 +35,7 @@
                                     Password
                                     <span class="text-tomato">*</span>
                                 </label>
-                                <div class="input-container w-full rounded-lg bg-white border-lightgray border-solid border-[1px] box-border h-11 overflow-hidden flex flex-row items-center py-2.5 px-4 gap-2 text-gray-200 font-outfit">
+                                <div class="input-container w-full shadow-[0px_1px_2px_rgba(16,_24,_40,_0.05)] rounded-lg bg-white border-lightgray border-solid border-[1px] box-border h-11 overflow-hidden flex flex-row items-center py-2.5 px-4 gap-2 text-gray-200 font-outfit">
                                     <x-text-input id="password" name="password" type="password" placeholder="Enter your password" required autocomplete="current-password" class="flex-1 relative leading-5 bg-transparent border-none" />
                                     <img class="w-5 relative h-5 object-cover cursor-pointer toggle-password" alt="Toggle password visibility" src="{{ asset('images/eye-enabled.svg') }}">
                                 </div>
@@ -57,7 +57,7 @@
 
                     <!-- Submit Button -->
                     <div class="w-full flex flex-col items-start justify-start mt-6">
-                        <button type="submit" class="login-button w-full rounded-lg bg-slategray-200 border-slategray-200 border-solid border-[1px] overflow-hidden flex flex-row items-center justify-center py-3 px-4 font-outfit text-white">
+                        <button type="submit" class="login-button w-full shadow-[0px_1px_2px_rgba(16,_24,_40,_0.05)] rounded-lg bg-slategray-200 border-slategray-200 border-solid border-[1px] overflow-hidden flex flex-row items-center justify-center py-3 px-4 font-outfit text-white">
                             <span class="relative leading-5 font-medium">Log In</span>
                         </button>
                     </div>

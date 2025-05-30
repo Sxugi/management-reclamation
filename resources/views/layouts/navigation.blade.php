@@ -44,13 +44,13 @@
 
     <!-- Mobile menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden absolute top-full left-0 right-0 sm:hidden bg-gainsboro border-solid border-b-[1px] border-r-[0px] border-l-[0px] border-t-[0px] box-border border-darkslategray z-10 overflow-hidden">
-        <div class="pt-4 pb-1">
+        <div class="pt-4">
             <div class="px-4">
                 <div class="font-medium text-base text-black font-outfit">{{ Auth::user()->username }}</div>
                 <div class="font-medium text-sm text-gray-500 font-outfit">{{ Auth::user()->email }}</div>
             </div>
 
-            <div class="mt-3 space-y-1">
+            <div class="mt-3 space-y-1 border-solid border-b-[0px] border-r-[0px] border-l-[0px] border-t-[1px] box-border border-darkslategray">
                 <x-responsive-nav-link :href="route('profile.edit')" class="block px-4 py-2 text-sm text-black no-underline font-outfit">
                     {{ __('Profile') }}
                 </x-responsive-nav-link>

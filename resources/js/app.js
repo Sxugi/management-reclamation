@@ -66,3 +66,27 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+//Simple script to handle dropdown toggle
+document.addEventListener('DOMContentLoaded', function() {
+    const dropdownButtons = document.querySelectorAll('.dropdown button');
+    
+    dropdownButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const menu = this.nextElementSibling;
+            menu.classList.toggle('hidden');
+        });
+    });
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(event) {
+        dropdownButtons.forEach(button => {
+            if (!button.contains(event.target)) {
+                const menu = button.nextElementSibling;
+                if (!menu.classList.contains('hidden')) {
+                    menu.classList.add('hidden');
+                }
+            }
+        });
+    });
+});

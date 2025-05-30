@@ -1,11 +1,8 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\LahanController;
 use Illuminate\Support\Facades\Route;
-
-Route::get('/', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -13,8 +10,9 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-Route::get('/test', function () {
-    return view('test');
+Route::middleware(['auth'])->group(function () {
+    Route::get('/', [LahanController::class, 'index'])->name('dashboard');
+    Route::resource('lahans', LahanController::class);
 });
 
 require __DIR__.'/auth.php';
