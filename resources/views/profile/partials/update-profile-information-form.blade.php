@@ -19,19 +19,19 @@
 
         <div class="grid grid-cols-1 gap-8 sm:grid-cols-2">
             <div class="sm:col-span-2">
-                <x-input-label for="username" :value="__('Username')" />
+                <x-main.input-label for="username" :value="__('Username')" />
                 <div class="mt-2">
-                    <x-text-input id="username" name="username" type="text" :value="old('username', $user->username)" required autofocus autocomplete="username" />
+                    <x-main.text-input id="username" name="username" type="text" :value="old('username', $user->username)" required autofocus autocomplete="username" />
                 </div>
-                <x-input-error class="mt-2" :messages="$errors->get('username')" />
+                <x-main.input-error class="mt-2" :messages="$errors->get('username')" />
             </div>
 
             <div class="sm:col-span-2">
-                <x-input-label for="email" :value="__('Email')" />
+                <x-main.input-label for="email" :value="__('Email')" />
                 <div class="mt-2">
-                    <x-text-input id="email" name="email" type="email" :value="old('email', $user->email)" required autocomplete="email" />
+                    <x-main.text-input id="email" name="email" type="email" :value="old('email', $user->email)" required autocomplete="email" />
                 </div>
-                <x-input-error class="mt-2" :messages="$errors->get('email')" />
+                <x-main.input-error class="mt-2" :messages="$errors->get('email')" />
 
                 @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
                     <div class="mt-3">
@@ -54,7 +54,7 @@
         </div>
 
         <div class="flex items-center justify-start gap-4 mt-6">
-            <x-primary-button>{{ __('Save') }}</x-primary-button>
+            <x-main.primary-button>{{ __('Save') }}</x-main.primary-button>
 
             @if (session('status') === 'profile-updated')
                 <p

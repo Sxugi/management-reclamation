@@ -1,6 +1,16 @@
 import './bootstrap';
-
 import Alpine from 'alpinejs';
+
+import maplibregl from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
+
+import MaplibreGeocoder from '@maplibre/maplibre-gl-geocoder';
+import '@maplibre/maplibre-gl-geocoder/dist/maplibre-gl-geocoder.css';
+
+window.maplibregl = maplibregl;
+window.MaplibreGeocoder = MaplibreGeocoder;
+
+import './components/map-component.js';
 
 window.Alpine = Alpine;
 
@@ -90,3 +100,4 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+

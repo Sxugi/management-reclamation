@@ -2,7 +2,7 @@
     <!-- Logo -->
     <div class="w-[191px] h-[37px] flex flex-row items-center justify-center">
         <a href="{{ route('dashboard') }}" class="w-[191px] relative h-[37px] flex">
-            <x-application-logo class="w-[41px] h-[37px] object-cover" />
+            <x-main.application-logo class="w-[41px] h-[37px] object-cover" />
         </a>
     </div>
 
@@ -51,9 +51,9 @@
             </div>
 
             <div class="mt-3 space-y-1 border-solid border-b-[0px] border-r-[0px] border-l-[0px] border-t-[1px] box-border border-darkslategray">
-                <x-responsive-nav-link :href="route('profile.edit')" class="block px-4 py-2 text-sm text-black no-underline font-outfit">
+                <x-main.responsive-nav-link :href="route('profile.edit')" class="block px-4 py-2 text-sm text-black no-underline font-outfit">
                     {{ __('Profile') }}
-                </x-responsive-nav-link>
+                </x-main.responsive-nav-link>
 
                 <!-- Authentication -->
                 <form method="POST" action="{{ route('logout') }}">

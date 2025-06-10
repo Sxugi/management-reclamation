@@ -8,21 +8,17 @@ use Illuminate\Support\Facades\Auth;
 
 class LahanController extends Controller
 {
-    // /**
-    //  * Create a new controller instance.
-    //  */
-    // public function __construct()
-    // {
-    //     $this->middleware('auth');
-    // }
-    
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $lahans = Lahan::where('user_id', Auth::user()->user_id)->get();
-        return view('lahans.index', compact('lahans'));
+        $lahan = Lahan::where('user_id', Auth::user()->user_id)->get();
+
+        // Sorting the lahan by created_at in ascending order
+        $lahan = $lahan->sortBy('created_at');
+
+        return view('lahan.index', compact('lahan'));
     }
 
     /**
@@ -30,7 +26,7 @@ class LahanController extends Controller
      */
     public function create()
     {
-        return view('lahans.create');
+        return view('lahan.create');
     }
 
     /**
@@ -44,14 +40,19 @@ class LahanController extends Controller
             'tahun_awal' => 'required|integer|min:1900|max:' . (date('Y') + 50),
             'tahun_akhir' => 'required|integer|min:' . $request->tahun_awal,
             'pic_reklamasi' => 'required|string|max:255',
+            'longitude' => 'required|numeric',
+            'latitude' => 'required|numeric',
         ]);
         
         // Add the current user's ID
         $validated['user_id'] = Auth::user()->user_id;
         
-        Lahan::create($validated);
+        $lahan = Lahan::create($validated);
+
+        // Save the location after the model is created
+        $lahan->setLocation($validated['longitude'], $validated['latitude']);
         
-        return redirect()->route('lahans.index')
+        return redirect()->route('lahan.index')
                         ->with('success', 'Data lahan berhasil ditambahkan');
     }
 
@@ -67,7 +68,7 @@ class LahanController extends Controller
             abort(403, 'Unauthorized action.');
         }
         
-        return view('lahans.show', compact('lahan'));
+        return view('lahan.show', compact('lahan'));
     }
 
     /**
@@ -82,7 +83,7 @@ class LahanController extends Controller
             abort(403, 'Unauthorized action.');
         }
         
-        return view('lahans.edit', compact('lahan'));
+        return view('lahan.edit', compact('lahan'));
     }
 
     /**
@@ -103,11 +104,13 @@ class LahanController extends Controller
             'tahun_awal' => 'required|integer|min:1900|max:' . (date('Y') + 50),
             'tahun_akhir' => 'required|integer|min:' . $request->tahun_awal,
             'pic_reklamasi' => 'required|string|max:255',
+            'longitude' => 'required|numeric',
+            'latitude' => 'required|numeric',
         ]);
         
         $lahan->update($validated);
         
-        return redirect()->route('lahans.index')
+        return redirect()->route('lahan.index')
                         ->with('success', 'Data lahan berhasil diperbarui');
     }
 
@@ -125,7 +128,22 @@ class LahanController extends Controller
         
         $lahan->delete();
         
-        return redirect()->route('lahans.index')
+        return redirect()->route('lahan.index')
                         ->with('success', 'Data lahan berhasil dihapus');
+    }
+
+    /**
+     * Update the specified lahan status.
+     */
+    public function updateStatus(Request $request, Lahan $lahan)
+    {
+        $validated = $request->validate([
+            'status' => 'required|in:Active,Non - Active,Finished',
+        ]);
+        
+        $lahan->status = $validated['status'];
+        $lahan->save();
+        
+        return redirect()->back()->with('success', 'Status lahan berhasil diperbarui.');
     }
 }

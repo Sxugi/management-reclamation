@@ -19,8 +19,10 @@ return new class extends Migration
             $table->year('tahun_awal');
             $table->year('tahun_akhir');
             $table->string('pic_reklamasi');
+            $table->string('status')->default('aktif');
             $table->timestamps();
         });
+         DB::statement('ALTER TABLE lahans ADD COLUMN location GEOMETRY(Point, 4326)');
     }
 
     /**

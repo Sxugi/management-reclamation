@@ -12,7 +12,8 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/', [LahanController::class, 'index'])->name('dashboard');
-    Route::resource('lahans', LahanController::class);
+    Route::patch('lahan/{lahan}/status', [LahanController::class, 'updateStatus'])->name('lahan.update-status');
+    Route::resource('lahan', LahanController::class);
 });
 
 require __DIR__.'/auth.php';
