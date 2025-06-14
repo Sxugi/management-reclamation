@@ -8,6 +8,7 @@ document.addEventListener('alpine:init', () => {
             lng: null,
             lat: null
         },
+        currentBasemap: 'arcgis_hybrid',
         searchResults: [],
         isSearching: false,
         
@@ -203,27 +204,7 @@ document.addEventListener('alpine:init', () => {
             // Handle ArcGIS Hybrid specially
             if (basemapId === 'arcgis_hybrid') {
                 this.map.setStyle(this.getHybridStyle());
-            } else if (basemapId === 'arcgis') {
-                // ArcGIS Satellite
-                const satelliteStyle = {
-                    version: 8,
-                    sources: {
-                        'raster-tiles': {
-                            type: 'raster',
-                            tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-                            tileSize: 256,
-                            attribution: 'Tiles &copy; Esri'
-                        }
-                    },
-                    layers: [{
-                        id: 'basemap',
-                        type: 'raster',
-                        source: 'raster-tiles',
-                        minzoom: 0,
-                        maxzoom: 22
-                    }]
-                };
-                this.map.setStyle(satelliteStyle);
+                this.currentBasemap = 'arcgis_hybrid';
             } else if (basemapId === 'osm') {
                 // OpenStreetMap
                 const osmStyle = {
@@ -245,6 +226,7 @@ document.addEventListener('alpine:init', () => {
                     }]
                 };
                 this.map.setStyle(osmStyle);
+                this.currentBasemap = 'osm';
             }
             
             // Restore view state when style is loaded

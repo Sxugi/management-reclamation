@@ -19,7 +19,7 @@
                                     Email / Username
                                     <span class="text-tomato">*</span>
                                 </label>
-                                <div class="input-container w-full shadow-[0px_1px_2px_rgba(16,_24,_40,_0.05)] rounded-lg bg-white border-lightgray border-solid border-[1px] box-border h-11 overflow-hidden flex flex-row items-center py-2.5 px-4 text-gray-200 font-outfit">
+                                <div class="input-container w-full shadow-[0px_1px_2px_rgba(16,_24,_40,_0.05)] rounded-lg bg-white border-lightgray border-solid border-[1px] box-border h-11 overflow-hidden flex flex-row items-center py-2.5 px-4 text-gray-200">
                                     <x-main.text-input 
                                         id="email" 
                                         name="email" 
@@ -43,7 +43,7 @@
                                     Password
                                     <span class="text-tomato">*</span>
                                 </label>
-                                <div class="input-container w-full shadow-[0px_1px_2px_rgba(16,_24,_40,_0.05)] rounded-lg bg-white border-lightgray border-solid border-[1px] box-border h-11 overflow-hidden flex flex-row items-center py-2.5 px-4 gap-2 text-gray-200 font-outfit">
+                                <div class="input-container w-full shadow-[0px_1px_2px_rgba(16,_24,_40,_0.05)] rounded-lg bg-white border-lightgray border-solid border-[1px] box-border h-11 overflow-hidden flex flex-row items-center py-2.5 px-4 gap-2 text-gray-200">
                                     <x-main.text-input 
                                         id="password" 
                                         name="password" 
