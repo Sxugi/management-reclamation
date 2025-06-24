@@ -33,7 +33,7 @@
                 <!-- Status -->
                 <div>
                     <x-lahan.info-label>Status Reklamasi</x-lahan.info-label>
-                    <x-lahan.status-dropdown :status="$lahan->status ?? 'Aktif'" :lahan="$lahan" />
+                    <x-lahan.status-dropdown :status="$lahan->status ?? 'Active'" :lahan="$lahan" />
                 </div>
             </div>
             

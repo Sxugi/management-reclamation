@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+a:visited {
+  color: inherit; /* Keeps the same color as non-visited */
+}
+
 @layer components {
   /* Remove all borders and outlines in normal and focus states */
   input,

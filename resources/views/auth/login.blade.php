@@ -81,4 +81,26 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const togglePasswordVisibility = document.querySelector('.toggle-password');
+            const passwordInput = document.getElementById('password');
+            
+            if (togglePasswordVisibility && passwordInput) {
+                togglePasswordVisibility.addEventListener('click', function() {
+                    // Toggle password visibility
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    
+                    // Toggle eye icon
+                    const iconSrc = type === 'password' 
+                        ? '/images/eye-enabled.svg'  // Hidden password
+                        : '/images/eye-disabled.svg';  // Visible password
+                        
+                    this.setAttribute('src', iconSrc);
+                });
+            }
+        });
+    </script>
 </x-guest-layout>

@@ -1,12 +1,12 @@
 document.addEventListener('alpine:init', () => {
     // Register the map component
-    Alpine.data('mapComponent', () => ({
+    Alpine.data('mapComponent', (initialData = {}) => ({
         map: null,
         marker: null,
         geocoder: null,
         coordinates: {
-            lng: null,
-            lat: null
+            lng: initialData.longitude ? parseFloat(initialData.longitude) : null,
+            lat: initialData.latitude ? parseFloat(initialData.latitude) : null
         },
         currentBasemap: 'arcgis_hybrid',
         searchResults: [],
@@ -32,16 +32,35 @@ document.addEventListener('alpine:init', () => {
             
             const maplibregl = window.maplibregl;
             
+            // Default center if no coordinates
+            let centerLng = 118.0149; 
+            let centerLat = -2.5489;
+            let initialZoom = 5;
+            
+            // Use existing coordinates if available
+            if (this.coordinates.lng !== null && this.coordinates.lat !== null) {
+                centerLng = this.coordinates.lng;
+                centerLat = this.coordinates.lat;
+                initialZoom = 14;
+            }
+            
             // Create the map with ArcGIS Hybrid basemap
             this.map = new maplibregl.Map({
                 container: 'map',
                 style: this.getHybridStyle(),
-                center: [118.0149, -2.5489], // Indonesia's center
-                zoom: 5
+                center: [centerLng, centerLat], 
+                zoom: initialZoom
             });
             
             // Add navigation controls
             this.map.addControl(new maplibregl.NavigationControl());
+            
+            // Add initial marker if coordinates exist
+            if (this.coordinates.lng !== null && this.coordinates.lat !== null) {
+                this.marker = new maplibregl.Marker()
+                    .setLngLat([this.coordinates.lng, this.coordinates.lat])
+                    .addTo(this.map);
+            }
             
             // Add click handler for selecting coordinates
             this.map.on('click', (e) => {
@@ -245,7 +264,6 @@ document.addEventListener('alpine:init', () => {
         }
     }));
     
-    // Register the form component (unchanged)
     Alpine.data('formData', () => ({
         longitude: '',
         latitude: '',
@@ -261,8 +279,7 @@ document.addEventListener('alpine:init', () => {
                 this.latitude = latInput.value;
                 this.checkFormValidity();
             }
-            
-            // REPLACE $listen with window.addEventListener
+
             window.addEventListener('coordinates-updated', (event) => {
                 // Custom events put their data in the detail property
                 const coordinates = event.detail;

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Lahan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Requests\Lahan\CreateLahanRequest;
+use App\Http\Requests\Lahan\UpdateLahanRequest;
 
 class LahanController extends Controller
 {
@@ -32,18 +34,11 @@ class LahanController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
-    {
-        $validated = $request->validate([
-            'nama_lahan' => 'required|string|max:255',
-            'luas_lahan' => 'required|numeric|min:0',
-            'tahun_awal' => 'required|integer|min:1900|max:' . (date('Y') + 50),
-            'tahun_akhir' => 'required|integer|min:' . $request->tahun_awal,
-            'pic_reklamasi' => 'required|string|max:255',
-            'longitude' => 'required|numeric',
-            'latitude' => 'required|numeric',
-        ]);
-        
+    public function store(CreateLahanRequest $request)
+    {     
+        // Validate the request data
+        $validated = $request->validated();
+
         // Add the current user's ID
         $validated['user_id'] = Auth::user()->user_id;
         
@@ -68,7 +63,7 @@ class LahanController extends Controller
             abort(403, 'Unauthorized action.');
         }
         
-        return view('lahan.show', compact('lahan'));
+        return view('detail-lahan.dashboard', compact('lahan'));
     }
 
     /**
@@ -89,7 +84,7 @@ class LahanController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $lahan_id)
+    public function update(UpdateLahanRequest $request, $lahan_id)
     {
         $lahan = Lahan::findOrFail($lahan_id);
         
@@ -97,19 +92,18 @@ class LahanController extends Controller
         if ($lahan->user_id !== Auth::user()->user_id) {
             abort(403, 'Unauthorized action.');
         }
-        
-        $validated = $request->validate([
-            'nama_lahan' => 'required|string|max:255',
-            'luas_lahan' => 'required|numeric|min:0',
-            'tahun_awal' => 'required|integer|min:1900|max:' . (date('Y') + 50),
-            'tahun_akhir' => 'required|integer|min:' . $request->tahun_awal,
-            'pic_reklamasi' => 'required|string|max:255',
-            'longitude' => 'required|numeric',
-            'latitude' => 'required|numeric',
-        ]);
-        
+
+        $validated = $request->validated();
+
         $lahan->update($validated);
-        
+
+        if (isset($validated['longitude']) && isset($validated['latitude'])) {
+            $lahan->setLocation(
+                $validated['longitude'],
+                $validated['latitude']
+            );
+        }
+
         return redirect()->route('lahan.index')
                         ->with('success', 'Data lahan berhasil diperbarui');
     }

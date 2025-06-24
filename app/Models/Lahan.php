@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Lahan extends Model
 {
@@ -31,6 +33,12 @@ class Lahan extends Model
         'pic_reklamasi',
         'status',
     ];
+
+    public function getRouteKeyName()
+    {
+        return 'lahan_id';
+    }
+
 
     // Set location (point) from latitude and longitude
     public function setLocation($longitude, $latitude)
@@ -66,8 +74,13 @@ class Lahan extends Model
         return $point[0]->longitude ?? null;
     }
 
-    public function user()
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id', 'user_id');
+        return $this->belongsTo(User::class);
+    }
+
+    public function plot(): HasMany
+    {
+        return $this->hasMany(Plot::class);
     }
 }

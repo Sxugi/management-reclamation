@@ -7,7 +7,7 @@
                 </svg>
                 <span class="text-white">Back</span>
             </a>
-            <h2 class="text-xl sm:text-2xl font-bold text-darkslategray-200 font-outfit">Input Data Lahan</h2>
+            <h2 class="text-xl sm:text-2xl font-bold text-darkslategray-300 font-outfit">Edit Data Lahan</h2>
         </div>
     </x-slot>
 
@@ -15,10 +15,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Map Column -->
-                <x-lahan.map />
+                <x-lahan.map :longitude="$lahan->longitude ?? null" :latitude="$lahan->latitude ?? null" />
 
                 <!-- Form Column -->
-                <x-lahan.form />
+                <x-lahan.form :lahan="$lahan" />
             </div>
         </div>
     </div>

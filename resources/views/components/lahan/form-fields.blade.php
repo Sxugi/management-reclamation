@@ -1,3 +1,5 @@
+@props(['lahan' => null])
+
 <!-- Nama Lahan -->
 <div class="space-y-1.5">
     <x-main.input-label for="nama_lahan" :value="__('Nama Lahan')" class="text-darkslategray-200" />
@@ -7,7 +9,7 @@
             name="nama_lahan"
             type="text"
             class="block w-full"
-            :value="old('nama_lahan')"
+            :value="old('nama_lahan', $lahan?->nama_lahan ?? '')"
             required
             placeholder="Masukkan nama lahan"
         />
@@ -25,7 +27,7 @@
             type="number"
             step="0.01"
             class="block w-full"
-            :value="old('luas_lahan')"
+            :value="old('luas_lahan', $lahan?->luas_lahan ?? '')"
             required
             placeholder="0.00"
         />
@@ -45,7 +47,7 @@
                 class="border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm block w-full font-outfit"
                 required
             >
-                <option value="" disabled {{ old('tahun_awal') ? '' : 'selected' }}>Tahun Awal</option>
+                <option value="" disabled {{ old('tahun_awal', $lahan?->tahun_awal ?? '') ? '' : 'selected' }}>Tahun Awal</option>
                 @for ($year = date('Y') - 5; $year <= date('Y') + 5; $year++)
                     <option value="{{ $year }}" {{ old('tahun_awal') == $year ? 'selected' : '' }}>
                         {{ $year }}
@@ -63,8 +65,8 @@
                 class="border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm block w-full font-outfit"
                 required
             >
-                <option value="" disabled {{ old('tahun_akhir') ? '' : 'selected' }}>Tahun Akhir</option>
-                @for ($year = date('Y') - 1; $year <= date('Y') + 10; $year++)
+                <option value="" disabled {{ old('tahun_akhir', $lahan?->tahun_akhir ?? '') ? '' : 'selected' }}>Tahun Akhir</option>
+                @for ($year = date('Y') - 1; $year <= date('Y') + 9; $year++)
                     <option value="{{ $year }}" {{ old('tahun_akhir') == $year ? 'selected' : '' }}>
                         {{ $year }}
                     </option>
@@ -84,7 +86,7 @@
             name="pic_reklamasi"
             type="text"
             class="block w-full"
-            :value="old('pic_reklamasi')"
+            :value="old('pic_reklamasi', $lahan?->pic_reklamasi ?? '')"
             required
             placeholder="Masukkan nama PIC"
         />
