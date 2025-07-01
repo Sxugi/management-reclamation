@@ -14,7 +14,7 @@
             margin: 0;
             padding: 0;
         }
-        @media (min-width: 768px) {
+        @media (min-width: 1024px) {
             .main-content {
                 margin-left: 16rem;
             }
@@ -24,13 +24,13 @@
             }
         }
     </style>
-    <body class="font-sans antialiased">
-        <div x-data="{ sidebarOpen: false }" class="w-full min-h-screen bg-gray-100">
+    <body class="font-sans antialiased bg-whitesmoke">
+        <div x-data="{ sidebarOpen: false }" class="w-full min-h-screen">
             <!-- Mobile sidebar backdrop -->
             <div 
                 x-show="sidebarOpen" 
                 @click="sidebarOpen = false" 
-                class="fixed inset-0 z-20 bg-gray-600 bg-opacity-75 md:hidden"
+                class="fixed inset-0 z-20 bg-gray-600 bg-opacity-75 lg:hidden"
                 x-transition:enter="transition-opacity ease-linear duration-300"
                 x-transition:enter-start="opacity-0"
                 x-transition:enter-end="opacity-100"
@@ -42,7 +42,7 @@
             <!-- Mobile sidebar -->
             <div
                 x-show="sidebarOpen"
-                class="fixed inset-y-0 left-0 z-30 w-64 md:hidden"
+                class="fixed inset-y-0 left-0 z-30 w-64 lg:hidden"
                 x-transition:enter="transition ease-in-out duration-300 transform"
                 x-transition:enter-start="-translate-x-full"
                 x-transition:enter-end="translate-x-0"
@@ -54,7 +54,7 @@
 
             <div class="min-h-full bg-whitesmoke flex flex-row">
                 <!-- Sidebar -->
-                <div class="hidden md:block h-screen">
+                <div class="hidden lg:block h-screen">
                     @include('layouts.sidebar')
                 </div>
                 <!-- Main Content Area -->

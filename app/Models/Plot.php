@@ -10,8 +10,18 @@ class Plot extends Model
 {
     use HasFactory;
 
+    /**
+     * The primary key for the model.
+     *
+     * @var string
+     */
     protected $primaryKey = 'plot_id';
 
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
     protected $fillable = [
         'lahan_id',
         'nama_plot',
@@ -19,6 +29,11 @@ class Plot extends Model
         'area'
     ];
 
+    /**
+     * The attributes that should be cast to native types.
+     *
+     * @var array
+     */
     protected $casts = [
         'coordinates' => 'array',
         'area' => 'float',

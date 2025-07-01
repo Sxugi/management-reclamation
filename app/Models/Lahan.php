@@ -83,4 +83,9 @@ class Lahan extends Model
     {
         return $this->hasMany(Plot::class);
     }
+
+    public function rencanaBiaya(): HasMany
+    {
+        return $this->hasMany(RencanaBiaya::class);
+    }
 }

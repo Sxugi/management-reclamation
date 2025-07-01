@@ -7,7 +7,7 @@
     </div>
 
     <!-- Desktop Right Side Menu -->
-    <div class="hidden md:flex md:items-center">
+    <div class="hidden lg:flex lg:items-center">
         <div class="flex items-center gap-4">
             <!-- Profile Link -->
             <a type="button" href="{{ route('profile.edit') }}" class="functional-button w-[118px] rounded-lg bg-darkslategray h-9 flex flex-row items-center justify-between py-[15px] px-5 box-border gap-0 text-sm text-white font-outfit no-underline hover:bg-slategray-200">
@@ -33,8 +33,8 @@
     </div>
 
     <!-- Mobile menu button -->
-    <div class="flex items-center md:hidden">
-        <button @click="sidebarOpen = !sidebarOpen" class="inline-flex items-center justify-center p-2 rounded-md border-solid border-[1px] text-white hover:text-darkslategray bg-darkslategray hover:bg-white focus:outline-none transition duration-150 ease-in-out">
+    <div class="flex items-center lg:hidden">
+        <button @click="sidebarOpen = !sidebarOpen" class="inline-flex items-center justify-center p-2 rounded-lg border-solid border-[1px] text-white hover:text-darkslategray bg-darkslategray hover:bg-white focus:outline-none transition duration-150 ease-in-out">
             <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
                 <path :class="{'hidden': sidebarOpen, 'inline-flex': !sidebarOpen }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                 <path :class="{'hidden': !sidebarOpen, 'inline-flex': sidebarOpen }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />

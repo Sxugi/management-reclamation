@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LahanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PlotController;
+use App\Http\Controllers\RencanaBiayaController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
@@ -21,6 +22,9 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth'])->group(function () {
     Route::get('lahan/{lahan}/dashboard', [DashboardController::class, 'dashboard'])->name('detail-lahan.dashboard');
     Route::resource('lahan.plot', PlotController::class)->shallow();
+    Route::resource('lahan.rencana-biaya', RencanaBiayaController::class)->except('show', 'destroy');
+    Route::get('lahan/{lahan}/rencana-biaya/pdf', [RencanaBiayaController::class, 'generatePDF'])
+        ->name('lahan.rencana-biaya.pdf');
 });
 
 require __DIR__.'/auth.php';

@@ -25,19 +25,19 @@
                         <!-- Latitude Input -->
                         <div class="flex-1 rounded-lg bg-white border-lightgray border-solid border-[1px] box-border h-11 overflow-hidden flex flex-row items-center justify-start">
                             <x-main.text-input type="text" 
-                                    x-model="point.lat" 
-                                    class="w-full h-full focus:outline-none"
-                                    placeholder="Latitude"
-                                    @input="updateMapFromInputs()" />
+                                x-model="point.lat" 
+                                class="w-full h-full focus:outline-none"
+                                placeholder="Latitude"
+                                @input="if(point.lat && point.lng && !isNaN(point.lat) && !isNaN(point.lng)) updateMapFromInputs()" />
                         </div>
-                        
+
                         <!-- Longitude Input -->
-                        <div class="flex-1 rounded-lg bg-white border-lightgray border-solid border-[1px] box-border h-11 overflow-hidden flex flex-row items-center justify-start ">
+                        <div class="flex-1 rounded-lg bg-white border-lightgray border-solid border-[1px] box-border h-11 overflow-hidden flex flex-row items-center justify-start">
                             <x-main.text-input type="text" 
-                                    x-model="point.lng" 
-                                    class="w-full h-full focus:outline-none"
-                                    placeholder="Longitude"
-                                    @input="updateMapFromInputs()" />
+                                x-model="point.lng" 
+                                class="w-full h-full focus:outline-none"
+                                placeholder="Longitude"
+                                @input="if(point.lat && point.lng && !isNaN(point.lat) && !isNaN(point.lng)) updateMapFromInputs()" />
                         </div>
                         
                         <!-- Delete Button -->

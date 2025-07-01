@@ -22,8 +22,8 @@
             <tbody>
                 @forelse($plot ?? [] as $plot)
                     <tr>
-                        <td class="py-3 px-6 text-sm text-gray leading-5 font-medium">{{ $plot->nama_plot }}</td>
-                        <td class="py-3 px-6 text-sm text-gray leading-5">{{ $plot->area }}</td>
+                        <td class="py-3 px-6 text-sm text-center text-gray leading-5">{{ $plot->nama_plot }}</td>
+                        <td class="py-3 px-6 text-sm text-center text-gray leading-5">{{ $plot->area }}</td>
                         <td class="py-3 px-6">
                             <div class="flex flex-row items-center justify-center gap-3">
                                 <!-- View Icon -->
