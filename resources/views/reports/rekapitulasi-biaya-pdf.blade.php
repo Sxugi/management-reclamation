@@ -1,0 +1,482 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="id" lang="id">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <title>Rencana Biaya Reklamasi</title>
+    <style>
+        @font-face {
+            font-family: 'Bookman Old Style';
+            src: url('{{ storage_path('fonts/Bookman Old Style.ttf') }}') format('truetype');
+            font-weight: normal;
+            font-style: normal;
+        }
+        @font-face {
+            font-family: 'Bookman Old Style';
+            src: url('{{ storage_path('fonts/Bookman Old Style Bold.ttf') }}') format('truetype');
+            font-weight: bold;
+            font-style: normal;
+        }
+        * {
+            margin: 0; 
+            padding: 0; 
+            text-indent: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Bookman Old Style', serif;
+        }
+        .s1 { 
+            color: black; 
+            font-family: 'Bookman Old Style', serif; 
+            font-style: normal; 
+            font-size: 12pt; 
+        }
+        .s2 { 
+            color: black; 
+            font-family: 'Bookman Old Style', serif; 
+            text-decoration: none; 
+            font-size: 10pt; 
+        }
+        .s4 { 
+            color: black; 
+            font-family: 'Bookman Old Style', serif; 
+            text-decoration: none; 
+            font-size: 10pt; 
+            vertical-align: 2pt; 
+        }
+        .p, p { 
+            color: black; 
+            font-family: 'Bookman Old Style', serif; 
+            text-decoration: none; 
+            font-size: 9pt; 
+            margin:0pt; 
+        }
+        .s5 { 
+            color: black; 
+            font-family: 'Bookman Old Style', serif; 
+            text-decoration: none; 
+            font-size: 9pt; 
+            vertical-align: 2pt; 
+        }
+        table, tbody {
+            vertical-align: top; 
+            overflow: visible; 
+        }
+        .page-break {
+            page-break-after: always;
+        }
+    </style>
+</head>
+<body>
+    <p class="s1" style="padding-top: 50pt; padding-left: 164pt; padding-right: 34pt; text-indent: -104pt; line-height: 150%; text-align: center;">
+        Matrik 15. Rekapitulasi Biaya Reklamasi Tahap Operasi Produksi
+    </p>
+
+    <table style="border-collapse:collapse;margin:6pt auto" cellspacing="0" class="page-break">
+        <tbody>
+            <!-- Header Tabel -->
+            <tr style="height:14pt">
+                <td style="width:36pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" rowspan="2">
+                    <p class="s2" style="padding-left: 8pt;text-indent: 0pt;line-height: 12pt;text-align: left;">NO.</p>
+                </td>
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" rowspan="2">
+                    <p class="s2" style="padding-left: 51pt;text-indent: 0pt;line-height: 12pt;text-align: left;">DESKRIPSI BIAYA</p>
+                </td>
+                <td style="width:232pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" colspan="2">
+                    <p class="s2" style="text-indent: 0pt;line-height: 12pt;text-align: center;">Tahun {{ $tahun }}</p>
+                </td>
+            </tr>
+            <tr style="height:14pt">
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 5pt;text-indent: 0pt;line-height: 12pt;text-align: center;">Rencana</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 5pt;text-indent: 0pt;line-height: 12pt;text-align: center;">Realisasi</p>
+                </td>
+            </tr>
+            
+            <!-- Biaya Langsung Section -->
+            <tr style="height:14pt">
+                <td style="width:36pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="text-indent: 0pt;text-align: center;">1.</p>
+                </td>
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 5pt;text-indent: 0pt;text-align: left;">Biaya langsung (Rp/US$)</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p style="text-indent: 0pt;text-align: left;"><br/></p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p style="text-indent: 0pt;text-align: left;"><br/></p>
+                </td>
+            </tr>
+            
+            <tr style="height:27pt">
+                <td style="width:36pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" rowspan="18">
+                    <p style="text-indent: 0pt;text-align: left;"><br/></p>
+                </td>
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 5pt;text-indent: 0pt;line-height: 12pt;text-align: left;">a. Biaya penatagunaan lahan,</p>
+                    <p class="s2" style="padding-top: 1pt;padding-left: 23pt;text-indent: 0pt;text-align: left;">terdiri atas biaya :</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p style="text-indent: 0pt;text-align: left;"><br/></p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p style="text-indent: 0pt;text-align: left;"><br/></p>
+                </td>
+            </tr>
+            
+            <tr style="height:14pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 26pt;text-indent: 0pt;line-height: 12pt;text-align: left;">1) Penataan permukaan tanah</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($rencana['penataan_tanah'] ?? 0, 0) }}</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($realisasi['penataan_tanah'] ?? 0, 0) }}</p>
+                </td>
+            </tr>
+            
+            <tr style="height:27pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 26pt;text-indent: 0pt;line-height: 12pt;text-align: left;">2) Penebaran tanah zona</p>
+                    <p class="s2" style="padding-top: 1pt;padding-left: 44pt;text-indent: 0pt;text-align: left;">pengakaran</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($rencana['penebaran_tanah_pengakaran'] ?? 0, 0) }}</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($realisasi['penebaran_tanah_pengakaran'] ?? 0, 0) }}</p>
+                </td>
+            </tr>
+            
+            <tr style="height:27pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 26pt;text-indent: 0pt;line-height: 12pt;text-align: left;">3) Pengendalian erosi dan</p>
+                    <p class="s2" style="padding-top: 1pt;padding-left: 44pt;text-indent: 0pt;text-align: left;">sedimentasi</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($rencana['pengendalian_erosi'] ?? 0, 0) }}</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($realisasi['pengendalian_erosi'] ?? 0, 0) }}</p>
+                </td>
+            </tr>
+            
+            <tr style="height:27pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 5pt;text-indent: 0pt;line-height: 12pt;text-align: left;">b. Biaya revegetasi, terdiri atas</p>
+                    <p class="s2" style="padding-top: 1pt;padding-left: 23pt;text-indent: 0pt;text-align: left;">biaya :</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p style="text-indent: 0pt;text-align: left;"><br/></p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p style="text-indent: 0pt;text-align: left;"><br/></p>
+                </td>
+            </tr>
+            
+            <tr style="height:14pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 26pt;text-indent: 0pt;text-align: left;">1) analisis kualitas tanah</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($rencana['kualitas_tanah'] ?? 0, 0) }}</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($realisasi['kualitas_tanah'] ?? 0, 0) }}</p>
+                </td>
+            </tr>
+
+            <tr style="height:14pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 26pt;text-indent: 0pt;line-height: 12pt;text-align: left;">2) pemupukan</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($rencana['pemupukan'] ?? 0, 0) }}</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($realisasi['pemupukan'] ?? 0, 0) }}</p>
+                </td>
+            </tr>
+
+            <tr style="height:14pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 26pt;text-indent: 0pt;line-height: 12pt;text-align: left;">3) pengadaan bibit</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($rencana['pengadaan_bibit'] ?? 0, 0) }}</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($realisasi['pengadaan_bibit'] ?? 0, 0) }}</p>
+                </td>
+            </tr>
+
+            <tr style="height:14pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 26pt;text-indent: 0pt;text-align: left;">4) penanaman</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($rencana['penanaman'] ?? 0, 0) }}</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($realisasi['penanaman'] ?? 0, 0) }}</p>
+                </td>
+            </tr>
+
+            <tr style="height:14pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 26pt;text-indent: 0pt;line-height: 12pt;text-align: left;">5) pemeliharaan tanaman</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($rencana['pemeliharaan_tanaman'] ?? 0, 0) }}</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($realisasi['pemeliharaan_tanaman'] ?? 0, 0) }}</p>
+                </td>
+            </tr>
+
+            <tr style="height:41pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 23pt;text-indent: -18pt;line-height: 113%;text-align: left;">c. biaya pencegahan dan penanggulangan air asam</p>
+                    <p class="s2" style="padding-left: 23pt;text-indent: 0pt;text-align: left;">tambang (apabila ada)</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($rencana['pencegahan_air_asam'] ?? 0, 0) }}</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($realisasi['pencegahan_air_asam'] ?? 0, 0) }}</p>
+                </td>
+            </tr>
+
+            <tr style="height:41pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 23pt;text-indent: -18pt;line-height: 113%;text-align: left;">d. biaya untuk pekerjaan sipil sesuai peruntukan lahan</p>
+                    <p class="s2" style="padding-left: 23pt;text-indent: 0pt;text-align: left;">Pascatambang atau program reklamasi bentuk lain</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($rencana['pekerjaan_sipil'] ?? 0, 0) }}</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($realisasi['pekerjaan_sipil'] ?? 0, 0) }}</p>
+                </td>
+            </tr>
+
+            <tr style="height:27pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 5pt;text-indent: 0pt;line-height: 12pt;text-align: left;">e. biaya pemanfaatan lubang bekas</p>
+                    <p class="s2" style="padding-top: 1pt;padding-left: 23pt;text-indent: 0pt;text-align: left;">tambang(void) terdiri atas biaya:</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p style="text-indent: 0pt;text-align: left;"><br/></p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p style="text-indent: 0pt;text-align: left;"><br/></p>
+                </td>
+            </tr>
+
+            <tr style="height:14pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 26pt;text-indent: 0pt;text-align: left;">1) stabilisasi lereng</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($rencana['stabilisasi_lereng'] ?? 0, 0) }}</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($realisasi['stabilisasi_lereng'] ?? 0, 0) }}</p>
+                </td>
+            </tr>
+
+            <tr style="height:27pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 26pt;text-indent: 0pt;text-align: left;">2) pengamanan lubang bekas</p>
+                    <p class="s2" style="padding-top: 1pt;padding-left: 44pt;text-indent: 0pt;text-align: left;">tambang (void)</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($rencana['pengamanan_lubang'] ?? 0, 0) }}</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($realisasi['pengamanan_lubang'] ?? 0, 0) }}</p>
+                </td>
+            </tr>
+
+            <tr style="height:71pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 40pt;padding-right: 13pt;text-indent: -22pt;line-height: 114%;text-align: left;">3) pemulihan dan pemantauan kualitas air serta pengelolaan air dalam lubang bekas tambang (void) sesuai dengan peruntukannya.</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($rencana['pemulihan_kualitas_air'] ?? 0, 0) }}</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($realisasi['pemulihan_kualitas_air'] ?? 0, 0) }}</p>
+                </td>
+            </tr>
+
+            <tr style="height:27pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 26pt;text-indent: 0pt;text-align: left;">4) pemeliharaan lubang bekas</p>
+                    <p class="s2" style="padding-top: 1pt;padding-left: 44pt;text-indent: 0pt;text-align: left;">tambang (void)</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($rencana['pemeliharaan_lubang'] ?? 0, 0) }}</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($realisasi['pemeliharaan_lubang'] ?? 0, 0) }}</p>
+                </td>
+            </tr>
+            
+            <!-- SUBTOTAL 1 -->
+            <tr style="height:14pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 4pt;text-indent: 0pt;line-height: 12pt;text-align: left;"><strong>SUBTOTAL 1 (Rp/US$)</strong></p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;"><strong>{{ number_format($rencana['subtotal_1'] ?? 0, 0) }}</strong></p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;"><strong>{{ number_format($realisasi['subtotal_1'] ?? 0, 0) }}</strong></p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <table style="border-collapse:collapse;margin:6pt auto;padding-top: 50pt;" cellspacing="0">
+        <tbody>
+            <!-- Header Tabel -->
+            <tr style="height:14pt">
+                <td style="width:36pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" rowspan="2">
+                    <p class="s2" style="padding-left: 8pt;text-indent: 0pt;line-height: 12pt;text-align: left;">NO.</p>
+                </td>
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" rowspan="2">
+                    <p class="s2" style="padding-left: 51pt;text-indent: 0pt;line-height: 12pt;text-align: left;">DESKRIPSI BIAYA</p>
+                </td>
+                <td style="width:232pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" colspan="2">
+                    <p class="s2" style="text-indent: 0pt;line-height: 12pt;text-align: center;">Tahun {{ $tahun }}</p>
+                </td>
+            </tr>
+            <tr style="height:14pt">
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 5pt;text-indent: 0pt;line-height: 12pt;text-align: center;">Rencana</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 5pt;text-indent: 0pt;line-height: 12pt;text-align: center;">Realisasi</p>
+                </td>
+            </tr>
+
+            <!-- Biaya Tidak Langsung -->
+            <tr style="height:14pt">
+                <td style="width:36pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="text-indent: 0pt;line-height: 12pt;text-align: center;">2.</p>
+                </td>
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 4pt;text-indent: 0pt;line-height: 12pt;text-align: left;">Biaya tidak langsung (Rp/US$)</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p style="text-indent: 0pt;text-align: left;"><br/></p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p style="text-indent: 0pt;text-align: left;"><br/></p>
+                </td>
+            </tr>
+            
+            <tr style="height:30pt">
+                <td style="width:36pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" rowspan="5">
+                    <p style="text-indent: 0pt;text-align: left;"><br/></p>
+                </td>
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 17pt;text-indent: 0pt;line-height: 12pt;text-align: left;">a. biaya mobilisasi dan</p>
+                    <p class="s2" style="padding-top: 1pt;padding-left: 40pt;text-indent: 0pt;text-align: left;">demobilisasi alat<span class="s4">**1)</span></p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($rencana['mobilisasi_demobilisasi_alat'] ?? 0, 0) }}</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($realisasi['mobilisasi_demobilisasi_alat'] ?? 0, 0) }}</p>
+                </td>
+            </tr>
+            
+            <tr style="height:30pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 17pt;text-indent: 0pt;line-height: 12pt;text-align: left;">b. biaya perencanaan</p>
+                    <p class="s2" style="padding-top: 1pt;padding-left: 40pt;text-indent: 0pt;text-align: left;">Reklamasi**<span class="s4">2)</span></p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($rencana['perencanaan_reklamasi'] ?? 0, 0) }}</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($realisasi['perencanaan_reklamasi'] ?? 0, 0) }}</p>
+                </td>
+            </tr>
+            
+            <tr style="height:71pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 40pt;padding-right: 13pt;text-indent: -22pt;line-height: 114%;text-align: left;">c. biaya administrasi dan keuntungan pihak ketiga sebagai pelaksana Reklamasi tahap</p>
+                    <p class="s2" style="padding-left: 40pt;text-indent: 0pt;text-align: left;">Eksplorasi<span class="s4">**3)</span></p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($rencana['administrasi_pihak_ketiga'] ?? 0, 0) }}</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($realisasi['administrasi_pihak_ketiga'] ?? 0, 0) }}</p>
+                </td>
+            </tr>
+            
+            <tr style="height:16pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 17pt;text-indent: 0pt;line-height: 14pt;text-align: left;">d. biaya supervisi<span class="s4">**4)</span></p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($rencana['supervisi'] ?? 0, 0) }}</p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($realisasi['supervisi'] ?? 0, 0) }}</p>
+                </td>
+            </tr>
+            
+            <tr style="height:14pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 5pt;text-indent: 0pt;line-height: 12pt;text-align: left;"><strong>SUBTOTAL 2 (Rp/US$)</strong></p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;"><strong>{{ number_format($rencana['subtotal_2'] ?? 0, 0) }}</strong></p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;"><strong>{{ number_format($realisasi['subtotal_2'] ?? 0, 0) }}</strong></p>
+                </td>
+            </tr>
+            
+            <tr style="height:14pt">
+                <td style="width:230pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" colspan="2">
+                    <p class="s2" style="padding-left: 41pt;text-indent: 0pt;line-height: 12pt;text-align: left;"><strong>TOTAL (Rp/US$)</strong></p>
+                </td>
+                @php
+                    $totalRencana = ($rencana['subtotal_1'] ?? 0) + ($rencana['subtotal_2'] ?? 0);
+                    $totalRealisasi = ($realisasi['subtotal_1'] ?? 0) + ($realisasi['subtotal_2'] ?? 0);
+                @endphp
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;"><strong>{{ number_format($totalRencana, 0) }}</strong></p>
+                </td>
+                <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;"><strong>{{ number_format($totalRealisasi, 0) }}</strong></p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <p style="padding-top: 3pt;padding-left: 87pt;text-indent: 0pt;text-align: left;">Keterangan :</p>
+    <p class="s5" style="padding-top: 1pt;padding-left: 87pt;text-indent: 0pt;text-align: left;">
+        **1) <span class="p">besarnya 2,5% dari biaya langsung atau berdasarkan perhitungan</span>
+    </p>
+    <p class="s5" style="padding-top: 1pt;padding-left: 87pt;text-indent: 0pt;text-align: left;">
+        **2)<span class="p">besarnya 2% - 10% dari biaya langsung (<i>grafik Englemen's Heavy Construction Cost File</i>)</span>
+    </p>
+    <p class="s5" style="padding-top: 1pt;padding-left: 87pt;text-indent: 0pt;text-align: left;">
+        **3)<span class="p">besarnya 3% - 14% dari biaya langsung (<i>grafik Englemen's Heavy Construction Cost File</i>)</span>
+    </p>
+    <p class="s5" style="padding-top: 1pt;padding-left: 87pt;text-indent: 0pt;text-align: left;">
+        **4) <span class="p">besarnya 2% - 7% dari biaya langsung (<i>grafik Englemen's Heavy Construction Cost File</i>)</span>
+    </p>
+</body>
+</html>

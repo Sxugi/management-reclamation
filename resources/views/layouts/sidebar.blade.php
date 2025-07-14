@@ -87,9 +87,9 @@
             
             <div class="self-stretch flex flex-col items-start justify-start gap-1 text-sm text-white">
                 <!-- Rencana Reklamasi -->
-                <a href="#" 
+                <a href="{{ route('lahan.rencana-reklamasi.index', ['lahan' => $globalLahanId]) }}"
                    class="self-stretch rounded-lg flex flex-row items-center justify-start py-2 px-3 no-underline hover:bg-white hover:text-darkslategray ease-in-out
-                   {{ request()->routeIs('expense.*', '#') ? 'bg-white !text-darkslategray' : 'bg-darkslategray text-white' }}">
+                   {{ request()->routeIs('expense.*', 'lahan.rencana-reklamasi.*') ? 'bg-white !text-darkslategray' : 'bg-darkslategray text-white' }}">
                     <div class="flex-1 flex flex-row items-center justify-start gap-3">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M8 3.5C8 3.10218 8.15804 2.72064 8.43934 2.43934C8.72064 2.15804 9.10218 2 9.5 2H14.5C14.8978 2 15.2794 2.15804 15.5607 2.43934C15.842 2.72064 16 3.10218 16 3.5V4.5C16 4.89782 15.842 5.27936 15.5607 5.56066C15.2794 5.84196 14.8978 6 14.5 6H9.5C9.10218 6 8.72064 5.84196 8.43934 5.56066C8.15804 5.27936 8 4.89782 8 4.5V3.5Z" fill="currentColor"/>
@@ -100,7 +100,7 @@
                 </a>
 
                 <!-- Rencana Biaya Reklamasi -->
-                <a href="{{ route('lahan.rencana-biaya.index', ['lahan' => $globalLahanId, 'tahun' => request()->route('lahan.rencana-biaya.tahun')]) }}"
+                <a href="{{ route('lahan.rencana-biaya.index', ['lahan' => $globalLahanId]) }}"
                    class="self-stretch rounded-lg flex flex-row items-center justify-start py-2 px-3 no-underline hover:bg-white hover:text-darkslategray ease-in-out
                    {{ request()->routeIs('expense.*', 'lahan.rencana-biaya.*') ? 'bg-white !text-darkslategray' : 'bg-darkslategray text-white' }}">
                     <div class="flex-1 flex flex-row items-center justify-start gap-3">
@@ -112,23 +112,21 @@
                 </a>
 
                 <!-- Rekapitulasi Pelaksanaan -->
-                <a href="#" 
+                <a href="{{ route('lahan.rekapitulasi-reklamasi.index', ['lahan' => $globalLahanId]) }}" 
                    class="self-stretch rounded-lg flex flex-row items-center justify-start py-2 px-3 no-underline hover:bg-white hover:text-darkslategray ease-in-out
-                   {{ request()->routeIs('expense.*', '#') ? 'bg-white !text-darkslategray' : 'bg-darkslategray text-white' }}">
-                    <div class="flex-1 flex flex-row items-center justify-start">
-                        <div class="flex flex-row items-center justify-start gap-2.5">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M9 17V15M12 17V13M15 17V11M17 21H7C6.46957 21 5.96086 20.7893 5.58579 20.4142C5.21071 20.0391 5 19.5304 5 19V5C5 4.46957 5.21071 3.96086 5.58579 3.58579C5.96086 3.21071 6.46957 3 7 3H12.586C12.8512 3.00006 13.1055 3.10545 13.293 3.293L18.707 8.707C18.8946 8.89449 18.9999 9.1488 19 9.414V19C19 19.5304 18.7893 20.0391 18.4142 20.4142C18.0391 20.7893 17.5304 21 17 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            </svg>
-                            <div class="w-[190px] relative leading-5 font-medium inline-block shrink-0">Rekapitulasi Pelaksanaan</div>
-                        </div>
+                   {{ request()->routeIs('expense.*', 'lahan.rekapitulasi-reklamasi.*') ? 'bg-white !text-darkslategray' : 'bg-darkslategray text-white' }}">
+                    <div class="flex-1 flex flex-row items-center justify-start gap-3">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M9 17V15M12 17V13M15 17V11M17 21H7C6.46957 21 5.96086 20.7893 5.58579 20.4142C5.21071 20.0391 5 19.5304 5 19V5C5 4.46957 5.21071 3.96086 5.58579 3.58579C5.96086 3.21071 6.46957 3 7 3H12.586C12.8512 3.00006 13.1055 3.10545 13.293 3.293L18.707 8.707C18.8946 8.89449 18.9999 9.1488 19 9.414V19C19 19.5304 18.7893 20.0391 18.4142 20.4142C18.0391 20.7893 17.5304 21 17 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                        <div class="flex-1 relative leading-5 font-medium">Rekapitulasi Reklamasi</div>
                     </div>
                 </a>
 
                 <!-- Rekapitulasi Biaya -->
-                <a href="#" 
+                <a href="{{ route('lahan.rekapitulasi-biaya.index', ['lahan' => $globalLahanId]) }}" 
                    class="self-stretch rounded-lg flex flex-row items-center justify-start py-2 px-3 no-underline hover:bg-white hover:text-darkslategray ease-in-out
-                   {{ request()->routeIs('expense.*', '#') ? 'bg-white !text-darkslategray' : 'bg-darkslategray text-white' }}">
+                   {{ request()->routeIs('expense.*', 'lahan.rekapitulasi-biaya.*') ? 'bg-white !text-darkslategray' : 'bg-darkslategray text-white' }}">
                     <div class="flex-1 flex flex-row items-center justify-start gap-3">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M3.25 5C3.25 4.27065 3.53973 3.57118 4.05546 3.05546C4.57118 2.53973 5.27065 2.25 6 2.25H16C16.7293 2.25 17.4288 2.53973 17.9445 3.05546C18.4603 3.57118 18.75 4.27065 18.75 5V10.5C18.75 10.6989 18.671 10.8897 18.5303 11.0303C18.3897 11.171 18.1989 11.25 18 11.25C17.8011 11.25 17.6103 11.171 17.4697 11.0303C17.329 10.8897 17.25 10.6989 17.25 10.5V5C17.25 4.31 16.69 3.75 16 3.75H6C5.31 3.75 4.75 4.31 4.75 5V19C4.75 19.69 5.31 20.25 6 20.25H13.5C13.6989 20.25 13.8897 20.329 14.0303 20.4697C14.171 20.6103 14.25 20.8011 14.25 21C14.25 21.1989 14.171 21.3897 14.0303 21.5303C13.8897 21.671 13.6989 21.75 13.5 21.75H6C5.27065 21.75 4.57118 21.4603 4.05546 20.9445C3.53973 20.4288 3.25 19.7293 3.25 19V5Z" fill="currentColor"/>
@@ -143,8 +141,8 @@
                    class="self-stretch rounded-lg flex flex-row items-center justify-start py-2 px-3 no-underline hover:bg-white hover:text-darkslategray ease-in-out
                    {{ request()->routeIs('expense.*', '#') ? 'bg-white !text-darkslategray' : 'bg-darkslategray text-white' }}">
                     <div class="flex-1 flex flex-row items-center justify-start gap-3">
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M15.879 4.99999H4C3.46957 4.99999 2.96086 5.2107 2.58579 5.58578C2.21071 5.96085 2 6.46956 2 6.99999V13C2 13.5304 2.21071 14.0391 2.58579 14.4142C2.96086 14.7893 3.46957 15 4 15H16C16.5304 15 17.0391 14.7893 17.4142 14.4142C17.7893 14.0391 18 13.5304 18 13V7.12099L13.56 11.561C13.277 11.8341 12.898 11.9851 12.5047 11.9815C12.1114 11.9779 11.7353 11.82 11.4573 11.5417C11.1793 11.2635 11.0217 10.8872 11.0185 10.4939C11.0153 10.1006 11.1666 9.72176 11.44 9.43899L15.879 4.99999ZM4 8.49999C4 8.36738 4.05268 8.24021 4.14645 8.14644C4.24021 8.05267 4.36739 7.99999 4.5 7.99999H6.5C6.63261 7.99999 6.75979 8.05267 6.85355 8.14644C6.94732 8.24021 7 8.36738 7 8.49999C7 8.6326 6.94732 8.75978 6.85355 8.85354C6.75979 8.94731 6.63261 8.99999 6.5 8.99999H4.5C4.36739 8.99999 4.24021 8.94731 4.14645 8.85354C4.05268 8.75978 4 8.6326 4 8.49999ZM4 11.5C4 11.3674 4.05268 11.2402 4.14645 11.1464C4.24021 11.0527 4.36739 11 4.5 11H9C9.13261 11 9.25979 11.0527 9.35355 11.1464C9.44732 11.2402 9.5 11.3674 9.5 11.5C9.5 11.6326 9.44732 11.7598 9.35355 11.8535C9.25979 11.9473 9.13261 12 9 12H4.5C4.36739 12 4.24021 11.9473 4.14645 11.8535C4.05268 11.7598 4 11.6326 4 11.5ZM17.854 5.85399C17.9479 5.7601 18.0006 5.63277 18.0006 5.49999C18.0006 5.36722 17.9479 5.23988 17.854 5.14599C17.7601 5.0521 17.6328 4.99936 17.5 4.99936C17.3672 4.99936 17.2399 5.0521 17.146 5.14599L12.146 10.146C12.0521 10.2399 11.9994 10.3672 11.9994 10.5C11.9994 10.6328 12.0521 10.7601 12.146 10.854C12.2399 10.9479 12.3672 11.0006 12.5 11.0006C12.6328 11.0006 12.7601 10.9479 12.854 10.854L17.854 5.85399Z" fill="currentColor"/>
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17.879 6.99999H6C5.46957 6.99999 4.96086 7.2107 4.58579 7.58578C4.21071 7.96085 4 8.46956 4 8.99999V15C4 15.5304 4.21071 16.0391 4.58579 16.4142C4.96086 16.7893 5.46957 17 6 17H18C18.5304 17 19.0391 16.7893 19.4142 16.4142C19.7893 16.0391 20 15.5304 20 15V9.12099L15.56 13.561C15.277 13.8341 14.898 13.9851 14.5047 13.9815C14.1114 13.9779 13.7353 13.82 13.4573 13.5417C13.1793 13.2635 13.0217 12.8872 13.0185 12.4939C13.0153 12.1006 13.1666 11.7218 13.44 11.439L17.879 6.99999ZM6 10.5C6 10.3674 6.05268 10.2402 6.14645 10.1464C6.24021 10.0527 6.36739 9.99999 6.5 9.99999H8.5C8.63261 9.99999 8.75979 10.0527 8.85355 10.1464C8.94732 10.2402 9 10.3674 9 10.5C9 10.6326 8.94732 10.7598 8.85355 10.8535C8.75979 10.9473 8.63261 11 8.5 11H6.5C6.36739 11 6.24021 10.9473 6.14645 10.8535C6.05268 10.7598 6 10.6326 6 10.5ZM6 13.5C6 13.3674 6.05268 13.2402 6.14645 13.1464C6.24021 13.0527 6.36739 13 6.5 13H11C11.1326 13 11.2598 13.0527 11.3536 13.1464C11.4473 13.2402 11.5 13.3674 11.5 13.5C11.5 13.6326 11.4473 13.7598 11.3536 13.8535C11.2598 13.9473 11.1326 14 11 14H6.5C6.36739 14 6.24021 13.9473 6.14645 13.8535C6.05268 13.7598 6 13.6326 6 13.5ZM19.854 7.85399C19.9479 7.7601 20.0006 7.63277 20.0006 7.49999C20.0006 7.36722 19.9479 7.23988 19.854 7.14599C19.7601 7.0521 19.6328 6.99936 19.5 6.99936C19.3672 6.99936 19.2399 7.0521 19.146 7.14599L14.146 12.146C14.0521 12.2399 13.9994 12.3672 13.9994 12.5C13.9994 12.6328 14.0521 12.7601 14.146 12.854C14.2399 12.9479 14.3672 13.0006 14.5 13.0006C14.6328 13.0006 14.7601 12.9479 14.854 12.854L19.854 7.85399Z" fill="currentColor"/>
                         </svg>
                         <div class="flex-1 relative leading-5 font-medium">Kriteria Keberhasilan</div>
                     </div>

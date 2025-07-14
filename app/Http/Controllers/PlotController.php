@@ -7,8 +7,10 @@ use App\Models\Lahan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Providers\View;
-// use App\Http\Requests\Plot\CreatePlotRequest;
-// use App\Http\Requests\Plot\UpdatePlotRequest;
+use App\Http\Requests\Plot\CreatePlotRequest;
+use App\Http\Requests\Plot\UpdatePlotRequest;
+use App\Services\PlotService;
+
 
 class PlotController extends Controller
 {
@@ -24,8 +26,11 @@ class PlotController extends Controller
         }
         
         $plot = Plot::where('lahan_id', $lahan->lahan_id)->get();
-        
-        return view('detail-lahan.plot.index', compact('plot', 'lahan'));
+
+        return view('detail-lahan.plot.index', [
+            'plot' => $plot,
+            'lahan' => $lahan,
+        ]);
     }
 
     /**
@@ -39,27 +44,25 @@ class PlotController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        return view('detail-lahan.plot.create', compact('lahan'));
+        return view('detail-lahan.plot.create', [
+            'lahan' => $lahan,
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      * Uses nested route: /lahan/{lahan}/plot (POST)
      */
-    public function store(Request $request, Lahan $lahan)
+    public function store(CreatePlotRequest $request, Lahan $lahan)
     {
-        $validated = $request->validate([
-            'nama_plot' => 'string|max:255',
-            'coordinates' => 'required|json',
-            'area' => 'required|numeric',
-        ]);
+        $validated = $request->validated();
 
-        $validated['area'] = (float) $validated['area'];
+        $validated['luas_area'] = (float) $validated['luas_area'];
 
-        $validated['coordinates'] = json_decode($validated['coordinates'], true);
-        
         $validated['lahan_id'] = $lahan->lahan_id;
-        
+
+        $validated['polygon'] = PlotService::processPolygon($request->polygon);
+
         $plot = Plot::create($validated);
         
         return redirect()->route('lahan.plot.index', $lahan->lahan_id)
@@ -96,15 +99,18 @@ class PlotController extends Controller
         if ($lahan->user_id !== Auth::user()->user_id) {
             abort(403, 'Unauthorized action.');
         }
-        
-        return view('detail-lahan.plot.edit', compact('plot', 'lahan'));
+
+        return view('detail-lahan.plot.edit', [
+            'plot' => $plot,
+            'lahan' => $lahan,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      * Uses shallow route: /plot/{plot} (PUT/PATCH)
      */
-    public function update(Request $request, Plot $plot)
+    public function update(UpdatePlotRequest $request, Plot $plot)
     {
         // Get the associated lahan
         $lahan = Lahan::findOrFail($plot->lahan_id);
@@ -114,17 +120,13 @@ class PlotController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $validated = $request->validate([
-            'nama_plot' => 'required|string|max:255',
-            'coordinates' => 'required|json',
-            'area' => 'required|numeric',
-        ]);
-        
-        $validated['area'] = (float) $validated['area'];
+        $validated = $request->validated();
 
-        $validated['coordinates'] = json_decode($validated['coordinates'], true);
-        
+        $validated['luas_area'] = (float) $validated['luas_area'];
+
         $validated['lahan_id'] = $lahan->lahan_id;
+
+        $validated['polygon'] = PlotService::processPolygon($request->polygon);
 
         $plot->update($validated);
         

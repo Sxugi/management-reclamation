@@ -4,27 +4,58 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LahanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PlotController;
+use App\Http\Controllers\RencanaReklamasiController;
 use App\Http\Controllers\RencanaBiayaController;
+use App\Http\Controllers\RekapitulasiReklamasiController;
+use App\Http\Controllers\RekapitulasiBiayaController;
 use Illuminate\Support\Facades\Route;
 
+// Route for profile
 Route::middleware(['auth'])->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile', [ProfileController::class, 'edit'])
+        ->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])
+        ->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])
+        ->name('profile.destroy');
 });
 
+// Route for lahan management
 Route::middleware(['auth'])->group(function () {
-    Route::get('/lahan', [LahanController::class, 'index'])->name('lahan.index');
-    Route::patch('lahan/{lahan}/status', [LahanController::class, 'updateStatus'])->name('lahan.update-status');
+    Route::get('/lahan', [LahanController::class, 'index'])
+        ->name('lahan.index');
+    Route::patch('lahan/{lahan}/status', [LahanController::class, 'updateStatus'])
+        ->name('lahan.update-status');
     Route::resource('lahan', LahanController::class);
 });
 
+// Route for progress management
 Route::middleware(['auth'])->group(function () {
-    Route::get('lahan/{lahan}/dashboard', [DashboardController::class, 'dashboard'])->name('detail-lahan.dashboard');
-    Route::resource('lahan.plot', PlotController::class)->shallow();
-    Route::resource('lahan.rencana-biaya', RencanaBiayaController::class)->except('show', 'destroy');
+    Route::get('lahan/{lahan}/dashboard', [DashboardController::class, 'dashboard'])
+        ->name('detail-lahan.dashboard');
+    Route::resource('lahan.plot', PlotController::class)
+        ->shallow();
+});
+
+// Route for administration
+Route::middleware(['auth'])->group(function () {
+    Route::resource('lahan.rencana-reklamasi', RencanaReklamasiController::class)
+        ->except('show', 'destroy');
+    Route::get('lahan/{lahan}/rencana-reklamasi/pdf', [RencanaReklamasiController::class, 'generatePDF'])
+        ->name('lahan.rencana-reklamasi.pdf');
+    Route::resource('lahan.rencana-biaya', RencanaBiayaController::class)
+        ->except('show', 'destroy');
     Route::get('lahan/{lahan}/rencana-biaya/pdf', [RencanaBiayaController::class, 'generatePDF'])
         ->name('lahan.rencana-biaya.pdf');
+    Route::resource('lahan.rekapitulasi-reklamasi', RekapitulasiReklamasiController::class)
+        ->except('show', 'destroy');
+    Route::get('lahan/{lahan}/rekapitulasi-reklamasi/pdf', [RekapitulasiReklamasiController::class, 'generatePDF'])
+        ->name('lahan.rekapitulasi-reklamasi.pdf');
+    Route::resource('lahan.rekapitulasi-biaya', RekapitulasiBiayaController::class)
+        ->except('show', 'destroy');
+    Route::get('lahan/{lahan}/rekapitulasi-biaya/pdf', [RekapitulasiBiayaController::class, 'generatePDF'])
+        ->name('lahan.rekapitulasi-biaya.pdf');
 });
+
 
 require __DIR__.'/auth.php';

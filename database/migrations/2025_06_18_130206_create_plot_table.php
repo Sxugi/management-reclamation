@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('plots', function (Blueprint $table) {
-            $table->bigIncrements('plot_id'); // Using plot_id as the primary key
+        Schema::create('plot', function (Blueprint $table) {
+            $table->bigIncrements('plot_id');
             $table->string('nama_plot');
-            $table->json('coordinates'); // Stores the polygon coordinates as JSON
-            $table->decimal('area', 10, 2)->nullable(); // Area in square meters (or your preferred unit)
-            $table->foreignId('lahan_id')->constrained('lahans', 'lahan_id')->onDelete('cascade'); // Foreign key to lahan table
+            $table->decimal('luas_area', 10, 2);
+            $table->magellanPolygon('polygon', 4326)->nullable();
+            $table->foreignId('lahan_id')->constrained('lahan', 'lahan_id')->onDelete('cascade');
             $table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('plots');
+        Schema::dropIfExists('plot');
     }
 };

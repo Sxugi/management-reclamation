@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Clickbar\Magellan\Data\Geometries\Polygon;
 
 class Plot extends Model
 {
@@ -18,6 +19,13 @@ class Plot extends Model
     protected $primaryKey = 'plot_id';
 
     /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'plot';
+
+    /**
      * The attributes that should be cast to native types.
      *
      * @var array
@@ -25,8 +33,8 @@ class Plot extends Model
     protected $fillable = [
         'lahan_id',
         'nama_plot',
-        'coordinates',
-        'area'
+        'luas_area',
+        'polygon'
     ];
 
     /**
@@ -35,66 +43,29 @@ class Plot extends Model
      * @var array
      */
     protected $casts = [
-        'coordinates' => 'array',
-        'area' => 'float',
+        'polygon' => Polygon::class,
+        'luas_area' => 'float',
     ];
+
+    public function getCoordinatesAttribute()
+    {
+        if (!$this->polygon) {
+            return [];
+        }
+        $coordinates = [];
+        foreach ($this->polygon->getLineStrings() as $ring) {
+            $coords = [];
+            foreach ($ring->getPoints() as $point) {
+                $coords[] = [$point->getX(), $point->getY()];
+            }
+            $coordinates[] = $coords;
+        }
+        return $coordinates[0] ?? [];
+    }
 
     public function getRouteKeyName()
     {
         return 'plot_id';
-    }
-
-    // Accessor to ensure coordinates are in correct format for MapLibre
-    public function getCoordinatesAttribute($value)
-    {
-        $coordinates = json_decode($value, true);
-        
-        if (!is_array($coordinates)) {
-            return [];
-        }
-        
-        // Convert coordinates to proper format
-        return collect($coordinates)->map(function ($coord) {
-            // If coordinate is in {lng, lat} object format
-            if (is_array($coord) && isset($coord['lng']) && isset($coord['lat'])) {
-                return [(float) $coord['lng'], (float) $coord['lat']];
-            }
-            
-            // If coordinate is already in [lng, lat] array format
-            if (is_array($coord) && count($coord) >= 2) {
-                return [(float) $coord[0], (float) $coord[1]];
-            }
-            
-            return $coord;
-        })->toArray();
-    }
-
-    // Mutator to store coordinates consistently
-    public function setCoordinatesAttribute($value)
-    {
-        if (is_string($value)) {
-            $value = json_decode($value, true);
-        }
-        
-        if (!is_array($value)) {
-            $this->attributes['coordinates'] = json_encode([]);
-            return;
-        }
-        
-        // Ensure coordinates are stored as [lng, lat] arrays
-        $normalized = collect($value)->map(function ($coord) {
-            if (is_array($coord) && isset($coord['lng']) && isset($coord['lat'])) {
-                return [(float) $coord['lng'], (float) $coord['lat']];
-            }
-            
-            if (is_array($coord) && count($coord) >= 2) {
-                return [(float) $coord[0], (float) $coord[1]];
-            }
-            
-            return $coord;
-        })->toArray();
-        
-        $this->attributes['coordinates'] = json_encode($normalized);
     }
 
     public function lahan(): BelongsTo

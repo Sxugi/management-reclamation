@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('lahans', function (Blueprint $table) {
+        Schema::create('lahan', function (Blueprint $table) {
             $table->bigIncrements('lahan_id');
             $table->foreignId('user_id')->constrained('users', 'user_id')->onDelete('cascade');
             $table->string('nama_lahan');
@@ -19,10 +19,10 @@ return new class extends Migration
             $table->year('tahun_awal');
             $table->year('tahun_akhir');
             $table->string('pic_reklamasi');
+            $table->magellanPoint('location', 4326);
             $table->string('status')->default('Active');
             $table->timestamps();
         });
-         DB::statement('ALTER TABLE lahans ADD COLUMN location GEOMETRY(Point, 4326)');
     }
 
     /**
@@ -30,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('lahans');
+        Schema::dropIfExists('lahan');
     }
 };

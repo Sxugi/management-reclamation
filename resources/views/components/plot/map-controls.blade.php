@@ -4,8 +4,8 @@
         class="w-full h-[394px] relative" 
         x-data="mapPlotComponent({
             polygons: window.plotData,
-            longitude: {{ $lahan->longitude ?? 'null' }},
-            latitude: {{ $lahan->latitude ?? 'null' }},
+            longitude: {{ $lahan->location->getX() ?? 'null' }},
+            latitude: {{ $lahan->location->getY() ?? 'null' }},
             enableDraw: {{ $enableDraw ? 'true' : 'false' }},
         })"
         >
@@ -24,14 +24,8 @@
     </div>
 </div>
 
-<script>
-    window.plotData = 
-        @if(Route::currentRouteName() === 'lahan.plot.index')
-            @json($plot)
-        @elseif(Route::currentRouteName() === 'lahan.plot.create')
-            []
-        @else
-            [@json($plot)]
-        @endif
-    ;
-</script>
+@if(isset($plot))
+    <script>
+        window.plotData = @json($plot);
+    </script>
+@endif

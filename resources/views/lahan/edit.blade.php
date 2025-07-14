@@ -15,7 +15,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <!-- Map Column -->
-                <x-lahan.map :longitude="$lahan->longitude ?? null" :latitude="$lahan->latitude ?? null" />
+                <x-lahan.map :longitude="$point->getX() ?? null" :latitude="$point->getY() ?? null" />
 
                 <!-- Form Column -->
                 <x-lahan.form :lahan="$lahan" />

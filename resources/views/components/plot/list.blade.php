@@ -23,7 +23,7 @@
                 @forelse($plot ?? [] as $plot)
                     <tr>
                         <td class="py-3 px-6 text-sm text-center text-gray leading-5">{{ $plot->nama_plot }}</td>
-                        <td class="py-3 px-6 text-sm text-center text-gray leading-5">{{ $plot->area }}</td>
+                        <td class="py-3 px-6 text-sm text-center text-gray leading-5">{{ $plot->luas_area }}</td>
                         <td class="py-3 px-6">
                             <div class="flex flex-row items-center justify-center gap-3">
                                 <!-- View Icon -->
@@ -43,15 +43,31 @@
                                 </a>
                                 
                                 <!-- Delete Icon -->
-                                <form action="{{ route('plot.destroy', $plot->plot_id) }}" method="POST" class="inline">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" onclick="return confirm('Are you sure you want to delete this plot?')" class="border-none bg-transparent cursor-pointer">
-                                        <svg width="20" height="20" viewBox="0 0 25 30" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M7.54464 1.50254L7.14286 2.3125H1.78571C0.797991 2.3125 0 3.12246 0 4.125C0 5.12754 0.797991 5.9375 1.78571 5.9375H23.2143C24.202 5.9375 25 5.12754 25 4.125C25 3.12246 24.202 2.3125 23.2143 2.3125H17.8571L17.4554 1.50254C17.154 0.885156 16.5346 0.5 15.8594 0.5H9.14062C8.4654 0.5 7.84598 0.885156 7.54464 1.50254ZM23.2143 7.75H1.78571L2.96875 26.9512C3.05804 28.3842 4.22991 29.5 5.64174 29.5H19.3583C20.7701 29.5 21.942 28.3842 22.0312 26.9512L23.2143 7.75Z" fill="#F24822"/>
-                                        </svg>
-                                    </button>
-                                </form>
+                                <x-main.modal name="confirm-plot-deletion-{{ $plot->plot_id }}" focusable>
+                                    <form method="POST" action="{{ route('plot.destroy', $plot->plot_id) }}" class="p-6">
+                                        @csrf
+                                        @method('DELETE')
+                                        <h2 class="text-lg font-medium text-gray-900">
+                                            {{ __('Are you sure you want to delete this plot?') }}
+                                        </h2>
+                                        <p class="mt-1 text-sm text-gray-600">
+                                            {{ __('Once deleted, all data related to this plot will be permanently lost. This action cannot be undone.') }}
+                                        </p>
+                                        <div class="mt-6 flex justify-end font-outfit">
+                                            <x-main.secondary-button @click="$dispatch('close')">
+                                                {{ __('Cancel') }}
+                                            </x-main.secondary-button>
+                                            <x-main.danger-button type="submit" class="ml-3">
+                                                {{ __('Delete') }}
+                                            </x-main.danger-button>
+                                        </div>
+                                    </form>
+                                </x-main.modal>
+                                <button x-data="" x-on:click.prevent="$dispatch('open-modal', 'confirm-plot-deletion-{{ $plot->plot_id }}')" class="border-none bg-transparent cursor-pointer">
+                                    <svg width="20" height="20" viewBox="0 0 25 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M7.54464 1.50254L7.14286 2.3125H1.78571C0.797991 2.3125 0 3.12246 0 4.125C0 5.12754 0.797991 5.9375 1.78571 5.9375H23.2143C24.202 5.9375 25 5.12754 25 4.125C25 3.12246 24.202 2.3125 23.2143 2.3125H17.8571L17.4554 1.50254C17.154 0.885156 16.5346 0.5 15.8594 0.5H9.14062C8.4654 0.5 7.84598 0.885156 7.54464 1.50254ZM23.2143 7.75H1.78571L2.96875 26.9512C3.05804 28.3842 4.22991 29.5 5.64174 29.5H19.3583C20.7701 29.5 21.942 28.3842 22.0312 26.9512L23.2143 7.75Z" fill="#F24822"/>
+                                    </svg>
+                                </button>
                             </div>
                         </td>
                     </tr>

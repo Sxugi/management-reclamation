@@ -62,14 +62,17 @@
             vertical-align: top; 
             overflow: visible; 
         }
+        .page-break {
+            page-break-after: always;
+        }
     </style>
 </head>
 <body>
-    <p class="s1" style="padding-top: 3pt; padding-left: 164pt; text-indent: -104pt; line-height: 150%; text-align: left;">
+    <p class="s1" style="padding-top: 50pt; padding-left: 164pt; padding-right: 34pt; text-indent: -104pt; line-height: 150%; text-align: left;">
         Matrik 2.2 Rencana Biaya Reklamasi Tahap Operasi Produksi Periode Tahun {{ $tahunRange }}
     </p>
 
-    <table style="border-collapse:collapse;margin:6pt auto" cellspacing="0">
+    <table style="border-collapse:collapse;margin:6pt auto" cellspacing="0" class="page-break">
         <tbody>
             <!-- Header Tabel -->
             <tr style="height:14pt">
@@ -107,7 +110,7 @@
             </tr>
             
             <tr style="height:27pt">
-                <td style="width:36pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" rowspan="12">
+                <td style="width:36pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" rowspan="18">
                     <p style="text-indent: 0pt;text-align: left;"><br/></p>
                 </td>
                 <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
@@ -127,7 +130,7 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($biayaPerTahun[$tahun]['biaya_langsung']['penataan_permukaan_tanah'] ?? 0, 0) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['penataan_tanah'] ?? 0, 0) }}</p>
                 </td>
                 @endforeach
             </tr>
@@ -139,7 +142,7 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($biayaPerTahun[$tahun]['biaya_langsung']['penebaran_tanah_zona_pengakaran'] ?? 0, 0) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['penebaran_tanah_pengakaran'] ?? 0, 0) }}</p>
                 </td>
                 @endforeach
             </tr>
@@ -151,7 +154,7 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($biayaPerTahun[$tahun]['biaya_langsung']['pengendalian_erosi'] ?? 0, 0) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['pengendalian_erosi'] ?? 0, 0) }}</p>
                 </td>
                 @endforeach
             </tr>
@@ -174,7 +177,7 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($biayaPerTahun[$tahun]['biaya_langsung']['analisis_kualitas_tanah'] ?? 0, 0) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['kualitas_tanah'] ?? 0, 0) }}</p>
                 </td>
                 @endforeach
             </tr>
@@ -185,7 +188,7 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($biayaPerTahun[$tahun]['biaya_langsung']['pemupukan'] ?? 0, 0) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['pemupukan'] ?? 0, 0) }}</p>
                 </td>
                 @endforeach
             </tr>
@@ -196,7 +199,7 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($biayaPerTahun[$tahun]['biaya_langsung']['pengadaan_bibit'] ?? 0, 0) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['pengadaan_bibit'] ?? 0, 0) }}</p>
                 </td>
                 @endforeach
             </tr>
@@ -207,7 +210,7 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($biayaPerTahun[$tahun]['biaya_langsung']['penanaman'] ?? 0, 0) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['penanaman'] ?? 0, 0) }}</p>
                 </td>
                 @endforeach
             </tr>
@@ -218,7 +221,7 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($biayaPerTahun[$tahun]['biaya_langsung']['pemeliharaan_tanaman'] ?? 0, 0) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['pemeliharaan_tanaman'] ?? 0, 0) }}</p>
                 </td>
                 @endforeach
             </tr>
@@ -230,7 +233,77 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($biayaPerTahun[$tahun]['biaya_langsung']['biaya_pencegahan'] ?? 0, 0) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['pencegahan_air_asam'] ?? 0, 0) }}</p>
+                </td>
+                @endforeach
+            </tr>
+
+            <tr style="height:41pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 23pt;text-indent: -18pt;line-height: 113%;text-align: left;">d. biaya untuk pekerjaan sipil sesuai peruntukan lahan</p>
+                    <p class="s2" style="padding-left: 23pt;text-indent: 0pt;text-align: left;">Pascatambang atau program reklamasi bentuk lain</p>
+                </td>
+                @foreach($tahuns as $tahun)
+                <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['pekerjaan_sipil'] ?? 0, 0) }}</p>
+                </td>
+                @endforeach
+            </tr>
+
+            <tr style="height:27pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 5pt;text-indent: 0pt;line-height: 12pt;text-align: left;">e. biaya pemanfaatan lubang bekas</p>
+                    <p class="s2" style="padding-top: 1pt;padding-left: 23pt;text-indent: 0pt;text-align: left;">tambang(void) terdiri atas biaya:</p>
+                </td>
+                @foreach($tahuns as $tahun)
+                <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p style="text-indent: 0pt;text-align: left;"><br/></p>
+                </td>
+                @endforeach
+            </tr>
+
+            <tr style="height:14pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 26pt;text-indent: 0pt;text-align: left;">1) stabilisasi lereng</p>
+                </td>
+                @foreach($tahuns as $tahun)
+                <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['stabilisasi_lereng'] ?? 0, 0) }}</p>
+                </td>
+                @endforeach
+            </tr>
+
+            <tr style="height:27pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 26pt;text-indent: 0pt;text-align: left;">2) pengamanan lubang bekas</p>
+                    <p class="s2" style="padding-top: 1pt;padding-left: 44pt;text-indent: 0pt;text-align: left;">tambang (void)</p>
+                </td>
+                @foreach($tahuns as $tahun)
+                <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['pengamanan_lubang'] ?? 0, 0) }}</p>
+                </td>
+                @endforeach
+            </tr>
+
+            <tr style="height:71pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 40pt;padding-right: 13pt;text-indent: -22pt;line-height: 114%;text-align: left;">3) pemulihan dan pemantauan kualitas air serta pengelolaan air dalam lubang bekas tambang (void) sesuai dengan peruntukannya.</p>
+                </td>
+                @foreach($tahuns as $tahun)
+                <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['pemulihan_kualitas_air'] ?? 0, 0) }}</p>
+                </td>
+                @endforeach
+            </tr>
+
+            <tr style="height:27pt">
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 26pt;text-indent: 0pt;text-align: left;">4) pemeliharaan lubang bekas</p>
+                    <p class="s2" style="padding-top: 1pt;padding-left: 44pt;text-indent: 0pt;text-align: left;">tambang (void)</p>
+                </td>
+                @foreach($tahuns as $tahun)
+                <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['pemeliharaan_lubang'] ?? 0, 0) }}</p>
                 </td>
                 @endforeach
             </tr>
@@ -242,11 +315,35 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;"><strong>{{ number_format($biayaPerTahun[$tahun]['biaya_langsung']['subtotal_1'] ?? 0, 0) }}</strong></p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;"><strong>{{ number_format($dataPerTahun[$tahun]['subtotal_1'] ?? 0, 0) }}</strong></p>
                 </td>
                 @endforeach
             </tr>
-            
+        </tbody>
+    </table>
+
+    <table style="border-collapse:collapse;margin:6pt auto;padding-top: 50pt;" cellspacing="0">
+        <tbody>
+            <!-- Header Tabel -->
+            <tr style="height:14pt">
+                <td style="width:36pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" rowspan="2">
+                    <p class="s2" style="padding-left: 8pt;text-indent: 0pt;line-height: 12pt;text-align: left;">NO.</p>
+                </td>
+                <td style="width:194pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" rowspan="2">
+                    <p class="s2" style="padding-left: 51pt;text-indent: 0pt;line-height: 12pt;text-align: left;">DESKRIPSI BIAYA</p>
+                </td>
+                <td style="width:232pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt" colspan="{{ count($tahuns) }}">
+                    <p class="s2" style="text-indent: 0pt;line-height: 12pt;text-align: center;">TAHUN</p>
+                </td>
+            </tr>
+            <tr style="height:14pt">
+                @foreach($tahuns as $tahun)
+                <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
+                    <p class="s2" style="padding-left: 5pt;text-indent: 0pt;line-height: 12pt;text-align: center;">{{ $tahun }}</p>
+                </td>
+                @endforeach
+            </tr>
+
             <!-- Biaya Tidak Langsung -->
             <tr style="height:14pt">
                 <td style="width:36pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
@@ -272,7 +369,7 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($biayaPerTahun[$tahun]['biaya_tidak_langsung']['biaya_mobilisasi'] ?? 0, 0) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['mobilisasi_demobilisasi_alat'] ?? 0, 0) }}</p>
                 </td>
                 @endforeach
             </tr>
@@ -284,7 +381,7 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($biayaPerTahun[$tahun]['biaya_tidak_langsung']['biaya_perencanaan'] ?? 0, 0) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['perencanaan_reklamasi'] ?? 0, 0) }}</p>
                 </td>
                 @endforeach
             </tr>
@@ -296,7 +393,7 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($biayaPerTahun[$tahun]['biaya_tidak_langsung']['biaya_admin'] ?? 0, 0) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['administrasi_pihak_ketiga'] ?? 0, 0) }}</p>
                 </td>
                 @endforeach
             </tr>
@@ -307,7 +404,7 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($biayaPerTahun[$tahun]['biaya_tidak_langsung']['biaya_supervisi'] ?? 0, 0) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['supervisi'] ?? 0, 0) }}</p>
                 </td>
                 @endforeach
             </tr>
@@ -318,7 +415,7 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;"><strong>{{ number_format($biayaPerTahun[$tahun]['biaya_tidak_langsung']['subtotal_2'] ?? 0, 0) }}</strong></p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;"><strong>{{ number_format($dataPerTahun[$tahun]['subtotal_2'] ?? 0, 0) }}</strong></p>
                 </td>
                 @endforeach
             </tr>
@@ -329,8 +426,8 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 @php
-                    $total = ($biayaPerTahun[$tahun]['biaya_langsung']['subtotal_1'] ?? 0) + 
-                            ($biayaPerTahun[$tahun]['biaya_tidak_langsung']['subtotal_2'] ?? 0);
+                    $total = ($dataPerTahun[$tahun]['subtotal_1'] ?? 0) + 
+                            ($dataPerTahun[$tahun]['subtotal_2'] ?? 0);
                 @endphp
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
                     <p class="s2" style="padding-right: 5pt;text-align: center;"><strong>{{ number_format($total, 0) }}</strong></p>
@@ -340,17 +437,17 @@
         </tbody>
     </table>
     
-    <p style="padding-top: 3pt;padding-left: 7pt;text-indent: 0pt;text-align: left;">Keterangan :</p>
-    <p class="s5" style="padding-top: 1pt;padding-left: 7pt;text-indent: 0pt;text-align: left;">
+    <p style="padding-top: 3pt;padding-left: 87pt;text-indent: 0pt;text-align: left;">Keterangan :</p>
+    <p class="s5" style="padding-top: 1pt;padding-left: 87pt;text-indent: 0pt;text-align: left;">
         **1) <span class="p">besarnya 2,5% dari biaya langsung atau berdasarkan perhitungan</span>
     </p>
-    <p class="s5" style="padding-top: 1pt;padding-left: 7pt;text-indent: 0pt;text-align: left;">
+    <p class="s5" style="padding-top: 1pt;padding-left: 87pt;text-indent: 0pt;text-align: left;">
         **2)<span class="p">besarnya 2% - 10% dari biaya langsung (<i>grafik Englemen's Heavy Construction Cost File</i>)</span>
     </p>
-    <p class="s5" style="padding-top: 1pt;padding-left: 7pt;text-indent: 0pt;text-align: left;">
+    <p class="s5" style="padding-top: 1pt;padding-left: 87pt;text-indent: 0pt;text-align: left;">
         **3)<span class="p">besarnya 3% - 14% dari biaya langsung (<i>grafik Englemen's Heavy Construction Cost File</i>)</span>
     </p>
-    <p class="s5" style="padding-top: 1pt;padding-left: 7pt;text-indent: 0pt;text-align: left;">
+    <p class="s5" style="padding-top: 1pt;padding-left: 87pt;text-indent: 0pt;text-align: left;">
         **4) <span class="p">besarnya 2% - 7% dari biaya langsung (<i>grafik Englemen's Heavy Construction Cost File</i>)</span>
     </p>
 </body>

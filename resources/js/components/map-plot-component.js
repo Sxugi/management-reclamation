@@ -48,16 +48,11 @@ document.addEventListener('alpine:init', () => {
                 center: [centerLng, centerLat], 
                 maxZoom: 18,
                 zoom: initialZoom,
-                dragPan: false,
-                scrollZoom: false,
-                touchZoomRotate: false,
-                doubleClickZoom: false,
             });
 
             // Add only zoom controls without pan controls
             this.map.addControl(new maplibregl.NavigationControl({
-                showCompass: false,
-                visualizePitch: false,
+                showCompass: true,
                 showZoom: true
             }));
             
@@ -73,16 +68,16 @@ document.addEventListener('alpine:init', () => {
                     if (this.draw) {                       
                         // Add the updated feature
                         this.draw.add(e.detail);
-                        
-                        // Calculate area
-                        const area = this.calculatePolygonArea(e.detail.geometry.coordinates);
-                        
-                        // Update form with the new area
+
+                        // Calculate luas_area
+                        const luas_area = this.calculatePolygonArea(e.detail.geometry.coordinates);
+
+                        // Update form with the new luas_area
                         window.dispatchEvent(new CustomEvent('polygon-updated', {
                             detail: {
                                 id: e.detail.id,
                                 coordinates: e.detail.geometry.coordinates,
-                                area: area.toFixed(2)
+                                luas_area: luas_area.toFixed(2)
                             }
                         }));
                     }
@@ -186,26 +181,17 @@ document.addEventListener('alpine:init', () => {
             const geojsonData = {
                 type: 'FeatureCollection',
                 features: this.polygonData.map(plot => {
-                    const coords = [...plot.coordinates];
-
-                    const first = coords[0];
-                    const last = coords[coords.length - 1];
-
-                    if (first[0] !== last[0] || first[1] !== last[1]) {
-                        coords.push([...first]);
-                    }
-
                     return {
                         type: 'Feature',
                         id: plot.plot_id,
                         properties: {
                             plot_id: plot.plot_id,
                             nama_plot: plot.nama_plot,
-                            area: plot.area,
+                            luas_area: plot.luas_area,
                         },
                         geometry: {
                             type: 'Polygon',
-                            coordinates: [coords] // Ensure nested array for polygon coordinates
+                            coordinates: plot.polygon.coordinates
                         }
                     };
                 })
@@ -268,8 +254,8 @@ document.addEventListener('alpine:init', () => {
                             <div class="plot-popup-content">
                                 <h3 class="text-lg font-bold mb-2">${properties.nama_plot}</h3>
                                 <div class="flex justify-between mb-2">
-                                    <span>Area:</span>
-                                    <span class="font-semibold">${properties.area} Ha</span>
+                                    <span>Luas Area:</span>
+                                    <span class="font-semibold">${properties.luas_area} Ha</span>
                                 </div>
                                 <div class="mt-2 text-center">
                                     <a href="/plot/${plotId}/edit" class="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded">
@@ -334,40 +320,40 @@ document.addEventListener('alpine:init', () => {
         // Fit map to show all polygons
         fitMapToPolygons() {
             if (!this.polygonData || !this.polygonData.length) return;
-            
+
             const maplibregl = window.maplibregl;
             const bounds = new maplibregl.LngLatBounds();
-            
+
             this.polygonData.forEach(plot => {
-                if (plot.coordinates && Array.isArray(plot.coordinates)) {
-                    let coords = [plot.coordinates];
-                    
-                    // Handle nested coordinate structure
-                    if (Array.isArray(coords[0]) && Array.isArray(coords[0][0])) {
-                        coords = coords[0];
-                    }
-                    
-                    coords.forEach(coord => {
+                // Pastikan format GeoJSON Polygon
+                if (
+                    plot.polygon &&
+                    plot.polygon.coordinates &&
+                    Array.isArray(plot.polygon.coordinates) &&
+                    Array.isArray(plot.polygon.coordinates[0])
+                ) {
+                    // Ambil ring pertama (umumnya outline polygon)
+                    plot.polygon.coordinates[0].forEach(coord => {
                         if (Array.isArray(coord) && coord.length >= 2) {
                             bounds.extend([coord[0], coord[1]]);
                         }
                     });
                 }
             });
-            
-            // Fit map to bounds
+
+            if (bounds.isEmpty()) return; // Jangan fit jika bounds kosong
             this.map.fitBounds(bounds, { padding: 50 });
         },
         
         // Handle polygon creation
         handlePolygonCreated(feature) {
-            // Calculate area for the new polygon
-            const area = this.calculatePolygonArea(feature.geometry.coordinates);
-            
+            // Calculate luas_area for the new polygon
+            const luas_area = this.calculatePolygonArea(feature.geometry.coordinates);
+
             const polygonData = {
                 nama_plot: 'Blok A',
                 coordinates: feature.geometry.coordinates,
-                area: area.toFixed(2),
+                luas_area: luas_area.toFixed(2),
                 lahan_id: document.getElementById('lahan_id')?.value || null,
             };
             
@@ -381,14 +367,14 @@ document.addEventListener('alpine:init', () => {
         
         // Handle polygon updates
         handlePolygonUpdated(feature) {
-            // Recalculate area
-            const area = this.calculatePolygonArea(feature.geometry.coordinates);
-            
+            // Recalculate luas_area
+            const luas_area = this.calculatePolygonArea(feature.geometry.coordinates);
+
             // Dispatch update event
             this.$dispatch('polygon-updated', {
                 id: feature.id,
                 coordinates: feature.geometry.coordinates,
-                area: area.toFixed(2),
+                luas_area: luas_area.toFixed(2),
                 nama_plot: feature.properties.nama_plot
             });
         },
@@ -597,6 +583,8 @@ document.addEventListener('alpine:init', () => {
                 // Restore view
                 this.map.setCenter(center);
                 this.map.setZoom(zoom);
+
+                const maplibregl = window.maplibregl;
                 
                 // Re-add controls
                 this.map.addControl(new maplibregl.NavigationControl({
@@ -624,9 +612,7 @@ document.addEventListener('alpine:init', () => {
                     { lat: '', lng: '' }
                 ],
         nama_plot: initialData.nama_plot || '',
-        area: initialData.area || 0,
-        longitude: initialData.longitude || null,
-        latitude: initialData.latitude || null,
+        luas_area: initialData.luas_area || 0,
         polygonId: null,
         
         init() {
@@ -637,7 +623,7 @@ document.addEventListener('alpine:init', () => {
             window.addEventListener('polygon-created', (e) => {
                 if (e.detail && e.detail.data && e.detail.data.coordinates) {
                     this.polygonId = e.detail.id;
-                    this.area = e.detail.data.area;
+                    this.luas_area = e.detail.data.luas_area;
                     this.nama_plot = e.detail.data.nama_plot;
 
                     // Get coordinates from the first ring of the polygon
@@ -660,8 +646,8 @@ document.addEventListener('alpine:init', () => {
             // Listen for polygon update events from the map
             window.addEventListener('polygon-updated', (e) => {
                 if (e.detail && e.detail.coordinates) {
-                    this.area = e.detail.area;
-                    
+                    this.luas_area = e.detail.luas_area;
+
                     // Get coordinates from the first ring of the polygon
                     const coords = e.detail.coordinates[0];
 
@@ -687,57 +673,50 @@ document.addEventListener('alpine:init', () => {
                     { lat: '', lng: '' }
                 ];
                 this.polygonId = null;
-                this.area = 0;
+                this.luas_area = 0;
             });
         },
         
         // Function to load existing data for pre-populating the form
         loadInitialData() {
-            // Check for initial data in hidden input fields or data attributes
-            const initialDataEl = document.getElementById('initial-plot-data');
-            if (initialDataEl && initialDataEl.value) {
-                try {
-                    const plotData = JSON.parse(initialDataEl.value);
-                    console.log('Loading initial plot data:', plotData);
-                    
-                    // Set polygon ID if available
-                    if (plotData.plot_id) {
-                        this.polygonId = plotData.plot_id;
-                    }
-                    
-                    // Set plot name if available
-                    if (plotData.nama_plot) {
-                        this.nama_plot = plotData.nama_plot;
-                    }
-                    
-                    // Set area if available
-                    if (plotData.area) {
-                        this.area = plotData.area;
-                    }
-                    
-                    // Set coordinates if available
-                    if (plotData.coordinates && Array.isArray(plotData.coordinates)) {
-                        // Convert coordinates to the required format
-                        this.points = plotData.coordinates.map(coord => ({
-                            lng: parseFloat(coord[0]),
-                            lat: parseFloat(coord[1])
-                        }));
-                        
-                        // Ensure we have at least 3 points
-                        while (this.points.length < 3) {
-                            this.points.push({ lat: '', lng: '' });
-                        }
-                        
-                        // Update the map with these coordinates after a short delay
-                        // to ensure the map is fully initialized
-                        setTimeout(() => this.updateMapFromInputs(), 500);
-                    }
-                } catch (e) {
-                    console.error('Error loading initial plot data:', e);
-                }
-            } else {
-                console.log('No initial plot data found');
+            if (!this.polygons || typeof this.polygons !== 'object') {
+                console.warn('No polygon data found');
+                return;
             }
+
+            // Set polygon ID, name, and area
+            this.polygonId = this.polygons.plot_id ?? null;
+            this.nama_plot = this.polygons.nama_plot ?? '';
+            this.luas_area = this.polygons.luas_area ?? 0;
+
+            // Extract coordinates from the polygons object
+            const coordinates = this.polygons?.polygon?.coordinates;
+
+            if (Array.isArray(coordinates) && Array.isArray(coordinates[0])) {
+                const coords = coordinates[0]; // Ambil ring pertama
+                const uniqueCoords = coords.length > 1 &&
+                    coords[0][0] === coords[coords.length - 1][0] &&
+                    coords[0][1] === coords[coords.length - 1][1]
+                    ? coords.slice(0, -1)
+                    : coords;
+
+                this.points = uniqueCoords.map(coord => ({
+                    lng: parseFloat(coord[0]),
+                    lat: parseFloat(coord[1])
+                }));
+            }
+
+            // Ensure there are at least 3 points
+            if (!Array.isArray(this.points) || this.points.length < 3) {
+                this.points = [
+                    { lat: '', lng: '' },
+                    { lat: '', lng: '' },
+                    { lat: '', lng: '' }
+                ];
+            }
+
+            // Update map setelah delay
+            setTimeout(() => this.updateMapFromInputs(), 500);
         },
         
         // Add a new empty input field
@@ -751,7 +730,7 @@ document.addEventListener('alpine:init', () => {
                 this.points.splice(index, 1);
                 this.updateMapFromInputs();
             } else {
-                alert('A polygon requires at least 3 points.');
+                this.$dispatch('open-modal', 'point-error');
             }
         },
         

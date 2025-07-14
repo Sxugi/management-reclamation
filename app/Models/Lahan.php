@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Clickbar\Magellan\Data\Geometries\Point;
 
 class Lahan extends Model
 {
@@ -20,6 +21,13 @@ class Lahan extends Model
     protected $primaryKey = 'lahan_id';
 
     /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'lahan';
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
@@ -31,47 +39,17 @@ class Lahan extends Model
         'tahun_awal',
         'tahun_akhir',
         'pic_reklamasi',
+        'location',
         'status',
+    ];
+
+    protected $casts = [
+        'location' => Point::class,
     ];
 
     public function getRouteKeyName()
     {
         return 'lahan_id';
-    }
-
-
-    // Set location (point) from latitude and longitude
-    public function setLocation($longitude, $latitude)
-    {
-        DB::statement(
-            "UPDATE lahans SET location = ST_SetSRID(ST_MakePoint(?, ?), 4326) WHERE lahan_id = ?",
-            [$longitude, $latitude, $this->lahan_id]
-        );
-        return $this;
-    }
-
-    // Get latitude
-    public function getLatitudeAttribute()
-    {
-        if (!$this->exists) return null;
-        
-        $point = DB::select(
-            "SELECT ST_Y(location::geometry) as latitude FROM lahans WHERE lahan_id = ?", 
-            [$this->lahan_id]
-        );
-        return $point[0]->latitude ?? null;
-    }
-
-    // Get longitude
-    public function getLongitudeAttribute()
-    {
-        if (!$this->exists) return null;
-        
-        $point = DB::select(
-            "SELECT ST_X(location::geometry) as longitude FROM lahans WHERE lahan_id = ?", 
-            [$this->lahan_id]
-        );
-        return $point[0]->longitude ?? null;
     }
 
     public function user(): BelongsTo
@@ -84,8 +62,13 @@ class Lahan extends Model
         return $this->hasMany(Plot::class);
     }
 
-    public function rencanaBiaya(): HasMany
+    public function dataReklamasi(): HasMany
     {
-        return $this->hasMany(RencanaBiaya::class);
+        return $this->hasMany(DataReklamasi::class);
+    }
+
+    public function biayaReklamasi(): HasMany
+    {
+        return $this->hasMany(BiayaReklamasi::class);
     }
 }

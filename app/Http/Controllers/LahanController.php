@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Lahan\CreateLahanRequest;
 use App\Http\Requests\Lahan\UpdateLahanRequest;
+use Clickbar\Magellan\Data\Geometries\Point;
 
 class LahanController extends Controller
 {
@@ -41,11 +42,10 @@ class LahanController extends Controller
 
         // Add the current user's ID
         $validated['user_id'] = Auth::user()->user_id;
-        
-        $lahan = Lahan::create($validated);
 
-        // Save the location after the model is created
-        $lahan->setLocation($validated['longitude'], $validated['latitude']);
+        $validated['location'] = Point::make($validated['longitude'], $validated['latitude']);
+
+        $lahan = Lahan::create($validated);
         
         return redirect()->route('lahan.index')
                         ->with('success', 'Data lahan berhasil ditambahkan');
@@ -77,8 +77,10 @@ class LahanController extends Controller
         if ($lahan->user_id !== Auth::user()->user_id) {
             abort(403, 'Unauthorized action.');
         }
-        
-        return view('lahan.edit', compact('lahan'));
+
+        $point = $lahan->location;
+
+        return view('lahan.edit', compact('lahan', 'point'));
     }
 
     /**
@@ -94,15 +96,10 @@ class LahanController extends Controller
         }
 
         $validated = $request->validated();
+        
+        $validated['location'] = Point::make($validated['longitude'], $validated['latitude']);
 
         $lahan->update($validated);
-
-        if (isset($validated['longitude']) && isset($validated['latitude'])) {
-            $lahan->setLocation(
-                $validated['longitude'],
-                $validated['latitude']
-            );
-        }
 
         return redirect()->route('lahan.index')
                         ->with('success', 'Data lahan berhasil diperbarui');

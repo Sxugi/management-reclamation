@@ -11,7 +11,7 @@
 <div class="flex flex-row items-center justify-between gap-2 py-4 text-white">
     <div class="rounded-lg bg-darkslategray-300 overflow-hidden flex flex-row items-center justify-center gap-2">
         @if ($rencana_biaya)
-            <a href="{{ route('lahan.rencana-biaya.edit', [$lahan->lahan_id, $rencana_biaya->rencana_biaya_id]) }}" class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200">
+            <a href="{{ route('lahan.rencana-biaya.edit', [$lahan->lahan_id, $rencana_biaya->biaya_reklamasi_id]) }}" class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200">
                 <span class="relative leading-5 font-medium">Edit</span>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M7 7H6C5.46957 7 4.96086 7.21071 4.58579 7.58579C4.21071 7.96086 4 8.46957 4 9V18C4 18.5304 4.21071 19.0391 4.58579 19.4142C4.96086 19.7893 5.46957 20 6 20H15C15.5304 20 16.0391 19.7893 16.4142 19.4142C16.7893 19.0391 17 18.5304 17 18V17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

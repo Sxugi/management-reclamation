@@ -1,4 +1,4 @@
-@props(['tahun_aktif', 'lahan', 'rencanaBiaya'])
+@props(['tahun_aktif', 'lahan'])
 
 <div class="relative rounded-lg flex flex-row items-start justify-start text-left text-sm text-slategray font-outfit bg-lightgray p-0.5">
     <div class="self-stretch rounded-lg bg-lightgray flex flex-row items-center justify-start">

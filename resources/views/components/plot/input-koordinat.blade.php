@@ -1,4 +1,3 @@
-@props(['initialPoints' => [], 'lahan' => null, 'plot' => null])
 <div class="self-stretch rounded-2xl flex flex-col items-center justify-start text-darkgray">
     <div class="self-stretch flex flex-row items-center justify-between gap-1 mb-6">
         <div class="flex-1 flex flex-col items-start justify-start gap-1 text-lg text-gray">
@@ -50,6 +49,22 @@
                 </div>
             </div>
         </template>
+        <x-main.modal name="point-error" focusable x-transition>
+            <div class="p-6">
+                <h2 class="text-lg font-medium text-gray-900">
+                    {{ __('Jumlah Koordinat Tidak Valid!!') }}
+                </h2>
+                <p class="mt-1 text-sm text-gray-600">
+                    {{ __('Polygon membutuhkan minimal 3 titik koordinat.') }}
+                </p>
+                <div class="mt-6 flex justify-end font-outfit">
+                    <x-main.secondary-button @click="$dispatch('close-modal', 'point-error')">
+                        {{ __('Okay') }}
+                    </x-main.secondary-button>
+                </div>
+            </div>
+        </x-main.modal>
+        <x-main.input-error :messages="$errors->get('polygon')" class="mt-2" />
     </div>
 
     <!-- Submit Button -->

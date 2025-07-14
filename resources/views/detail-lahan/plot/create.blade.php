@@ -38,34 +38,26 @@
                 </div>
 
                 <div x-data="koordinatInputData()" class="flex flex-col gap-6">
-                    <!-- First form - info input -->
-                    <form class="w-full">
-                        <div class="bg-white overflow-hidden shadow-sm rounded-lg sm:rounded-lg">
-                            <div class="p-6">
-                                <x-plot.input-info :initialPoints="$initialPoints ?? []" :lahan="$lahan"/>
-                            </div>
-                        </div>
-                    </form>
-                    
-                    <!-- Second form - coordinates input -->
                     <form 
                         method="POST" 
-                        action="{{ isset($plot) ? route('plot.update', $plot->plot_id) : route('lahan.plot.store', $lahan->lahan_id) }}"
+                        action="{{ route('lahan.plot.store', $lahan->lahan_id) }}"
                         class="w-full">
                         @csrf
-                        @if(isset($plot))
-                            @method('PUT')
-                        @endif
 
-                        <!-- Hidden fields to ensure all data from the shared Alpine context is submitted -->
                         <input type="hidden" name="lahan_id" value="{{ $lahan->lahan_id }}" />
-                        <input type="hidden" name="nama_plot" x-model="nama_plot" />
-                        <input type="hidden" name="coordinates" x-model="JSON.stringify(points)" />
-                        <input type="hidden" name="area" x-model="area" />
+                        <input type="hidden" name="polygon" :value="JSON.stringify([points.map(p => [parseFloat(p.lng), parseFloat(p.lat)])])" />
                         
-                        <div class="bg-white overflow-hidden shadow-sm rounded-lg sm:rounded-lg">
-                            <div class="p-6">
-                                <x-plot.input-koordinat :initialPoints="$initialPoints ?? []" :lahan="$lahan"/>
+                        <div class="flex flex-col gap-6">
+                            <div class="bg-white overflow-hidden shadow-sm rounded-lg sm:rounded-lg">
+                                <div class="p-6">
+                                    <x-plot.input-info :lahan="$lahan"/>
+                                </div>
+                            </div>
+
+                            <div class="bg-white overflow-hidden shadow-sm rounded-lg sm:rounded-lg">
+                                <div class="p-6">
+                                    <x-plot.input-koordinat :lahan="$lahan"/>
+                                </div>
                             </div>
                         </div>
                     </form>
