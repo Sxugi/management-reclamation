@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Clickbar\Magellan\Data\Geometries\Point;
 
 class Lahan extends Model
@@ -70,5 +71,10 @@ class Lahan extends Model
     public function biayaReklamasi(): HasMany
     {
         return $this->hasMany(BiayaReklamasi::class);
+    }
+
+    public function kriteriaKeberhasilan(): HasOne
+    {
+        return $this->hasOne(KriteriaKeberhasilan::class);
     }
 }

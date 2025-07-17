@@ -143,6 +143,10 @@ class RencanaReklamasiController extends Controller
             ->orderBy('tahun')
             ->get();
 
+        if ($data->isEmpty()) {
+            return redirect()->back()->with('error', 'Rencana pelaksanaan reklamasi belum tersedia.');
+        }
+
         return $pdfService->generate($lahan, $data, 'reports.rencana-reklamasi-pdf', 'Rencana Reklamasi');
     }
 }

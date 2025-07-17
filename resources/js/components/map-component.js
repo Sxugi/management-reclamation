@@ -49,7 +49,8 @@ document.addEventListener('alpine:init', () => {
                 container: 'map',
                 style: this.getHybridStyle(),
                 center: [centerLng, centerLat], 
-                zoom: initialZoom
+                zoom: initialZoom,
+                maxZoom: 18
             });
             
             // Add navigation controls

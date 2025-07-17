@@ -142,6 +142,10 @@ class RencanaBiayaController extends Controller
             ->orderBy('tahun')
             ->get();
 
+        if ($data->isEmpty()) {
+            return redirect()->back()->with('error', 'Rencana biaya reklamasi belum tersedia.');
+        }
+
         return $pdfService->generate($lahan, $data, 'reports.rencana-biaya-pdf', 'Rencana Biaya');
     }
 }

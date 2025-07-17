@@ -27,5 +27,11 @@
         </div>
     @endif
 
+    @if(session('error'))
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {{ session('error') }}
+        </div>
+    @endif
+
     <x-rekapitulasi-reklamasi.form :lahan="$lahan" :rekapitulasi_reklamasi="$rekapitulasi_reklamasi" :tahun_aktif="$tahun_aktif" :readonly="true" />
 </x-main-layout>

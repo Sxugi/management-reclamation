@@ -8,6 +8,7 @@ use App\Http\Controllers\RencanaReklamasiController;
 use App\Http\Controllers\RencanaBiayaController;
 use App\Http\Controllers\RekapitulasiReklamasiController;
 use App\Http\Controllers\RekapitulasiBiayaController;
+use App\Http\Controllers\KriteriaKeberhasilanController;
 use Illuminate\Support\Facades\Route;
 
 // Route for profile
@@ -55,6 +56,21 @@ Route::middleware(['auth'])->group(function () {
         ->except('show', 'destroy');
     Route::get('lahan/{lahan}/rekapitulasi-biaya/pdf', [RekapitulasiBiayaController::class, 'generatePDF'])
         ->name('lahan.rekapitulasi-biaya.pdf');
+    Route::prefix('lahan/{lahan}/kriteria-keberhasilan')
+        ->name('lahan.kriteria-keberhasilan.')->group(function () {
+            Route::get('/', [KriteriaKeberhasilanController::class, 'show'])
+                ->name('show');
+            Route::get('/edit', [KriteriaKeberhasilanController::class, 'edit'])
+                ->name('edit');
+            Route::patch('/penatagunaan', [KriteriaKeberhasilanController::class, 'updatePenatagunaan'])
+                ->name('update.penatagunaan');
+            Route::patch('/revegetasi', [KriteriaKeberhasilanController::class, 'updateRevegetasi'])
+                ->name('update.revegetasi');
+            Route::patch('/penyelesaian', [KriteriaKeberhasilanController::class, 'updatePenyelesaian'])
+                ->name('update.penyelesaian');
+            Route::get('/pdf', [KriteriaKeberhasilanController::class, 'generatePDF'])
+                ->name('pdf');
+    });
 });
 
 
