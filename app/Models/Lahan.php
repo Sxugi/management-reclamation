@@ -77,4 +77,9 @@ class Lahan extends Model
     {
         return $this->hasOne(KriteriaKeberhasilan::class);
     }
+
+    public function dokumentasi(): HasMany
+    {
+        return $this->hasMany(Dokumentasi::class, 'lahan_id', 'lahan_id');
+    }
 }

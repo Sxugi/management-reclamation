@@ -9,6 +9,7 @@ use App\Http\Controllers\RencanaBiayaController;
 use App\Http\Controllers\RekapitulasiReklamasiController;
 use App\Http\Controllers\RekapitulasiBiayaController;
 use App\Http\Controllers\KriteriaKeberhasilanController;
+use App\Http\Controllers\DokumentasiController;
 use Illuminate\Support\Facades\Route;
 
 // Route for profile
@@ -71,6 +72,7 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/pdf', [KriteriaKeberhasilanController::class, 'generatePDF'])
                 ->name('pdf');
     });
+    Route::resource('lahan.dokumentasi', DokumentasiController::class);
 });
 
 

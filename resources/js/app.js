@@ -24,6 +24,8 @@ window.turf = turf;
 
 import './components/map-component.js';
 import './components/map-plot-component.js';
+import './components/date-filter.js';
+import './components/file-upload.js';
 
 window.Alpine = Alpine;
 Alpine.start();

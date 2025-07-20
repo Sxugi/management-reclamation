@@ -149,9 +149,9 @@
                 </a>
 
                 <!-- Dokumentasi -->
-                <a href="#" 
+                <a href="{{ route('lahan.dokumentasi.index', ['lahan' => $globalLahanId]) }}" 
                    class="self-stretch rounded-lg flex flex-row items-center justify-start py-2 px-3 no-underline hover:bg-white hover:text-darkslategray ease-in-out
-                   {{ request()->routeIs('expense.*', '#') ? 'bg-white !text-darkslategray' : 'bg-darkslategray text-white' }}">
+                   {{ request()->routeIs('expense.*', 'lahan.dokumentasi.*') ? 'bg-white !text-darkslategray' : 'bg-darkslategray text-white' }}">
                     <div class="flex-1 flex flex-row items-center justify-start gap-3">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M15.2773 2C15.8741 2 16.4472 2.23723 16.8691 2.65918L19.3418 5.13184L19.4912 5.29688C19.8191 5.69721 20 6.20063 20 6.72266V16.75C20 17.9926 18.9926 19 17.75 19H16.248V19.75C16.2478 20.9924 15.2405 22 13.998 22H6.24805C5.00557 22 3.99831 20.9924 3.99805 19.75V7.24902C3.99805 6.00638 5.00541 4.99902 6.24805 4.99902H7.00391V4.25C7.00391 3.00736 8.01127 2 9.25391 2H15.2773ZM6.24805 6.49902C5.83383 6.49902 5.49805 6.83481 5.49805 7.24902V19.75C5.49831 20.164 5.834 20.5 6.24805 20.5H13.998C14.4121 20.5 14.7478 20.164 14.748 19.75V19H9.25391C8.01127 19 7.00391 17.9926 7.00391 16.75V6.49902H6.24805ZM9.25391 3.5C8.83969 3.5 8.50391 3.83579 8.50391 4.25V16.75C8.50391 17.1642 8.83969 17.5 9.25391 17.5H17.75C18.1642 17.5 18.5 17.1642 18.5 16.75V6.72266C18.5 6.57342 18.4556 6.42898 18.374 6.30664L18.2803 6.19238L15.8076 3.71973C15.667 3.57919 15.4762 3.5 15.2773 3.5H9.25391Z" fill="currentColor"/>
