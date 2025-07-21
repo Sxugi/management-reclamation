@@ -19,7 +19,7 @@
                 <div class="mt-2">
                     <x-main.text-input id="current_password" name="current_password" type="password" autocomplete="current-password" />
                 </div>
-                <x-main.input-error :messages="$errors->updatePassword->get('current_password')" class="mt-2" />
+                <x-main.input-error :messages="$errors->updatePassword->get('current_password')" data-turbo-temporary class="mt-2" />
             </div>
 
             <div>
@@ -27,7 +27,7 @@
                 <div class="mt-2">
                     <x-main.text-input id="password" name="password" type="password" autocomplete="new-password" />
                 </div>
-                <x-main.input-error :messages="$errors->updatePassword->get('password')" class="mt-2" />
+                <x-main.input-error :messages="$errors->updatePassword->get('password')" data-turbo-temporary class="mt-2" />
             </div>
 
             <div>
@@ -35,7 +35,7 @@
                 <div class="mt-2">
                     <x-main.text-input id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password" />
                 </div>
-                <x-main.input-error :messages="$errors->updatePassword->get('password_confirmation')" class="mt-2" />
+                <x-main.input-error :messages="$errors->updatePassword->get('password_confirmation')" data-turbo-temporary class="mt-2" />
             </div>
         </div>
 

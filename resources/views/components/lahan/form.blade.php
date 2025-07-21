@@ -16,7 +16,7 @@
             <!-- Hidden Coordinate Fields -->
             <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude', $lahan->longitude ?? '') }}" />
             <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude', $lahan->latitude ?? '') }}" />
-            <x-main.input-error :messages="$errors->get('longitude')" class="mt-2" />
+            <x-main.input-error :messages="$errors->get('longitude')" data-turbo-temporary class="mt-2" />
         </div>
         
         <!-- Save Button -->

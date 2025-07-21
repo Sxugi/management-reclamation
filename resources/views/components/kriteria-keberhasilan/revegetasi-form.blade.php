@@ -105,7 +105,7 @@
                                                 />
                                             </div>
                                         </div>
-                                        <x-main.input-error :messages="$errors->get($key)" class="mt-2" />
+                                        <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
                                     @endif
                                 </div>
                             @endforeach
@@ -161,7 +161,7 @@
                                                 />
                                             </div>
                                         </div>
-                                        <x-main.input-error :messages="$errors->get($key)" class="mt-2" />
+                                        <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
                                     @endif
                                 </div>
                             @endforeach

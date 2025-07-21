@@ -31,7 +31,7 @@
                                     />
                                 </div>
                                 @error('email')
-                                    <span class="text-tomato text-xs mt-1">{{ $message }}</span>
+                                    <span data-turbo-temporary class="text-tomato text-xs mt-1">{{ $message }}</span>
                                 @enderror
                             </div>
                         </div>
@@ -56,7 +56,7 @@
                                     <img class="w-5 relative h-5 object-cover cursor-pointer toggle-password shrink-0" alt="Toggle password visibility" src="{{ asset('images/eye-enabled.svg') }}">
                                 </div>
                                 @error('password')
-                                    <span class="text-tomato text-xs mt-1">{{ $message }}</span>
+                                    <span data-turbo-temporary class="text-tomato text-xs mt-1">{{ $message }}</span>
                                 @enderror
                             </div>
                         </div>
@@ -83,7 +83,7 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('turbo:load', function() {
             const togglePasswordVisibility = document.querySelector('.toggle-password');
             const passwordInput = document.getElementById('password');
             

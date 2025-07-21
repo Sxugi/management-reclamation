@@ -26,7 +26,7 @@
                             autocomplete="username" 
                         />
                     </div>
-                    <x-main.input-error :messages="$errors->get('email')" class="mt-2" />
+                    <x-main.input-error :messages="$errors->get('email')" data-turbo-temporary class="mt-2" />
                 </div>
 
                 <!-- Password -->
@@ -41,7 +41,7 @@
                             autocomplete="new-password" 
                         />
                     </div>
-                    <x-main.input-error :messages="$errors->get('password')" class="mt-2" />
+                    <x-main.input-error :messages="$errors->get('password')" data-turbo-temporary class="mt-2" />
                 </div>
 
                 <!-- Confirm Password -->
@@ -56,7 +56,7 @@
                             autocomplete="new-password"
                         />
                     </div>
-                    <x-main.input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+                    <x-main.input-error :messages="$errors->get('password_confirmation')" data-turbo-temporary class="mt-2" />
                 </div>
 
                 <div>

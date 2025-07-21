@@ -48,6 +48,11 @@ document.addEventListener('alpine:init', () => {
                 center: [centerLng, centerLat], 
                 maxZoom: 18,
                 zoom: initialZoom,
+                fadeDuration: 0,
+                prefetchZoomDelta: 0,
+                transformRequest: (url, resourceType) => {
+                    return { url };
+                }
             });
 
             // Add only zoom controls without pan controls

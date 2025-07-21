@@ -14,7 +14,7 @@
             placeholder="Masukkan nama lahan"
         />
     </div>
-    <x-main.input-error :messages="$errors->get('nama_lahan')" class="mt-2" />
+    <x-main.input-error :messages="$errors->get('nama_lahan')" data-turbo-temporary class="mt-2" />
 </div>
 
 <!-- Luas Lahan -->
@@ -32,7 +32,7 @@
             placeholder="0.00"
         />
     </div>
-    <x-main.input-error :messages="$errors->get('luas_lahan')" class="mt-2" />
+    <x-main.input-error :messages="$errors->get('luas_lahan')" data-turbo-temporary class="mt-2" />
 </div>
 
 <!-- Periode Tahun -->
@@ -54,7 +54,7 @@
                     </option>
                 @endfor
             </select>
-            <x-main.input-error :messages="$errors->get('tahun_awal')" class="mt-2" />
+            <x-main.input-error :messages="$errors->get('tahun_awal')" data-turbo-temporary class="mt-2" />
         </div>
         
         <!-- Tahun Akhir -->
@@ -72,7 +72,7 @@
                     </option>
                 @endfor
             </select>
-            <x-main.input-error :messages="$errors->get('tahun_akhir')" class="mt-2" />
+            <x-main.input-error :messages="$errors->get('tahun_akhir')" data-turbo-temporary class="mt-2" />
         </div>
     </div>
 </div>
@@ -91,5 +91,5 @@
             placeholder="Masukkan nama PIC"
         />
     </div>
-    <x-main.input-error :messages="$errors->get('pic_reklamasi')" class="mt-2" />
+    <x-main.input-error :messages="$errors->get('pic_reklamasi')" data-turbo-temporary class="mt-2" />
 </div>

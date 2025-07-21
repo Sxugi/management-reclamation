@@ -38,7 +38,7 @@
                     placeholder="{{ __('Password') }}"
                 />
 
-                <x-main.input-error :messages="$errors->userDeletion->get('password')" class="mt-2" />
+                <x-main.input-error :messages="$errors->userDeletion->get('password')" data-turbo-temporary class="mt-2" />
             </div>
 
             <div class="mt-6 flex justify-end font-outfit">

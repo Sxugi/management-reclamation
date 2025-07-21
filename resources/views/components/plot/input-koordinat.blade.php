@@ -64,7 +64,7 @@
                 </div>
             </div>
         </x-main.modal>
-        <x-main.input-error :messages="$errors->get('polygon')" class="mt-2" />
+        <x-main.input-error :messages="$errors->get('polygon')" data-turbo-temporary class="mt-2" />
     </div>
 
     <!-- Submit Button -->

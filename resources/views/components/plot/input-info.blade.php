@@ -13,13 +13,13 @@
                 <div class="flex flex-col gap-2">
                     <x-main.input-label>Nama Plot</x-main.input-label>
                     <x-main.text-input type="text" name="nama_plot" x-model="nama_plot" class="w-full rounded-lg border-lightgray border-solid border-[1px] p-2.5" />
-                    <x-main.input-error :messages="$errors->get('nama_plot')" class="mt-2" />
+                    <x-main.input-error :messages="$errors->get('nama_plot')" data-turbo-temporary class="mt-2" />
                 </div>
 
                 <div class="flex flex-col gap-2">
                     <x-main.input-label>Luas Area (Ha)</x-main.input-label>
                     <x-main.text-input type="text" name="luas_area" x-model="luas_area" class="w-full rounded-lg border-lightgray border-solid border-[1px] p-2.5" />
-                    <x-main.input-error :messages="$errors->get('luas_area')" class="mt-2" />
+                    <x-main.input-error :messages="$errors->get('luas_area')" data-turbo-temporary class="mt-2" />
                 </div>
             </div>
         </div>

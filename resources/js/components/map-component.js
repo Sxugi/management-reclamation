@@ -50,7 +50,12 @@ document.addEventListener('alpine:init', () => {
                 style: this.getHybridStyle(),
                 center: [centerLng, centerLat], 
                 zoom: initialZoom,
-                maxZoom: 18
+                maxZoom: 18,
+                fadeDuration: 0,
+                prefetchZoomDelta: 0,
+                transformRequest: (url, resourceType) => {
+                    return { url };
+                }
             });
             
             // Add navigation controls

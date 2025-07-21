@@ -101,7 +101,7 @@
                                     min="0"
                                     @if($readonly ?? false) readonly disabled @endif
                                 >
-                                <x-main.input-error :messages="$errors->get($key)" class="mt-2" />
+                                <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
                             </div>
                         @endforeach
                     @elseif ($section === 'sub_total')
@@ -120,7 +120,7 @@
                                     min="0"
                                     @if($readonly ?? false) readonly disabled @endif
                                 >
-                                <x-main.input-error :messages="$errors->get($key)" class="mt-2" />
+                                <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
                             @endforeach
                         </div>
                     @else
@@ -141,7 +141,7 @@
                                         min="0"
                                         @if($readonly ?? false) readonly disabled @endif
                                     >
-                                    <x-main.input-error :messages="$errors->get($key)" class="mt-2" />
+                                    <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
                                 </div>
                             @endforeach
                         </div>
@@ -176,7 +176,7 @@
                                 min="0"
                                 @if($readonly ?? false) readonly disabled @endif
                             >
-                            <x-main.input-error :messages="$errors->get($key)" class="mt-2" />
+                            <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
                         </div>
                     @else
                         <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
@@ -192,7 +192,7 @@
                             @if (!empty($field['hint']))
                                 <span class="self-stretch relative text-xs leading-[18px] text-darkslategray-100">{{ $field['hint'] }}</span>
                             @endif
-                            <x-main.input-error :messages="$errors->get($key)" class="mt-2" />
+                            <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
                         </div>
                     @endif
                 @endforeach

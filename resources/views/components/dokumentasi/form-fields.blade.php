@@ -78,7 +78,7 @@
                         accept="image/*" 
                         class="hidden">
             </div>
-            <x-main.input-error :messages="$errors->get('image')" class="mt-2" />
+            <x-main.input-error :messages="$errors->get('image')" data-turbo-temporary class="mt-2" />
         </div>
     </div>
 
@@ -91,7 +91,7 @@
                         value="{{ old('nama', $doc->nama ?? '') }}"
                         placeholder="Masukkan judul dokumentasi..." 
                         class="flex-1 leading-5 bg-transparent"/>
-                <x-main.input-error :messages="$errors->get('nama')" class="mt-2" />
+                <x-main.input-error :messages="$errors->get('nama')" data-turbo-temporary class="mt-2" />
             </div>
         </div>
     </div>
@@ -105,7 +105,7 @@
                                 rows="5" 
                                 placeholder="Masukkan deskripsi..." 
                                 class="flex-1 border-none outline-none resize-none leading-5 bg-transparent font-outfit">{{ old('deskripsi', $doc->deskripsi ?? '') }}</textarea>
-                    <x-main.input-error :messages="$errors->get('deskripsi')" class="mt-2" />
+                    <x-main.input-error :messages="$errors->get('deskripsi')" data-turbo-temporary class="mt-2" />
                 </div>
             </div>
         </div>

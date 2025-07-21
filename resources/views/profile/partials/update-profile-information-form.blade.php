@@ -23,7 +23,7 @@
                 <div class="mt-2">
                     <x-main.text-input id="username" name="username" type="text" :value="old('username', $user->username)" required autofocus autocomplete="username" />
                 </div>
-                <x-main.input-error class="mt-2" :messages="$errors->get('username')" />
+                <x-main.input-error data-turbo-temporary class="mt-2" :messages="$errors->get('username')" />
             </div>
 
             <div class="sm:col-span-2">
@@ -31,7 +31,7 @@
                 <div class="mt-2">
                     <x-main.text-input id="email" name="email" type="email" :value="old('email', $user->email)" required autocomplete="email" />
                 </div>
-                <x-main.input-error class="mt-2" :messages="$errors->get('email')" />
+                <x-main.input-error data-turbo-temporary class="mt-2" :messages="$errors->get('email')" />
 
                 @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
                     <div class="mt-3">

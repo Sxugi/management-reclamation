@@ -142,7 +142,7 @@
                                     @if($readonly ?? false) readonly disabled @endif
                                     min="0"
                                 >
-                                <x-main.input-error :messages="$errors->get($key)" class="mt-2" />
+                                <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
                             </div>
                         @endforeach
                     </div>
@@ -168,7 +168,7 @@
                             @if($readonly ?? false) readonly disabled @endif
                             min="0"
                         >
-                        <x-main.input-error :messages="$errors->get($key)" class="mt-2" />
+                        <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
                     </div>
                 @endforeach
             </div>
@@ -192,7 +192,7 @@
                             @if($readonly ?? false) readonly disabled @endif
                             min="0"
                         >
-                        <x-main.input-error :messages="$errors->get($key)" class="mt-2" />
+                        <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
                     </div>
                 @endforeach
             </div>
@@ -226,7 +226,7 @@
                                     @if($readonly ?? false) readonly disabled @endif
                                     min="0"
                                 >
-                                <x-main.input-error :messages="$errors->get($key)" class="mt-2" />
+                                <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
                             </div>
                         @endforeach
                     </div>
@@ -246,7 +246,7 @@
                             class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                             @if($readonly ?? false) readonly disabled @endif
                         >
-                        <x-main.input-error :messages="$errors->get($key)" class="mt-2" />
+                        <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
                     </div>
                 @endforeach
                 @foreach($pekerjaanSipilFields as $key => $field)
@@ -261,7 +261,7 @@
                             @if($readonly ?? false) readonly disabled @endif
                             min="0"
                         >
-                        <x-main.input-error :messages="$errors->get($key)" class="mt-2" />
+                        <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
                     </div>
                 @endforeach
             </div>
@@ -285,7 +285,7 @@
                                 @if($readonly ?? false) readonly disabled @endif
                                 min="0"
                             >
-                            <x-main.input-error :messages="$errors->get($key)" class="mt-2" />
+                            <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
                         </div>
                     @endforeach
                 </div>
