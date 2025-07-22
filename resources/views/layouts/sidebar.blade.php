@@ -186,15 +186,15 @@
                          x-transition:leave-end="opacity-0 transform -translate-y-2"
                          class="w-full flex flex-col items-start justify-start pt-0 pb-1 pl-[35px] pr-0 box-border gap-1">
                         
-                        <a href="#" 
+                        <a href="{{ route('lahan.file-rencana.index', ['lahan' => $globalLahanId]) }}" 
                             class="self-stretch rounded-lg flex flex-row items-center justify-start py-2 px-3 no-underline hover:bg-white hover:text-darkslategray ease-in-out
-                            {{ request()->routeIs('expense.*', '#') ? 'bg-white !text-darkslategray' : 'bg-darkslategray text-white' }}">
+                            {{ request()->routeIs('expense.*', 'lahan.file-rencana.*') ? 'bg-white !text-darkslategray' : 'bg-darkslategray text-white' }}">
                             <div class="flex-1 relative leading-5 font-medium">Rencana Reklamasi</div>
                         </a>
-                        
-                        <a href="#" 
+
+                        <a href="{{ route('lahan.file-laporan.index', ['lahan' => $globalLahanId]) }}" 
                             class="self-stretch rounded-lg flex flex-row items-center justify-start py-2 px-3 no-underline hover:bg-white hover:text-darkslategray ease-in-out
-                            {{ request()->routeIs('expense.*', '#') ? 'bg-white !text-darkslategray' : 'bg-darkslategray text-white' }}">
+                            {{ request()->routeIs('expense.*', 'lahan.file-laporan.*') ? 'bg-white !text-darkslategray' : 'bg-darkslategray text-white' }}">
                             <div class="flex-1 relative leading-5 font-medium">Laporan Pelaksanaan</div>
                         </a>
                     </div>

@@ -82,4 +82,9 @@ class Lahan extends Model
     {
         return $this->hasMany(Dokumentasi::class, 'lahan_id', 'lahan_id');
     }
+
+    public function reklamasiFile(): HasMany
+    {
+        return $this->hasMany(ReklamasiFile::class, 'lahan_id', 'lahan_id');
+    }
 }

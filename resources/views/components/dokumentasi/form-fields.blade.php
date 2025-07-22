@@ -113,7 +113,7 @@
 
     <div class="self-stretch flex flex-row items-center justify-end gap-3">
         <a href="{{ route('lahan.dokumentasi.index', $lahan) }}" 
-            class="rounded-md bg-darkslategray py-3 px-4 gap-2 !text-white text-sm no-underline hover:bg-slategray-200 font-medium">
+            class="bg-red-500 !text-white text-sm py-3 px-4 rounded-lg font-medium hover:bg-red-600 transition-colors no-underline">
             Cancel
         </a>
         <x-main.primary-button type="submit" 

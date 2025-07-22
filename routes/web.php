@@ -10,6 +10,8 @@ use App\Http\Controllers\RekapitulasiReklamasiController;
 use App\Http\Controllers\RekapitulasiBiayaController;
 use App\Http\Controllers\KriteriaKeberhasilanController;
 use App\Http\Controllers\DokumentasiController;
+use App\Http\Controllers\FileRencanaController;
+use App\Http\Controllers\FileLaporanController;
 use Illuminate\Support\Facades\Route;
 
 // Route for profile
@@ -73,6 +75,14 @@ Route::middleware(['auth'])->group(function () {
                 ->name('pdf');
     });
     Route::resource('lahan.dokumentasi', DokumentasiController::class);
+    Route::resource('lahan.file-rencana', FileRencanaController::class)
+        ->only(['index', 'store', 'destroy']);
+    Route::get('lahan/{lahan}/file-rencana/preview', [FileRencanaController::class, 'preview'])
+        ->name('lahan.file-rencana.preview');
+    Route::resource('lahan.file-laporan', FileLaporanController::class)
+        ->only(['index', 'store', 'destroy']);
+    Route::get('lahan/{lahan}/file-laporan/preview', [FileLaporanController::class, 'preview'])
+        ->name('lahan.file-laporan.preview');
 });
 
 

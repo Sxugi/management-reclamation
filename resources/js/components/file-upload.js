@@ -295,7 +295,7 @@ function closeImageModal() {
 }
 
 // Initialize the file upload handler when the document is ready
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('turbo:load', () => {
     window.fileUploadHandler = new FileUploadHandler();
     window.browseFile = browseFile;
     window.removeImage = removeImage;

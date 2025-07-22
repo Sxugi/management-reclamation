@@ -108,7 +108,7 @@ class DateFilter {
 }
 
 // Initialize DateFilter when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('turbo:load', function() {
     window.dateFilter = new DateFilter();
 });
 

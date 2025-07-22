@@ -1,13 +1,10 @@
-<div class="flex flex-row items-start justify-start gap-3">
+<div class="flex flex-row items-start justify-start gap-2">
     <form method="GET" action="{{ route('lahan.dokumentasi.index', $lahan) }}" id="dateFilterForm">
         <div class="rounded-lg bg-white border-lightgray border-solid border-[1px] overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 text-darkslategray-100 cursor-pointer" 
              data-date-filter-toggle 
              onclick="toggleDatePicker()">
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6.66667 1.66667V5" stroke="#374151" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M13.3333 1.66667V5" stroke="#374151" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M2.5 8.33333H17.5" stroke="#374151" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M17.5 3.33333H2.5C1.39543 3.33333 0.5 4.22876 0.5 5.33333V16.6667C0.5 17.7712 1.39543 18.6667 2.5 18.6667H17.5C18.6046 18.6667 19.5 17.7712 19.5 16.6667V5.33333C19.5 4.22876 18.6046 3.33333 17.5 3.33333Z" stroke="#374151" stroke-width="1.67" stroke-linecap="round" stroke-linejoin="round"/>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16 2C16.4142 2 16.75 2.33579 16.75 2.75V3.75H18.5C19.7426 3.75 20.75 4.75736 20.75 6V19C20.75 20.2426 19.7426 21.25 18.5 21.25H5.5C4.25736 21.25 3.25 20.2426 3.25 19V6C3.25 4.75736 4.25736 3.75 5.5 3.75H7.25V2.75C7.25 2.33579 7.58579 2 8 2C8.41421 2 8.75 2.33579 8.75 2.75V3.75H15.25V2.75C15.25 2.33579 15.5858 2 16 2ZM4.75 19C4.75 19.4142 5.08579 19.75 5.5 19.75H18.5C18.9142 19.75 19.25 19.4142 19.25 19V9.75H4.75V19ZM5.5 5.25C5.08579 5.25 4.75 5.58579 4.75 6V8.25H19.25V6C19.25 5.58579 18.9142 5.25 18.5 5.25H5.5Z" fill="#344054"/>
             </svg>
             <div class="relative leading-5 font-medium" id="dateRangeDisplay">
                 @if(request('start_date') && request('end_date'))
