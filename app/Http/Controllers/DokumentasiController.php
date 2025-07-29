@@ -24,17 +24,17 @@ class DokumentasiController extends Controller
 
         $dokumentasi = Dokumentasi::where('lahan_id', $lahan->lahan_id);
 
-        if ($request->filled('start_date')) {
-            $startDate = Carbon::parse($request->start_date)->startOfDay();
+        if ($request->filled('startDate')) {
+            $startDate = Carbon::parse($request->startDate)->startOfDay();
             $dokumentasi->where('created_at', '>=', $startDate);
         }
 
-        if ($request->filled('end_date')) {
-            $endDate = Carbon::parse($request->end_date)->endOfDay();
+        if ($request->filled('endDate')) {
+            $endDate = Carbon::parse($request->endDate)->endOfDay();
             $dokumentasi->where('created_at', '<=', $endDate);
         }
 
-        $hasFilter = $request->has(['start_date', 'end_date']);
+        $hasFilter = $request->has(['startDate', 'endDate']);
 
         $dokumentasi = $dokumentasi->latest()->paginate(8);
         

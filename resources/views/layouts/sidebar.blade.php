@@ -68,9 +68,9 @@
                 </a>
 
                 <!-- Gudang -->
-                <a href="#" 
+                <a href="{{ route('lahan.gudang.index', ['lahan' => $globalLahanId]) }}" 
                    class="self-stretch rounded-lg flex flex-row items-center justify-start py-2 px-3 no-underline hover:bg-white hover:text-darkslategray ease-in-out
-                   {{ request()->routeIs('expense.*', '#') ? 'bg-white !text-darkslategray' : 'bg-darkslategray text-white' }}">
+                   {{ request()->routeIs('expense.*', 'lahan.gudang.*') ? 'bg-white !text-darkslategray' : 'bg-darkslategray text-white' }}">
                     <div class="flex-1 flex flex-row items-center justify-start gap-3">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path fill-rule="evenodd" clip-rule="evenodd" d="M11.487 3.138C11.8184 3.0174 12.1816 3.0174 12.513 3.138L20.013 5.865C20.3023 5.9703 20.5523 6.1621 20.7288 6.41435C20.9054 6.6666 21.0001 6.96708 21 7.275V19.5C21 19.8978 20.842 20.2794 20.5607 20.5607C20.2794 20.842 19.8978 21 19.5 21H4.5C4.10218 21 3.72064 20.842 3.43934 20.5607C3.15804 20.2794 3 19.8978 3 19.5V7.275C2.99991 6.96708 3.09458 6.6666 3.27115 6.41435C3.44773 6.1621 3.69766 5.9703 3.987 5.865L11.487 3.138ZM7.5 19.5H9V16.5C9 16.1022 9.15804 15.7206 9.43934 15.4393C9.72064 15.158 10.1022 15 10.5 15H13.5C13.8978 15 14.2794 15.158 14.5607 15.4393C14.842 15.7206 15 16.1022 15 16.5V19.5H16.5V10.5H7.5V19.5ZM18 19.5V10.5C18 10.1022 17.842 9.72064 17.5607 9.43934C17.2794 9.15803 16.8978 9 16.5 9H7.5C7.10218 9 6.72064 9.15803 6.43934 9.43934C6.15804 9.72064 6 10.1022 6 10.5V19.5H4.5V7.275L12 4.548L19.5 7.275V19.5H18Z" fill="currentColor"/>

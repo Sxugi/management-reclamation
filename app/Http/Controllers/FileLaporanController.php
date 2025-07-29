@@ -56,7 +56,7 @@ class FileLaporanController extends Controller
         }
 
         $file = $request->file('file');
-        $path = $file->store("reklamasi_file/laporan/{$request->tahun}", 'private');
+        $path = $file->store("reklamasi_files/laporan/{$request->tahun}", 'private');
 
         ReklamasiFile::create([
             'lahan_id' => $lahan->lahan_id,

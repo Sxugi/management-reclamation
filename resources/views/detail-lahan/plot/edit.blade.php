@@ -16,7 +16,7 @@
         </div>
     </x-slot>
     <div class="py-6">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 flex flex-col gap-6">
+        <div class="self-stretch mx-auto sm:px-6 lg:px-8 flex flex-col gap-6">
             <div class="bg-white overflow-hidden shadow-sm rounded-lg sm:rounded-lg">
                 <div class="p-6">
                     <div class="self-stretch flex flex-row items-center justify-start gap-1 mb-6">

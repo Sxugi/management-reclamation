@@ -9,36 +9,36 @@
 
     <!-- Table Structure -->
     <div class="overflow-x-auto rounded-b-2xl border-gainsboro border-solid border-[1px]">
-        <table class="w-full text-xs text-darkslategray font-outfit table-auto">
+    <table class="w-full text-xs text-darkslategray font-outfit table-auto border-collapse">
             <!-- Table Header -->
-            <thead>
+            <thead class="border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[0px] border-l-[0px]">
                 <tr>
-                    <th class="h-6 py-3 px-6 text-center leading-[18px] font-bold">Nama Plot</th>
-                    <th class="h-6 py-3 px-6 text-center leading-[18px] font-bold">Luas Area (Ha)</th>
-                    <th class="h-6 py-3 px-6 text-center leading-[18px] font-bold">Actions</th>
+                    <th class="h-6 py-3 px-6 text-center leading-5 font-bold border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[1px] border-l-[0px]">Nama Plot</th>
+                    <th class="h-6 py-3 px-6 text-center leading-5 font-bold border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[1px] border-l-[0px]">Luas Area (Ha)</th>
+                    <th class="h-6 py-3 px-6 text-center leading-5 font-bold border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[0px] border-l-[1px]">Actions</th>
                 </tr>
             </thead>
             <!-- Table Body -->
             <tbody>
                 @forelse($plot ?? [] as $plot)
                     <tr>
-                        <td class="py-3 px-6 text-sm text-center text-gray leading-5">{{ $plot->nama_plot }}</td>
-                        <td class="py-3 px-6 text-sm text-center text-gray leading-5">{{ $plot->luas_area }}</td>
-                        <td class="py-3 px-6">
+                        <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[1px] border-l-[0px]">{{ $plot->nama_plot }}</td>
+                        <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[1px] border-l-[0px]">{{ $plot->luas_area }}</td>
+                        <td class="py-3 px-6 border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[0px] border-l-[1px]">
                             <div class="flex flex-row items-center justify-center gap-3">
                                 <!-- View Icon -->
                                 <a href="{{ route('plot.show', $plot->plot_id) }}">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <rect width="24" height="24" fill="white"/>
-                                        <path d="M0.240234 12C1.34566 9.83165 3.02909 8.01112 5.10446 6.73964C7.17983 5.46815 9.56634 4.79523 12.0002 4.79523C14.4341 4.79523 16.8206 5.46815 18.896 6.73964C20.9714 8.01112 22.6548 9.83165 23.7602 12C22.6548 14.1684 20.9714 15.9889 18.896 17.2604C16.8206 18.5319 14.4341 19.2048 12.0002 19.2048C9.56634 19.2048 7.17983 18.5319 5.10446 17.2604C3.02909 15.9889 1.34566 14.1684 0.240234 12ZM12.0002 16.8C13.2733 16.8 14.4942 16.2943 15.3943 15.3941C16.2945 14.494 16.8002 13.2731 16.8002 12C16.8002 10.727 16.2945 9.50609 15.3943 8.60592C14.4942 7.70574 13.2733 7.20003 12.0002 7.20003C10.7272 7.20003 9.5063 7.70574 8.60612 8.60592C7.70595 9.50609 7.20023 10.727 7.20023 12C7.20023 13.2731 7.70595 14.494 8.60612 15.3941C9.5063 16.2943 10.7272 16.8 12.0002 16.8ZM12.0002 14.4C11.3637 14.4 10.7533 14.1472 10.3032 13.6971C9.85309 13.247 9.60023 12.6365 9.60023 12C9.60023 11.3635 9.85309 10.7531 10.3032 10.303C10.7533 9.85289 11.3637 9.60003 12.0002 9.60003C12.6368 9.60003 13.2472 9.85289 13.6973 10.303C14.1474 10.7531 14.4002 11.3635 14.4002 12C14.4002 12.6365 14.1474 13.247 13.6973 13.6971C13.2472 14.1472 12.6368 14.4 12.0002 14.4Z" fill="#1D2939"/>
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <rect width="20" height="20" fill="white"/>
+                                        <path d="M0.200195 9.99997C1.12139 8.19299 2.52424 6.67588 4.25372 5.61631C5.98319 4.55674 7.97195 3.99597 10.0002 3.99597C12.0284 3.99597 14.0172 4.55674 15.7467 5.61631C17.4762 6.67588 18.879 8.19299 19.8002 9.99997C18.879 11.807 17.4762 13.3241 15.7467 14.3836C14.0172 15.4432 12.0284 16.004 10.0002 16.004C7.97195 16.004 5.98319 15.4432 4.25372 14.3836C2.52424 13.3241 1.12139 11.807 0.200195 9.99997ZM10.0002 14C11.0611 14 12.0785 13.5785 12.8286 12.8284C13.5788 12.0783 14.0002 11.0608 14.0002 9.99997C14.0002 8.93911 13.5788 7.92169 12.8286 7.17155C12.0785 6.4214 11.0611 5.99997 10.0002 5.99997C8.93933 5.99997 7.92191 6.4214 7.17177 7.17155C6.42162 7.92169 6.0002 8.93911 6.0002 9.99997C6.0002 11.0608 6.42162 12.0783 7.17177 12.8284C7.92191 13.5785 8.93933 14 10.0002 14ZM10.0002 12C9.46976 12 8.96106 11.7893 8.58598 11.4142C8.21091 11.0391 8.0002 10.5304 8.0002 9.99997C8.0002 9.46954 8.21091 8.96083 8.58598 8.58576C8.96106 8.21069 9.46976 7.99997 10.0002 7.99997C10.5306 7.99997 11.0393 8.21069 11.4144 8.58576C11.7895 8.96083 12.0002 9.46954 12.0002 9.99997C12.0002 10.5304 11.7895 11.0391 11.4144 11.4142C11.0393 11.7893 10.5306 12 10.0002 12Z" fill="#1D2939"/>
                                     </svg>
                                 </a>
                                 
                                 <!-- Edit Icon -->
                                 <a href="{{ route('plot.edit', $plot->plot_id) }}">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M7 7H6C5.46957 7 4.96086 7.21071 4.58579 7.58579C4.21071 7.96086 4 8.46957 4 9V18C4 18.5304 4.21071 19.0391 4.58579 19.4142C4.96086 19.7893 5.46957 20 6 20H15C15.5304 20 16.0391 19.7893 16.4142 19.4142C16.7893 19.0391 17 18.5304 17 18V17" stroke="#27374D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M16 4.99998L19 7.99998M20.385 6.58499C20.7788 6.19114 21.0001 5.65697 21.0001 5.09998C21.0001 4.543 20.7788 4.00883 20.385 3.61498C19.9912 3.22114 19.457 2.99988 18.9 2.99988C18.343 2.99988 17.8088 3.22114 17.415 3.61498L9 12V15H12L20.385 6.58499Z" stroke="#27374D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <path d="M5.83301 5.83333H4.99967C4.55765 5.83333 4.13372 6.00892 3.82116 6.32148C3.5086 6.63404 3.33301 7.05797 3.33301 7.49999V15C3.33301 15.442 3.5086 15.8659 3.82116 16.1785C4.13372 16.4911 4.55765 16.6667 4.99967 16.6667H12.4997C12.9417 16.6667 13.3656 16.4911 13.6782 16.1785C13.9907 15.8659 14.1663 15.442 14.1663 15V14.1667" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M13.3333 4.16666L15.8333 6.66666M16.9875 5.4875C17.3157 5.15929 17.5001 4.71415 17.5001 4.25C17.5001 3.78585 17.3157 3.3407 16.9875 3.0125C16.6593 2.68429 16.2142 2.49991 15.75 2.49991C15.2858 2.49991 14.8407 2.68429 14.5125 3.0125L7.5 10V12.5H10L16.9875 5.4875Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg>
                                 </a>
                                 
@@ -63,7 +63,7 @@
                                         </div>
                                     </form>
                                 </x-main.modal>
-                                <button x-data="" x-on:click.prevent="$dispatch('open-modal', 'confirm-plot-deletion-{{ $plot->plot_id }}')" class="border-none bg-transparent cursor-pointer">
+                                <button x-data="" x-on:click.prevent="$dispatch('open-modal', 'confirm-plot-deletion-{{ $plot->plot_id }}')" class="border-none bg-transparent cursor-pointer p-0">
                                     <svg width="20" height="20" viewBox="0 0 25 30" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <path d="M7.54464 1.50254L7.14286 2.3125H1.78571C0.797991 2.3125 0 3.12246 0 4.125C0 5.12754 0.797991 5.9375 1.78571 5.9375H23.2143C24.202 5.9375 25 5.12754 25 4.125C25 3.12246 24.202 2.3125 23.2143 2.3125H17.8571L17.4554 1.50254C17.154 0.885156 16.5346 0.5 15.8594 0.5H9.14062C8.4654 0.5 7.84598 0.885156 7.54464 1.50254ZM23.2143 7.75H1.78571L2.96875 26.9512C3.05804 28.3842 4.22991 29.5 5.64174 29.5H19.3583C20.7701 29.5 21.942 28.3842 22.0312 26.9512L23.2143 7.75Z" fill="#F24822"/>
                                     </svg>
@@ -72,7 +72,7 @@
                         </td>
                     </tr>
                 @empty
-                    <tr class="border-whitesmoke border-solid border-b-[1px] bg-white">
+                    <tr class="border-none">
                         <td colspan="3" class="py-6 px-6 text-center text-gray-400">No plot available yet</td>
                     </tr>
                 @endforelse

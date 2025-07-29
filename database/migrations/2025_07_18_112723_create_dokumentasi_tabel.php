@@ -15,7 +15,7 @@ return new class extends Migration
             $table->bigIncrements('dokumentasi_id');
             $table->foreignId('lahan_id')->constrained('lahan', 'lahan_id')->onDelete('cascade');
             $table->string('nama', 255);
-            $table->text('deskripsi');
+            $table->text('deskripsi')->nullable();
             $table->string('image_path');
             $table->timestamps();
         });

@@ -32,8 +32,8 @@
                                 <div class="space-y-4">
                                     <div>
                                         <label class="block text-sm font-medium mb-2">Pilih Tahun</label>
-                                        <select name="tahun" id="tahun-select" class="w-full rounded-lg border px-3 py-2 text-sm" onchange="handleYearChange()" required>
-                                            <option value="">-- Pilih tahun laporan --</option>
+                                        <select name="tahun" id="tahun-select" class="border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm block w-full font-outfit" onchange="handleYearChange()" required>
+                                            <option value="">-- Pilih Tahun Laporan --</option>
                                             @for($year = $lahan->tahun_awal; $year <= $lahan->tahun_akhir; $year++)
                                                 <option value="{{ $year }}">{{ $year }}</option>
                                             @endfor
@@ -166,6 +166,16 @@
 
             const laporan = laporanData[selectedYear];
 
+            function formatFileSize(bytes) {
+                const units = ['B', 'KB', 'MB', 'GB'];
+                let i = 0;
+                while (bytes > 1024 && i < units.length - 1) {
+                    bytes /= 1024;
+                    i++;
+                }
+                return bytes.toFixed(2) + ' ' + units[i];
+            }
+
             document.querySelectorAll('[id^="laporan-actions-"]').forEach(el => {
                 if (!laporan || el.id !== `laporan-actions-${laporan.reklamasi_file_id}`) {
                     el.classList.add('hidden');
@@ -206,7 +216,7 @@
                                 <div class="flex-1 min-w-0">
                                     <div class="font-medium text-darkslategray-300 truncate">${laporan.file_name }</div>
                                     <div class="text-sm text-gray-500 mt-1">
-                                        <div>Ukuran: ${(laporan.file_size / 1024).toFixed(2)} KB</div>
+                                        <div>Ukuran: ${formatFileSize(laporan.file_size)}</div>
                                         <div>Diupload: ${new Date(laporan.created_at).toLocaleString()}</div>
                                         <div>Tipe: ${laporan.mime_type.toUpperCase()}</div>
                                     </div>

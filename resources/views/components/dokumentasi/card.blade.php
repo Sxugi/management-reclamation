@@ -6,7 +6,6 @@
 
 <div class="w-full font-outfit">
     @if($dokumentasi->count() > 0)
-        <!-- Grid Layout for Cards -->
         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 w-full font-outfit">
             @foreach($dokumentasi as $doc)
                 <div class="w-full max-w-3xs mx-auto shadow-sm rounded-lg bg-white flex flex-col justify-between transition-transform hover:scale-105 duration-200">

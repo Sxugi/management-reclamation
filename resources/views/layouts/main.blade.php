@@ -41,7 +41,7 @@
 
                     @isset($header)
                         <header class="bg-transparent">
-                            <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+                            <div class="self-stretch mx-auto py-4 px-4 sm:px-6 lg:px-8">
                                 {{ $header }}
                             </div>
                         </header>
@@ -49,7 +49,7 @@
 
                     <!-- Main Content -->
                     <main class="py-6 px-4 sm:px-6 lg:px-8">
-                        <div class="mx-auto max-w-7xl">
+                        <div class="mx-auto w-full">
                             {{ $slot }}
                         </div>
                     </main>

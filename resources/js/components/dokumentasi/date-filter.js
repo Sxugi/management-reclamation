@@ -1,25 +1,22 @@
 class DateFilter {
     constructor() {
         this.datePickerOpen = false;
+        this.handleOutsideClickBound = this.handleOutsideClick.bind(this);
         this.init();
     }
 
     init() {
-        // Bind events
         document.addEventListener('DOMContentLoaded', () => {
             this.bindEvents();
         });
     }
 
     bindEvents() {
-        // Date input change events
-        const startDateInput = document.getElementById('start_date');
-        const endDateInput = document.getElementById('end_date');
-        
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
         if (startDateInput) {
             startDateInput.addEventListener('change', () => this.updateDateDisplay());
         }
-        
         if (endDateInput) {
             endDateInput.addEventListener('change', () => this.updateDateDisplay());
         }
@@ -30,65 +27,52 @@ class DateFilter {
         if (this.datePickerOpen) {
             this.closeDatePicker();
         } else {
-            datePicker.classList.remove('hidden');
+            if (datePicker) datePicker.classList.remove('hidden');
             this.datePickerOpen = true;
-            
-            // Close when clicking outside
-            document.addEventListener('click', (event) => this.handleOutsideClick(event));
+            document.addEventListener('click', this.handleOutsideClickBound);
         }
     }
 
     closeDatePicker() {
         const datePicker = document.getElementById('datePicker');
-        datePicker.classList.add('hidden');
+        if (datePicker) datePicker.classList.add('hidden');
         this.datePickerOpen = false;
-        document.removeEventListener('click', this.handleOutsideClick);
+        document.removeEventListener('click', this.handleOutsideClickBound);
     }
 
     handleOutsideClick(event) {
         const datePicker = document.getElementById('datePicker');
+        if (!datePicker) {
+            this.closeDatePicker();
+            return;
+        }
         const dateFilter = event.target.closest('[data-date-filter-toggle]');
-        
         if (!datePicker.contains(event.target) && !dateFilter) {
             this.closeDatePicker();
         }
     }
 
     clearDateFilter() {
-        document.getElementById('start_date').value = '';
-        document.getElementById('end_date').value = '';
+        document.getElementById('startDate').value = '';
+        document.getElementById('endDate').value = '';
         document.getElementById('dateRangeDisplay').textContent = 'Pilih Tanggal';
-        
-        // Submit form to clear filters
         const form = document.getElementById('dateFilterForm');
         const url = new URL(form.action);
-        url.searchParams.delete('start_date');
-        url.searchParams.delete('end_date');
+        url.searchParams.delete('startDate');
+        url.searchParams.delete('endDate');
         window.location.href = url.toString();
     }
 
     updateDateDisplay() {
-        const startDate = document.getElementById('start_date').value;
-        const endDate = document.getElementById('end_date').value;
+        const startDate = document.getElementById('startDate').value;
+        const endDate = document.getElementById('endDate').value;
         const display = document.getElementById('dateRangeDisplay');
-        
         if (startDate && endDate) {
-            const start = new Date(startDate).toLocaleDateString('id-ID', { 
-                day: 'numeric', 
-                month: 'short' 
-            });
-            const end = new Date(endDate).toLocaleDateString('id-ID', { 
-                day: 'numeric', 
-                month: 'short', 
-                year: 'numeric' 
-            });
+            const start = new Date(startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' });
+            const end = new Date(endDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
             display.textContent = `${start} - ${end}`;
         } else if (startDate) {
-            const start = new Date(startDate).toLocaleDateString('id-ID', { 
-                day: 'numeric', 
-                month: 'short', 
-                year: 'numeric' 
-            });
+            const start = new Date(startDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
             display.textContent = `${start} - ...`;
         } else {
             display.textContent = 'Pilih Tanggal';
@@ -97,30 +81,21 @@ class DateFilter {
 
     formatDate(dateString) {
         if (!dateString) return '';
-        
         const date = new Date(dateString);
-        return date.toLocaleDateString('id-ID', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-        });
+        return date.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 }
 
-// Initialize DateFilter when DOM is loaded
 document.addEventListener('turbo:load', function() {
     window.dateFilter = new DateFilter();
 });
 
-// Global functions for backward compatibility and inline event handlers
 window.toggleDatePicker = function() {
     window.dateFilter.toggleDatePicker();
 };
-
 window.closeDatePicker = function() {
     window.dateFilter.closeDatePicker();
 };
-
 window.clearDateFilter = function() {
     window.dateFilter.clearDateFilter();
 };

@@ -3,12 +3,12 @@
         <div class="rounded-lg bg-white border-lightgray border-solid border-[1px] overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 text-darkslategray-100 cursor-pointer" 
              data-date-filter-toggle 
              onclick="toggleDatePicker()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M16 2C16.4142 2 16.75 2.33579 16.75 2.75V3.75H18.5C19.7426 3.75 20.75 4.75736 20.75 6V19C20.75 20.2426 19.7426 21.25 18.5 21.25H5.5C4.25736 21.25 3.25 20.2426 3.25 19V6C3.25 4.75736 4.25736 3.75 5.5 3.75H7.25V2.75C7.25 2.33579 7.58579 2 8 2C8.41421 2 8.75 2.33579 8.75 2.75V3.75H15.25V2.75C15.25 2.33579 15.5858 2 16 2ZM4.75 19C4.75 19.4142 5.08579 19.75 5.5 19.75H18.5C18.9142 19.75 19.25 19.4142 19.25 19V9.75H4.75V19ZM5.5 5.25C5.08579 5.25 4.75 5.58579 4.75 6V8.25H19.25V6C19.25 5.58579 18.9142 5.25 18.5 5.25H5.5Z" fill="#344054"/>
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13.332 1.54199C13.7462 1.54199 14.082 1.87778 14.082 2.29199V3H15.415C16.5195 3 17.4149 3.89558 17.415 5V15.834C17.4147 16.9383 16.5194 17.834 15.415 17.834H4.58203C3.47783 17.8338 2.58238 16.9381 2.58203 15.834V5C2.58221 3.89569 3.47772 3.00018 4.58203 3H5.91504V2.29199C5.91504 1.878 6.25112 1.54234 6.66504 1.54199C7.07925 1.54199 7.41504 1.87778 7.41504 2.29199V3H12.582V2.29199C12.582 1.87789 12.918 1.54217 13.332 1.54199ZM4.08203 15.834C4.08238 16.1097 4.30626 16.3338 4.58203 16.334H15.415C15.691 16.334 15.9147 16.1098 15.915 15.834V8.25H4.08203V15.834ZM4.58203 4.5C4.30615 4.50018 4.08221 4.72412 4.08203 5V6.75H15.915V5C15.9149 4.72401 15.6911 4.5 15.415 4.5H4.58203Z" fill="#344054"/>
             </svg>
             <div class="relative leading-5 font-medium" id="dateRangeDisplay">
-                @if(request('start_date') && request('end_date'))
-                    {{ \Carbon\Carbon::parse(request('start_date'))->format('d M') }} - {{ \Carbon\Carbon::parse(request('end_date'))->format('d M Y') }}
+                @if(request('startDate') && request('endDate'))
+                    {{ \Carbon\Carbon::parse(request('startDate'))->format('d M') }} - {{ \Carbon\Carbon::parse(request('endDate'))->format('d M Y') }}
                 @else
                     Pilih Tanggal
                 @endif
@@ -20,18 +20,18 @@
                 <div>
                     <x-main.input-label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</x-main.input-label>
                     <x-main.text-input type="date" 
-                           name="start_date" 
-                           id="start_date" 
-                           value="{{ request('start_date') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                           name="startDate" 
+                           id="startDate" 
+                           value="{{ request('startDate') }}"
+                           class="border rounded p-2 text-sm"/>
                 </div>
                 <div>
                     <x-main.input-label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Akhir</x-main.input-label>
                     <x-main.text-input type="date" 
-                           name="end_date" 
-                           id="end_date" 
-                           value="{{ request('end_date') }}"
-                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+                           name="endDate" 
+                           id="endDate" 
+                           value="{{ request('endDate') }}"
+                           class="border rounded p-2 text-sm"/>
                 </div>
             </div>
             <div class="flex justify-between mt-4">

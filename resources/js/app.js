@@ -23,10 +23,12 @@ window.MaplibreGeocoder = MaplibreGeocoder;
 window.MapboxDraw = MapboxDraw;
 window.turf = turf;
 
-import './components/map-component.js';
-import './components/map-plot-component.js';
-import './components/date-filter.js';
-import './components/file-upload.js';
+import './components/lahan/map-component.js';
+import './components/plot/map-plot-component.js';
+import './components/dokumentasi/date-filter.js';
+import './components/dokumentasi/file-upload.js';
+import './components/gudang/panel-filter.js';
+import './components/gudang/detail-modal.js';
 
 // Start Turbo
 Turbo.start()

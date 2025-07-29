@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LahanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PlotController;
+use App\Http\Controllers\DataGudangController;
 use App\Http\Controllers\RencanaReklamasiController;
 use App\Http\Controllers\RencanaBiayaController;
 use App\Http\Controllers\RekapitulasiReklamasiController;
@@ -39,6 +40,8 @@ Route::middleware(['auth'])->group(function () {
         ->name('detail-lahan.dashboard');
     Route::resource('lahan.plot', PlotController::class)
         ->shallow();
+    Route::resource('lahan.gudang', DataGudangController::class)
+        ->except('show');
 });
 
 // Route for administration

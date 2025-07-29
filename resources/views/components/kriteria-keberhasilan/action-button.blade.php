@@ -5,22 +5,33 @@
 ])
 
 <div class="flex flex-row items-center justify-between gap-2 py-4 text-white">
-    <div class="rounded-lg bg-darkslategray-300 overflow-hidden flex flex-row items-center justify-center gap-2">
-        <a href="{{ route('lahan.kriteria-keberhasilan.edit', [$lahan->lahan_id, 'tab' => $tab_aktif]) }}" class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200">
-            <span class="relative leading-5 font-medium">Edit</span>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M7 7H6C5.46957 7 4.96086 7.21071 4.58579 7.58579C4.21071 7.96086 4 8.46957 4 9V18C4 18.5304 4.21071 19.0391 4.58579 19.4142C4.96086 19.7893 5.46957 20 6 20H15C15.5304 20 16.0391 19.7893 16.4142 19.4142C16.7893 19.0391 17 18.5304 17 18V17" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M16 5L19 8M20.385 6.585C20.7788 6.19115 21.0001 5.65698 21.0001 5.1C21.0001 4.54302 20.7788 4.00885 20.385 3.615C19.9912 3.22115 19.457 2.99989 18.9 2.99989C18.343 2.99989 17.8088 3.22115 17.415 3.615L9 12V15H12L20.385 6.585Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-        </a>
-    </div>
+    @if (request()->routeIs('lahan.kriteria-keberhasilan.show'))
+        <div class="rounded-lg bg-darkslategray-300 overflow-hidden flex flex-row items-center justify-center gap-2">
+            <a href="{{ route('lahan.kriteria-keberhasilan.edit', [$lahan->lahan_id, 'tab' => $tab_aktif]) }}" class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200">
+                <span class="relative leading-5 font-medium">Edit</span>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5.83301 5.83333H4.99967C4.55765 5.83333 4.13372 6.00892 3.82116 6.32148C3.5086 6.63404 3.33301 7.05797 3.33301 7.49999V15C3.33301 15.442 3.5086 15.8659 3.82116 16.1785C4.13372 16.4911 4.55765 16.6667 4.99967 16.6667H12.4997C12.9417 16.6667 13.3656 16.4911 13.6782 16.1785C13.9907 15.8659 14.1663 15.442 14.1663 15V14.1667" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M13.3333 4.16666L15.8333 6.66666M16.9875 5.4875C17.3157 5.15929 17.5001 4.71415 17.5001 4.25C17.5001 3.78585 17.3157 3.3407 16.9875 3.0125C16.6593 2.68429 16.2142 2.49991 15.75 2.49991C15.2858 2.49991 14.8407 2.68429 14.5125 3.0125L7.5 10V12.5H10L16.9875 5.4875Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </a>
+        </div>
 
-    <div class="rounded-lg bg-darkslategray-300 overflow-hidden flex flex-row items-center justify-center gap-2">
-        <a href="{{ route('lahan.kriteria-keberhasilan.pdf', $lahan->lahan_id) }}" class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200">
-            <span class="relative leading-5 font-medium">Download</span>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 15.575C11.8667 15.575 11.7417 15.5543 11.625 15.513C11.5083 15.4717 11.4 15.4007 11.3 15.3L7.7 11.7C7.5 11.5 7.404 11.2667 7.412 11C7.42 10.7333 7.516 10.5 7.7 10.3C7.9 10.1 8.13767 9.996 8.413 9.988C8.68833 9.98 8.92567 10.0757 9.125 10.275L11 12.15V5C11 4.71667 11.096 4.47934 11.288 4.288C11.48 4.09667 11.7173 4.00067 12 4C12.2827 3.99934 12.5203 4.09534 12.713 4.288C12.9057 4.48067 13.0013 4.718 13 5V12.15L14.875 10.275C15.075 10.075 15.3127 9.979 15.588 9.987C15.8633 9.995 16.1007 10.0993 16.3 10.3C16.4833 10.5 16.5793 10.7333 16.588 11C16.5967 11.2667 16.5007 11.5 16.3 11.7L12.7 15.3C12.6 15.4 12.4917 15.471 12.375 15.513C12.2583 15.555 12.1333 15.5757 12 15.575ZM6 20C5.45 20 4.97933 19.8043 4.588 19.413C4.19667 19.0217 4.00067 18.5507 4 18V16C4 15.7167 4.096 15.4793 4.288 15.288C4.48 15.0967 4.71733 15.0007 5 15C5.28267 14.9993 5.52033 15.0953 5.713 15.288C5.90567 15.4807 6.00133 15.718 6 16V18H18V16C18 15.7167 18.096 15.4793 18.288 15.288C18.48 15.0967 18.7173 15.0007 19 15C19.2827 14.9993 19.5203 15.0953 19.713 15.288C19.9057 15.4807 20.0013 15.718 20 16V18C20 18.55 19.8043 19.021 19.413 19.413C19.0217 19.805 18.5507 20.0007 18 20H6Z" fill="white"/>
-            </svg>
-        </a>
-    </div>
+        <div class="rounded-lg bg-darkslategray-300 overflow-hidden flex flex-row items-center justify-center gap-2">
+            <a href="{{ route('lahan.kriteria-keberhasilan.pdf', $lahan->lahan_id) }}" class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200">
+                <span class="relative leading-5 font-medium">Download</span>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9.99967 12.9792C9.88856 12.9792 9.7844 12.9619 9.68717 12.9275C9.58995 12.8931 9.49967 12.8339 9.41634 12.75L6.41634 9.75C6.24967 9.58333 6.16967 9.38889 6.17634 9.16666C6.18301 8.94444 6.26301 8.75 6.41634 8.58333C6.58301 8.41666 6.78106 8.33 7.01051 8.32333C7.23995 8.31666 7.43773 8.39639 7.60384 8.5625L9.16634 10.125V4.16666C9.16634 3.93055 9.24634 3.73278 9.40634 3.57333C9.56634 3.41389 9.76412 3.33389 9.99967 3.33333C10.2352 3.33278 10.4333 3.41278 10.5938 3.57333C10.7544 3.73389 10.8341 3.93166 10.833 4.16666V10.125L12.3955 8.5625C12.5622 8.39583 12.7602 8.31583 12.9897 8.3225C13.2191 8.32916 13.4169 8.41611 13.583 8.58333C13.7358 8.75 13.8158 8.94444 13.823 9.16666C13.8302 9.38889 13.7502 9.58333 13.583 9.75L10.583 12.75C10.4997 12.8333 10.4094 12.8925 10.3122 12.9275C10.215 12.9625 10.1108 12.9797 9.99967 12.9792ZM4.99967 16.6667C4.54134 16.6667 4.14912 16.5036 3.82301 16.1775C3.4969 15.8514 3.33356 15.4589 3.33301 15V13.3333C3.33301 13.0972 3.41301 12.8994 3.57301 12.74C3.73301 12.5806 3.93079 12.5006 4.16634 12.5C4.4019 12.4994 4.59995 12.5794 4.76051 12.74C4.92106 12.9006 5.00079 13.0983 4.99967 13.3333V15H14.9997V13.3333C14.9997 13.0972 15.0797 12.8994 15.2397 12.74C15.3997 12.5806 15.5975 12.5006 15.833 12.5C16.0686 12.4994 16.2666 12.5794 16.4272 12.74C16.5877 12.9006 16.6675 13.0983 16.6663 13.3333V15C16.6663 15.4583 16.5033 15.8508 16.1772 16.1775C15.8511 16.5042 15.4586 16.6672 14.9997 16.6667H4.99967Z" fill="white"/>
+                </svg>
+            </a>
+        </div>
+    @else
+        <div class="rounded-lg bg-darkslategray-300 overflow-hidden flex flex-row items-center justify-center gap-2">
+            <a href="{{ route('lahan.kriteria-keberhasilan.show', $lahan->lahan_id) }}" class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200">
+                <span class="relative leading-5 font-medium font-outfit">Back</span>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3.99994 10L3.29294 10.707L2.58594 10L3.29294 9.29303L3.99994 10ZM20.9999 18C20.9999 18.2652 20.8946 18.5196 20.707 18.7071C20.5195 18.8947 20.2652 19 19.9999 19C19.7347 19 19.4804 18.8947 19.2928 18.7071C19.1053 18.5196 18.9999 18.2652 18.9999 18H20.9999ZM8.29294 15.707L3.29294 10.707L4.70694 9.29303L9.70694 14.293L8.29294 15.707ZM3.29294 9.29303L8.29294 4.29303L9.70694 5.70703L4.70694 10.707L3.29294 9.29303ZM3.99994 9.00003H13.9999V11H3.99994V9.00003ZM20.9999 16V18H18.9999V16H20.9999ZM13.9999 9.00003C15.8565 9.00003 17.6369 9.73753 18.9497 11.0503C20.2620 12.363 20.9999 14.1435 20.9999 16H18.9999C18.9999 14.6739 18.4732 13.4022 17.5355 12.4645C16.5978 11.5268 15.326 11 13.9999 11V9.00003Z" fill="white"/>
+                </svg>
+            </a>
+        </div>
+    @endif
 </div>
