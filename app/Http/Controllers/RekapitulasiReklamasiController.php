@@ -6,11 +6,10 @@ use App\Models\Lahan;
 use App\Models\DataReklamasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Providers\View;
-use App\Services\RekapitulasiReklamasiService;
 use App\Http\Requests\RekapitulasiReklamasi\CreateRekapitulasiReklamasiRequest;
 use App\Http\Requests\RekapitulasiReklamasi\UpdateRekapitulasiReklamasiRequest;
-use Barryvdh\DomPDF\Facade\PDF;
+use App\Services\RekapitulasiReklamasiService;
+use Illuminate\Support\Facades\DB;
 
 class RekapitulasiReklamasiController extends Controller
 {
@@ -24,8 +23,9 @@ class RekapitulasiReklamasiController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $rekapitulasi_reklamasi = DataReklamasi::where('lahan_id', $lahan->lahan_id)
-            ->where('type', 'rekapitulasi')
+        $rekapitulasi_reklamasi = DataReklamasi::with('detailReklamasi')
+            ->where('lahan_id', $lahan->lahan_id)
+            ->where('tipe', 'rekapitulasi')
             ->orderBy('tahun')
             ->get()
             ->keyBy('tahun');
@@ -43,11 +43,11 @@ class RekapitulasiReklamasiController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $rekapitulasi_reklamasi = DataReklamasi::where('lahan_id', $lahan->lahan_id)
-            ->where('type', 'rekapitulasi')
+        $rekapitulasi_reklamasi = DataReklamasi::with('detailReklamasi')
+            ->where('lahan_id', $lahan->lahan_id)
+            ->where('tipe', 'rekapitulasi')
             ->orderBy('tahun')
-            ->get()
-            ->keyBy('tahun');
+            ->get();
 
         return view('detail-lahan.rekapitulasi-reklamasi.create', compact('lahan', 'rekapitulasi_reklamasi'));
     }
@@ -65,15 +65,37 @@ class RekapitulasiReklamasiController extends Controller
         // Validate the request
         $validated = $request->validated();
 
-        $validated['lahan_id'] = $lahan->lahan_id;
+        try {
+            DB::transaction(function () use ($validated, $lahan) {
+                $dataReklamasi = DataReklamasi::create([
+                    'lahan_id' => $lahan->lahan_id,
+                    'tahun' => $validated['tahun'],
+                    'tipe' => 'rekapitulasi',
+                ]);
 
-        $validated['type'] = 'rekapitulasi';
+                foreach ($validated['detail'] as $data) {
+                    $dataReklamasi->detailReklamasi()->create([
+                        'kegiatan' => $data['kegiatan'],
+                        'kategori' => $data['kategori'],
+                        'volume' => $data['volume'],
+                        'satuan' => $data['satuan'] ?? null,
+                    ]);
+                }
+            });
 
-        // Create the Rekapitulasi Reklamasi
-        $rekapitulasi_reklamasi = DataReklamasi::create($validated);
+            return redirect()->route('lahan.rekapitulasi-reklamasi.index', $lahan->lahan_id)
+                ->with('success', 'Rekapitulasi Reklamasi tahun ' . $validated['tahun'] . ' berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            \Log::error('Error creating rekapitulasi reklamasi', [
+                'user' => Auth::user()->name,
+                'lahan_id' => $lahan->lahan_id,
+                'error' => $e->getMessage()
+            ]);
 
-        return redirect()->route('lahan.rekapitulasi-reklamasi.index', $lahan->lahan_id)
-                        ->with('success', 'Rekapitulasi Pelaksanaan Reklamasi ' . $validated['tahun'] . ' berhasil ditambahkan.');
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan saat menyimpan data. Silakan coba lagi.');
+        }
     }
 
     /**
@@ -91,8 +113,9 @@ class RekapitulasiReklamasiController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $rekapitulasi_reklamasi_collection = DataReklamasi::where('lahan_id', $lahan->lahan_id)
-            ->where('type', 'rekapitulasi')
+        $rekapitulasi_reklamasi_collection = DataReklamasi::with('detailReklamasi')
+            ->where('lahan_id', $lahan->lahan_id)
+            ->where('tipe', 'rekapitulasi')
             ->orderBy('tahun')
             ->get()
             ->keyBy('tahun');
@@ -125,15 +148,40 @@ class RekapitulasiReklamasiController extends Controller
         // Validate the request
         $validated = $request->validated();
 
-        $validated['lahan_id'] = $lahan->lahan_id;
+        try {
+            DB::transaction(function () use ($validated, $rekapitulasi_reklamasi) {
+                $rekapitulasi_reklamasi->update([
+                    'tahun' => $validated['tahun'],
+                ]);
 
-        $validated['type'] = 'rekapitulasi';
+                $rekapitulasi_reklamasi->detailReklamasi()->delete();
 
-        // Update the Rekapitulasi Reklamasi
-        $rekapitulasi_reklamasi->update($validated);
+                foreach ($validated['detail'] as $data) {
+                    if (isset($data['volume']) && (float)$data['volume'] > 0) {
+                        $rekapitulasi_reklamasi->detailReklamasi()->create([
+                            'kegiatan' => $data['kegiatan'],
+                            'kategori' => $data['kategori'],
+                            'volume' => $data['volume'],
+                            'satuan' => $data['satuan'] ?? null,
+                        ]);
+                    }
+                }
+            });
 
-        return redirect()->route('lahan.rekapitulasi-reklamasi.index', $lahan->lahan_id)
-                        ->with('success', 'Rekapitulasi Pelaksanaan Reklamasi ' . $validated['tahun'] . ' berhasil diperbarui.');
+            return redirect()->route('lahan.rekapitulasi-reklamasi.index', $lahan->lahan_id)
+                ->with('success', 'Rekapitulasi Reklamasi ' . $validated['tahun'] . ' berhasil diperbarui.');
+
+        } catch (\Exception $e) {
+            \Log::error('Error updating rekapitulasi reklamasi', [
+                'user' => Auth::user()->name,
+                'lahan_id' => $lahan->lahan_id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan saat memperbarui data. Silakan coba lagi.');
+        }
     }
 
     public function generatePDF(Lahan $lahan, Request $request, RekapitulasiReklamasiService $pdfService)
@@ -142,8 +190,9 @@ class RekapitulasiReklamasiController extends Controller
         $tahun = $request->input('tahun');
 
         // Check if theres data for the specified lahan and year
-        $hasData = DataReklamasi::where('lahan_id', $lahan->lahan_id)
-            ->where('type', 'rekapitulasi')
+        $hasData = DataReklamasi::with('detailReklamasi')
+            ->where('lahan_id', $lahan->lahan_id)
+            ->where('tipe', 'rekapitulasi')
             ->where('tahun', $tahun)
             ->exists();
 

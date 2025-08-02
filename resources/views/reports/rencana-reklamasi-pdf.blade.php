@@ -126,7 +126,7 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['timbuman_tanah_pengakaran'] ?? 0, 2) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['timbunan_tanah_pengakaran'] ?? 0, 2) }}</p>
                 </td>
                 @endforeach
             </tr>
@@ -137,7 +137,7 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['timbuman_batuan_samping'] ?? 0, 2) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['timbunan_batuan_samping'] ?? 0, 2) }}</p>
                 </td>
                 @endforeach
             </tr>
@@ -148,7 +148,7 @@
                 </td>
                 @foreach($tahuns as $tahun)
                 <td style="width:43pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['timbuman_komoditas_tambang'] ?? 0, 2) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataPerTahun[$tahun]['timbunan_komoditas_tambang'] ?? 0, 2) }}</p>
                 </td>
                 @endforeach
             </tr>

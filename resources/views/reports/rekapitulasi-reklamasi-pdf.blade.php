@@ -124,10 +124,10 @@
                     <p class="s2" style="padding-left: 28pt;text-indent: 0pt;line-height: 12pt;text-align: left;">1) timbunan tanah zona pengakaran</p>
                 </td>
                 <td style="width:56pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataTahunan['timbuman_tanah_pengakaran'] ?? 0, 2) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataTahunan['timbunan_tanah_pengakaran'] ?? 0, 2) }}</p>
                 </td>
                 <td style="width:135pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataKumulatif['timbuman_tanah_pengakaran'] ?? 0, 2) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataKumulatif['timbunan_tanah_pengakaran'] ?? 0, 2) }}</p>
                 </td>
             </tr>
             
@@ -136,10 +136,10 @@
                     <p class="s2" style="padding-left: 28pt;text-indent: 0pt;line-height: 12pt;text-align: left;">2) timbunan batuan samping dan/atau tanah/batuan penutup</p>
                 </td>
                 <td style="width:56pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataTahunan['timbuman_batuan_samping'] ?? 0, 2) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataTahunan['timbunan_batuan_samping'] ?? 0, 2) }}</p>
                 </td>
                 <td style="width:135pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataKumulatif['timbuman_batuan_samping'] ?? 0, 2) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataKumulatif['timbunan_batuan_samping'] ?? 0, 2) }}</p>
                 </td>
             </tr>
             
@@ -148,10 +148,10 @@
                     <p class="s2" style="padding-left: 28pt;text-indent: 0pt;line-height: 12pt;text-align: left;">3) timbunan komoditas tambang</p>
                 </td>
                 <td style="width:56pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataTahunan['timbuman_komoditas_tambang'] ?? 0, 2) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataTahunan['timbunan_komoditas_tambang'] ?? 0, 2) }}</p>
                 </td>
                 <td style="width:135pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataKumulatif['timbuman_komoditas_tambang'] ?? 0, 2) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataKumulatif['timbunan_komoditas_tambang'] ?? 0, 2) }}</p>
                 </td>
             </tr>
 
@@ -160,10 +160,10 @@
                     <p class="s2" style="padding-left: 28pt;text-indent: 0pt;line-height: 12pt;text-align: left;">4) timbunan/penyimpanan limbah fasilitas penunjang</p>
                 </td>
                 <td style="width:56pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataTahunan['timbuman_limbah_fasilitas'] ?? 0, 2) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataTahunan['timbunan_limbah_fasilitas'] ?? 0, 2) }}</p>
                 </td>
                 <td style="width:135pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataKumulatif['timbuman_limbah_fasilitas'] ?? 0, 2) }}</p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;">{{ number_format($dataKumulatif['timbunan_limbah_fasilitas'] ?? 0, 2) }}</p>
                 </td>
             </tr>
             

@@ -10,91 +10,78 @@
 
     $lahanYangDibukaFields = [
         'Area Penambangan' => [
-            'area_penambangan' => 'Area Penambangan',
+            'Area Penambangan' => ['kegiatan' => 'area_penambangan', 'kategori' => 'lahan_dibuka', 'satuan' => 'ha'],
         ],
         'Area Diluar Penambangan' => [
-            'timbuman_tanah_pengakaran' => 'Timbunan Tanah Zona Pengakaran',
-            'timbuman_batuan_samping' => 'Timbunan Batuan Samping dan/atau Tanah/Butuan Penutup',
-            'timbuman_komoditas_tambang' => 'Timbunan Komoditas Tambang',
-            'jalan_tambang' => 'Jalan Tambang dan/atau Jalan Angkut',
-            'kolam_sedimen' => 'Kolam Sedimen',
-            'fasilitas_pengolahan' => 'Instalasi dan Fasilitas Pengolahan dan/atau Pemurnian',
-            'kantor_perumahan' => 'Kantor dan Perumahan (comp atau flying camp)',
-            'bengkel' => 'Bengkel',
-            'fasilitas_penunjang' => 'Fasilitas Penunjang Lainnya',
+            'Timbunan Tanah Zona Pengakaran' => ['kegiatan' => 'timbunan_tanah_pengakaran', 'kategori' => 'lahan_dibuka', 'satuan' => 'ha'],
+            'Timbunan Batuan Samping dan/atau Tanah/Butuan Penutup' => ['kegiatan' => 'timbunan_batuan_samping', 'kategori' => 'lahan_dibuka', 'satuan' => 'ha'],
+            'Timbunan Komoditas Tambang' => ['kegiatan' => 'timbunan_komoditas_tambang', 'kategori' => 'lahan_dibuka', 'satuan' => 'ha'],
+            'Jalan Tambang dan/atau Jalan Angkut' => ['kegiatan' => 'jalan_tambang', 'kategori' => 'lahan_dibuka', 'satuan' => 'ha'],
+            'Kolam Sedimen' => ['kegiatan' => 'kolam_sedimen', 'kategori' => 'lahan_dibuka', 'satuan' => 'ha'],
+            'Instalasi dan Fasilitas Pengolahan dan/atau Pemurnian' => ['kegiatan' => 'fasilitas_pengolahan', 'kategori' => 'lahan_dibuka', 'satuan' => 'ha'],
+            'Kantor dan Perumahan (comp atau flying camp)' => ['kegiatan' => 'kantor_perumahan', 'kategori' => 'lahan_dibuka', 'satuan' => 'ha'],
+            'Bengkel' => ['kegiatan' => 'bengkel', 'kategori' => 'lahan_dibuka', 'satuan' => 'ha'],
+            'Fasilitas Penunjang Lainnya' => ['kegiatan' => 'fasilitas_penunjang', 'kategori' => 'lahan_dibuka', 'satuan' => 'ha'],
         ]
     ];
 
     $penambanganFields = [
-        'lahan_selesai_ditambang' => [
-            'label' => 'Lahan Selesai Ditambang (ha)',
-        ],
-        'lahan_aktif_ditambang' => [
-            'label' => 'Lahan/Front Aktif ditambang (ha)',
-        ],
-        'volume_batuan_samping' => [
-            'label' => 'Volume Batuan Samping dan/atau Tanah/Batuan Penutup yang Digali (BCM atau m<sup>3</sup>)',
-        ],
+        'Lahan Selesai Ditambang (ha)' => ['kegiatan' => 'lahan_selesai_ditambang', 'kategori' => 'penambangan', 'satuan' => 'ha'],
+        'Lahan/Front Aktif ditambang (ha)' => ['kegiatan' => 'lahan_aktif_ditambang', 'kategori' => 'penambangan', 'satuan' => 'ha'],
+        'Volume Batuan Samping dan/atau Tanah/Batuan Penutup yang Digali (BCM atau m<sup>3</sup>)' => ['kegiatan' => 'volume_batuan_samping', 'kategori' => 'penambangan', 'satuan' => 'm3'],
     ];
 
     $penimbunanFields = [
-        'penimbunan_bekas_tambang' => [
-            'label' => 'Di Bekas Tambang (ha)',
-        ],
-        'penimbunan_diluar_bekas_tambang' => [
-            'label' => 'Di Luar Bekas Tambang (ha)',
-        ],
-        'volume_bekas_tambang' => [
-            'label' => 'Volume yang Ditimbun di Bekas Tambang (m<sup>3</sup>)',
-        ],
-        'volume_diluar_bekas_tambang' => [
-            'label' => 'Volume yang Ditimbun di Luar Bekas Tambang (m<sup>3</sup>)',
-        ],
+        'Di Bekas Tambang (ha)' => ['kegiatan' => 'penimbunan_bekas_tambang', 'kategori' => 'penimbunan', 'satuan' => 'ha'],
+        'Di Luar Bekas Tambang (ha)' => ['kegiatan' => 'penimbunan_diluar_bekas_tambang', 'kategori' => 'penimbunan', 'satuan' => 'ha'],
+        'Volume yang Ditimbun di Bekas Tambang (m<sup>3</sup>)' => ['kegiatan' => 'volume_bekas_tambang', 'kategori' => 'penimbunan', 'satuan' => 'm3'],
+        'Volume yang Ditimbun di Luar Bekas Tambang (m<sup>3</sup>)' => ['kegiatan' => 'volume_diluar_bekas_tambang', 'kategori' => 'penimbunan', 'satuan' => 'm3'],
     ];
 
     $reklamasiFields = [
         'Penatagunaan Lahan' => [
-            'penataan_tanah' => 'Penataan Lahan (ha)',
-            'penebaran_tanah_pengakaran' => 'Penebaran Tanah Zona Pengakaran (ha)',
-            'pengendalian_erosi' => 'Pengendalian Erosi dan Sedimentasi',
+            'Penataan Lahan (ha)' => ['kegiatan' => 'penataan_tanah', 'kategori' => 'penatagunaan_lahan', 'satuan' => 'ha'],
+            'Penebaran Tanah Zona Pengakaran (ha)' => ['kegiatan' => 'penebaran_tanah_pengakaran', 'kategori' => 'penatagunaan_lahan', 'satuan' => 'ha'],
+            'Pengendalian Erosi dan Sedimentasi' => ['kegiatan' => 'pengendalian_erosi', 'kategori' => 'penatagunaan_lahan', 'satuan' => 'unit'],
         ],
         'Revegetasi (ha)' => [
-            'kualitas_tanah' => 'Analisis Kualitas Tanah',
-            'pemupukan' => 'Pemupukan (ha)',
-            'pengadaan_bibit' => 'Pengadaan Bibit (Batang/kg)',
-            'penanaman' => 'Penanaman (Batang)',
-            'pemeliharaan_tanaman' => 'Pemeliharaan Tanaman (ha)',
+            'Analisis Kualitas Tanah' => ['kegiatan' => 'kualitas_tanah', 'kategori' => 'revegetasi', 'satuan' => 'unit'],
+            'Pemupukan (ha)' => ['kegiatan' => 'pemupukan', 'kategori' => 'revegetasi', 'satuan' => 'ha'],
+            'Pengadaan Bibit (Batang/kg)' => ['kegiatan' => 'pengadaan_bibit', 'kategori' => 'revegetasi', 'satuan' => 'batang'],
+            'Penanaman (Batang)' => ['kegiatan' => 'penanaman', 'kategori' => 'revegetasi', 'satuan' => 'batang'],
+            'Pemeliharaan Tanaman (ha)' => ['kegiatan' => 'pemeliharaan_tanaman', 'kategori' => 'revegetasi', 'satuan' => 'ha'],
         ]
     ];
 
     $pencegahanAirAsamFields = [
-        'pencegahan_air_asam' => [
-            'label' => 'Pencegahan dan Penanggulangan Air Asam Tambang',
-        ],
+        'Pencegahan dan Penanggulangan Air Asam Tambang' => ['kegiatan' => 'pencegahan_air_asam', 'kategori' => 'pencegahan_air_asam', 'satuan' => 'unit'],
     ];
 
     $pekerjaanSipilFields = [
-        'pekerjaan_sipil' => [
-            'label' => 'Pekerjaan Sipil Sesuai Peruntukan Lahan Pascatambang/Program Reklamasi Bentuk Lain (Satuan Luas)',
-        ],
+        'Pekerjaan Sipil Sesuai Peruntukan Lahan Pascatambang/Program Reklamasi Bentuk Lain (Satuan Luas)' => ['kegiatan' => 'pekerjaan_sipil', 'kategori' => 'pekerjaan_sipil', 'satuan' => 'ha'],
     ];
 
     $rencanaPemanfaatanFields = [
-        'stabilisasi_lereng' => [
-            'label' => 'Stabilisasi Lereng (ha)',
-        ],
-        'pengamanan_lubang' => [
-            'label' => 'Pengamanan Lubang Bekas Tambang (void) (ha)',
-        ],
-        'pemulihan_kualitas_air' => [
-            'label' => 'Pemulihan dan Pemantauan Kualitas Air dan Serta Pengolahan Air dalam Lubang Bekas Tambang (void) Sesuai dengan Peruntukannya',
-        ],
-        'pemeliharaan_lubang' => [
-            'label' => 'Pemeliharaan Lubang Bekas Tambang (void)',
-        ],
+        'Stabilisasi Lereng (ha)' => ['kegiatan' => 'stabilisasi_lereng', 'kategori' => 'rencana_pemanfaatan', 'satuan' => 'ha'],
+        'Pengamanan Lubang Bekas Tambang (void) (ha)' => ['kegiatan' => 'pengamanan_lubang', 'kategori' => 'rencana_pemanfaatan', 'satuan' => 'ha'],
+        'Pemulihan dan Pemantauan Kualitas Air dan Serta Pengolahan Air dalam Lubang Bekas Tambang (void) Sesuai dengan Peruntukannya' => ['kegiatan' => 'pemulihan_kualitas_air', 'kategori' => 'rencana_pemanfaatan', 'satuan' => 'unit'],
+        'Pemeliharaan Lubang Bekas Tambang (void)' => ['kegiatan' => 'pemeliharaan_lubang', 'kategori' => 'rencana_pemanfaatan', 'satuan' => 'unit'],
     ];
 
     $isEdit = !is_null($reklamasi);
+    
+    $getExistingVolume = function($kegiatan) use ($reklamasi, $isEdit) {
+        if (!$isEdit) {
+            return '';
+        }
+        
+        if (!$reklamasi || !$reklamasi->detailReklamasi) {
+            return 0;
+        }
+        
+        $detail = $reklamasi->detailReklamasi->where('kegiatan', $kegiatan)->first();
+        return $detail ? $detail->volume : 0;
+    };
 @endphp
 
 <form
@@ -112,7 +99,7 @@
 
     <input type="hidden" name="lahan_id" value="{{ $lahan->lahan_id }}">
     <input type="hidden" name="tahun" value="{{ $tahun_aktif }}">
-    <input type="hidden" name="type" value="rencana">
+    <input type="hidden" name="tipe" value="rencana">
 
     <!-- LEFT COLUMN -->
     <div class="flex flex-col items-start justify-start gap-6">
@@ -130,25 +117,29 @@
                                 <b class="relative leading-6">{{ $section }}</b>
                             </div>
                         </div>
-                        @foreach($fields as $key => $label)
+                        @foreach($fields as $label => $items)
                             <div class="self-stretch flex flex-col items-start justify-start gap-1.5 text-darkslategray-200">
                                 <div class="relative leading-5 font-medium">{!! $label !!}</div>
                                 <input
                                     type="number"
                                     step="0.01"
-                                    name="{{ $key }}"
-                                    value="{{ old($key, $reklamasi[$key] ?? 0) }}"
+                                    name="detail[{{ $items['kegiatan'] }}][volume]"
+                                    value="{{ old('detail.' . $items['kegiatan'] . '.volume', $getExistingVolume($items['kegiatan'])) }}"
                                     class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                                     @if($readonly ?? false) readonly disabled @endif
                                     min="0"
                                 >
-                                <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
+                                <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kegiatan]" value="{{ $items['kegiatan'] }}">
+                                <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kategori]" value="{{ $items['kategori'] }}">
+                                <input type="hidden" name="detail[{{ $items['kegiatan'] }}][satuan]" value="{{ $items['satuan'] }}">
+                                <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary class="mt-2" />
                             </div>
                         @endforeach
                     </div>
                 @endforeach
             </div>
         </div>
+        
         <div class="self-stretch rounded-2xl bg-white border-gainsboro border-solid border-[1px] flex flex-col items-center justify-start">
             <div class="self-stretch rounded-t-2xl border-gainsboro border-solid border-b-[1px] border-t-[0px] border-l-[0px] border-r-[0px] flex flex-row items-start justify-start py-5 px-6">
                 <div class="flex flex-col items-start justify-start">
@@ -156,23 +147,27 @@
                 </div>
             </div>
             <div class="self-stretch flex flex-col items-start justify-start p-6 gap-6 text-sm text-darkslategray-200">
-                @foreach($penambanganFields as $key => $field)
+                @foreach($penambanganFields as $label => $items)
                     <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                        <div class="relative leading-5 font-medium">{!! $field['label'] !!}</div>
+                        <div class="relative leading-5 font-medium">{!! $label !!}</div>
                         <input
                             type="number"
                             step="0.01"
-                            name="{{ $key }}"
-                            value="{{ old($key, $reklamasi[$key] ?? 0) }}"
+                            name="detail[{{ $items['kegiatan'] }}][volume]"
+                            value="{{ old('detail.' . $items['kegiatan'] . '.volume', $getExistingVolume($items['kegiatan'])) }}"
                             class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                             @if($readonly ?? false) readonly disabled @endif
                             min="0"
                         >
-                        <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
+                        <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kegiatan]" value="{{ $items['kegiatan'] }}">
+                        <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kategori]" value="{{ $items['kategori'] }}">
+                        <input type="hidden" name="detail[{{ $items['kegiatan'] }}][satuan]" value="{{ $items['satuan'] }}">
+                        <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary class="mt-2" />
                     </div>
                 @endforeach
             </div>
         </div>
+        
         <div class="self-stretch rounded-2xl bg-white border-gainsboro border-solid border-[1px] flex flex-col items-center justify-start">
             <div class="self-stretch rounded-t-2xl border-gainsboro border-solid border-b-[1px] border-t-[0px] border-l-[0px] border-r-[0px] flex flex-row items-start justify-start py-5 px-6">
                 <div class="flex flex-col items-start justify-start">
@@ -180,25 +175,29 @@
                 </div>
             </div>
             <div class="self-stretch flex flex-col items-start justify-start p-6 gap-6 text-sm text-darkslategray-200">
-                @foreach($penimbunanFields as $key => $field)
+                @foreach($penimbunanFields as $label => $items)
                     <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                        <div class="relative leading-5 font-medium">{!! $field['label'] !!}</div>
+                        <div class="relative leading-5 font-medium">{!! $label !!}</div>
                         <input
                             type="number"
                             step="0.01"
-                            name="{{ $key }}"
-                            value="{{ old($key, $reklamasi[$key] ?? 0) }}"
+                            name="detail[{{ $items['kegiatan'] }}][volume]"
+                            value="{{ old('detail.' . $items['kegiatan'] . '.volume', $getExistingVolume($items['kegiatan'])) }}"
                             class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                             @if($readonly ?? false) readonly disabled @endif
                             min="0"
                         >
-                        <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
+                        <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kegiatan]" value="{{ $items['kegiatan'] }}">
+                        <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kategori]" value="{{ $items['kategori'] }}">
+                        <input type="hidden" name="detail[{{ $items['kegiatan'] }}][satuan]" value="{{ $items['satuan'] }}">
+                        <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary class="mt-2" />
                     </div>
                 @endforeach
             </div>
         </div>
     </div>
-    <!-- RIGHT COLUMN: Biaya Tidak Langsung -->
+    
+    <!-- RIGHT COLUMN -->
     <div class="flex flex-col items-start justify-start gap-6">
         <div class="self-stretch rounded-2xl bg-white border-gainsboro border-solid border-[1px] flex flex-col items-center justify-start">
             <div class="self-stretch rounded-t-2xl border-gainsboro border-solid border-b-[1px] border-t-[0px] border-l-[0px] border-r-[0px] flex flex-row items-start justify-start py-5 px-6">
@@ -214,89 +213,104 @@
                                 <b class="relative leading-6">{{ $section }}</b>
                             </div>
                         </div>
-                        @foreach($fields as $key => $label)
+                        @foreach($fields as $label => $items)
                             <div class="self-stretch flex flex-col items-start justify-start gap-1.5 text-darkslategray-200">
                                 <div class="relative leading-5 font-medium">{!! $label !!}</div>
                                 <input
                                     type="number"
                                     step="0.01"
-                                    name="{{ $key }}"
-                                    value="{{ old($key, $reklamasi[$key] ?? 0) }}"
+                                    name="detail[{{ $items['kegiatan'] }}][volume]"
+                                    value="{{ old('detail.' . $items['kegiatan'] . '.volume', $getExistingVolume($items['kegiatan'])) }}"
                                     class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                                     @if($readonly ?? false) readonly disabled @endif
                                     min="0"
                                 >
-                                <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
+                                <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kegiatan]" value="{{ $items['kegiatan'] }}">
+                                <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kategori]" value="{{ $items['kategori'] }}">
+                                <input type="hidden" name="detail[{{ $items['kegiatan'] }}][satuan]" value="{{ $items['satuan'] }}">
+                                <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary class="mt-2" />
                             </div>
                         @endforeach
                     </div>
                 @endforeach
             </div>
         </div>
+        
         <div class="self-stretch rounded-2xl bg-white border-gainsboro border-solid border-[1px] flex flex-col items-center justify-start">
             <div class="self-stretch flex flex-col items-start justify-start p-6 gap-6 text-sm text-darkslategray-200">
-                @foreach($pencegahanAirAsamFields as $key => $field)
+                @foreach($pencegahanAirAsamFields as $label => $items)
                     <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                        <div class="relative leading-5 font-bold">{!! $field['label'] !!}</div>
+                        <div class="relative leading-5 font-bold">{!! $label !!}</div>
                         <input
                             type="number"
                             step="0.01"
-                            name="{{ $key }}"
-                            value="{{ old($key, $reklamasi[$key] ?? 0) }}"
+                            name="detail[{{ $items['kegiatan'] }}][volume]"
+                            value="{{ old('detail.' . $items['kegiatan'] . '.volume', $getExistingVolume($items['kegiatan'])) }}"
                             class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                             @if($readonly ?? false) readonly disabled @endif
                         >
-                        <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
+                        <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kegiatan]" value="{{ $items['kegiatan'] }}">
+                        <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kategori]" value="{{ $items['kategori'] }}">
+                        <input type="hidden" name="detail[{{ $items['kegiatan'] }}][satuan]" value="{{ $items['satuan'] }}">
+                        <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary class="mt-2" />
                     </div>
                 @endforeach
-                @foreach($pekerjaanSipilFields as $key => $field)
+                
+                @foreach($pekerjaanSipilFields as $label => $items)
                     <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                        <div class="relative leading-5 font-bold">{!! $field['label'] !!}</div>
+                        <div class="relative leading-5 font-bold">{!! $label !!}</div>
                         <input
                             type="number"
                             step="0.01"
-                            name="{{ $key }}"
-                            value="{{ old($key, $reklamasi[$key] ?? 0) }}"
+                            name="detail[{{ $items['kegiatan'] }}][volume]"
+                            value="{{ old('detail.' . $items['kegiatan'] . '.volume', $getExistingVolume($items['kegiatan'])) }}"
                             class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                             @if($readonly ?? false) readonly disabled @endif
                             min="0"
                         >
-                        <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
+                        <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kegiatan]" value="{{ $items['kegiatan'] }}">
+                        <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kategori]" value="{{ $items['kategori'] }}">
+                        <input type="hidden" name="detail[{{ $items['kegiatan'] }}][satuan]" value="{{ $items['satuan'] }}">
+                        <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary class="mt-2" />
                     </div>
                 @endforeach
             </div>
         </div>
+        
         <div class="self-stretch rounded-2xl bg-white border-gainsboro border-solid border-[1px] flex flex-col items-center justify-start">
-                <div class="self-stretch rounded-t-2xl border-gainsboro border-solid border-b-[1px] border-t-[0px] border-l-[0px] border-r-[0px] flex flex-row items-start justify-start py-5 px-6">
-                    <div class="flex flex-col items-start justify-start">
-                        <b class="relative leading-6">Rencana Pemanfaatan Lubang Bekastambang (void)</b>
+            <div class="self-stretch rounded-t-2xl border-gainsboro border-solid border-b-[1px] border-t-[0px] border-l-[0px] border-r-[0px] flex flex-row items-start justify-start py-5 px-6">
+                <div class="flex flex-col items-start justify-start">
+                    <b class="relative leading-6">Rencana Pemanfaatan Lubang Bekastambang (void)</b>
+                </div>
+            </div>
+            <div class="self-stretch flex flex-col items-start justify-start p-6 gap-6 text-sm text-darkslategray-200">
+                @foreach($rencanaPemanfaatanFields as $label => $items)
+                    <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
+                        <div class="relative leading-5 font-medium">{!! $label !!}</div>
+                        <input
+                            type="number"
+                            step="0.01"
+                            name="detail[{{ $items['kegiatan'] }}][volume]"
+                            value="{{ old('detail.' . $items['kegiatan'] . '.volume', $getExistingVolume($items['kegiatan'])) }}"
+                            class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
+                            @if($readonly ?? false) readonly disabled @endif
+                            min="0"
+                        >
+                        <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kegiatan]" value="{{ $items['kegiatan'] }}">
+                        <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kategori]" value="{{ $items['kategori'] }}">
+                        <input type="hidden" name="detail[{{ $items['kegiatan'] }}][satuan]" value="{{ $items['satuan'] }}">
+                        <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary class="mt-2" />
                     </div>
-                </div>
-                <div class="self-stretch flex flex-col items-start justify-start p-6 gap-6 text-sm text-darkslategray-200">
-                    @foreach($rencanaPemanfaatanFields as $key => $field)
-                        <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                            <div class="relative leading-5 font-medium">{!! $field['label'] !!}</div>
-                            <input
-                                type="number"
-                                step="0.01"
-                                name="{{ $key }}"
-                                value="{{ old($key, $reklamasi[$key] ?? 0) }}"
-                                class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
-                                @if($readonly ?? false) readonly disabled @endif
-                                min="0"
-                            >
-                            <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
-                        </div>
-                    @endforeach
-                </div>
+                @endforeach
             </div>
-            <div class="rounded-lg bg-darkslategray-300 overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 text-sm text-white">
-                @if (!($readonly ?? false))
-                    <x-main.primary-button type="submit" class="relative leading-5 font-medium">
-                        {{ $isEdit ? 'Update' : 'Save' }}
-                    </x-main.primary-button>
-                @endif
-            </div>
+        </div>
+        
+        <div class="rounded-lg bg-darkslategray-300 overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 text-sm text-white">
+            @if (!($readonly ?? false))
+                <x-main.primary-button type="submit" class="relative leading-5 font-medium">
+                    {{ $isEdit ? 'Update' : 'Save' }}
+                </x-main.primary-button>
+            @endif
         </div>
     </div>
 </form>
