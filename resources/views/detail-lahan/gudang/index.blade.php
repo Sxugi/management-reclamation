@@ -19,9 +19,9 @@
                     {{ session('success') }}
                 </div>
             @endif
-            <div class="bg-white shadow-sm rounded-lg sm:rounded-lg">
+            <div class="bg-white shadow-md rounded-lg sm:rounded-lg">
                 <div class="p-6">
-                    <div class="w-full flex flex-col items-start justify-start">
+                    <div class="w-full flex flex-col items-start justify-start shadow-sm">
                         <div class="rounded-t-2xl bg-white border-gainsboro border-solid border-[1px] border-b-0 box-border self-stretch flex flex-row items-center justify-between gap-1 py-4 px-6">
                             <div class="flex items-center self-stretch leading-7 font-semibold text-lg text-darkslategray font-outfit">
                                 List Barang

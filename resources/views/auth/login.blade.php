@@ -30,9 +30,7 @@
                                         class="flex-1 relative leading-5 bg-transparent border-none focus:ring-0 p-0 text-gray-200 w-full"
                                     />
                                 </div>
-                                @error('email')
-                                    <span data-turbo-temporary class="text-tomato text-xs mt-1">{{ $message }}</span>
-                                @enderror
+                                <x-main.input-error :messages="$errors->get('email')" data-turbo-temporary class="mt-2" />
                             </div>
                         </div>
 
@@ -55,9 +53,7 @@
                                     />
                                     <img class="w-5 relative h-5 object-cover cursor-pointer toggle-password shrink-0" alt="Toggle password visibility" src="{{ asset('images/eye-enabled.svg') }}">
                                 </div>
-                                @error('password')
-                                    <span data-turbo-temporary class="text-tomato text-xs mt-1">{{ $message }}</span>
-                                @enderror
+                                <x-main.input-error :messages="$errors->get('password')" data-turbo-temporary class="mt-2" />
                             </div>
                         </div>
                     </div>

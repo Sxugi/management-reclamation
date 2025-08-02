@@ -1,16 +1,13 @@
 <!-- Plot List -->
-<div class="mt-6">
-    <!-- Header Section -->
+<div class="mt-6 shadow-sm">
     <div class="w-full relative rounded-t-2xl bg-white border-gainsboro border-solid border-[1px] border-b-0 box-border overflow-hidden flex flex-row items-center justify-between py-4 px-6">
         <div class="flex flex-col items-start justify-start">
             <div class="self-stretch relative leading-7 font-semibold text-lg text-darkslategray font-outfit">Daftar Plot</div>
         </div>
     </div>
 
-    <!-- Table Structure -->
     <div class="overflow-x-auto rounded-b-2xl border-gainsboro border-solid border-[1px]">
     <table class="w-full text-xs text-darkslategray font-outfit table-auto border-collapse">
-            <!-- Table Header -->
             <thead class="border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[0px] border-l-[0px]">
                 <tr>
                     <th class="h-6 py-3 px-6 text-center leading-5 font-bold border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[1px] border-l-[0px]">Nama Plot</th>
@@ -18,7 +15,6 @@
                     <th class="h-6 py-3 px-6 text-center leading-5 font-bold border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[0px] border-l-[1px]">Actions</th>
                 </tr>
             </thead>
-            <!-- Table Body -->
             <tbody>
                 @forelse($plot ?? [] as $plot)
                     <tr>
@@ -26,7 +22,6 @@
                         <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[1px] border-l-[0px]">{{ $plot->luas_area }}</td>
                         <td class="py-3 px-6 border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[0px] border-l-[1px]">
                             <div class="flex flex-row items-center justify-center gap-3">
-                                <!-- View Icon -->
                                 <a href="{{ route('plot.show', $plot->plot_id) }}">
                                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <rect width="20" height="20" fill="white"/>
@@ -34,15 +29,13 @@
                                     </svg>
                                 </a>
                                 
-                                <!-- Edit Icon -->
                                 <a href="{{ route('plot.edit', $plot->plot_id) }}">
                                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                        <path d="M5.83301 5.83333H4.99967C4.55765 5.83333 4.13372 6.00892 3.82116 6.32148C3.5086 6.63404 3.33301 7.05797 3.33301 7.49999V15C3.33301 15.442 3.5086 15.8659 3.82116 16.1785C4.13372 16.4911 4.55765 16.6667 4.99967 16.6667H12.4997C12.9417 16.6667 13.3656 16.4911 13.6782 16.1785C13.9907 15.8659 14.1663 15.442 14.1663 15V14.1667" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                        <path d="M13.3333 4.16666L15.8333 6.66666M16.9875 5.4875C17.3157 5.15929 17.5001 4.71415 17.5001 4.25C17.5001 3.78585 17.3157 3.3407 16.9875 3.0125C16.6593 2.68429 16.2142 2.49991 15.75 2.49991C15.2858 2.49991 14.8407 2.68429 14.5125 3.0125L7.5 10V12.5H10L16.9875 5.4875Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M5.83301 5.83333H4.99967C4.55765 5.83333 4.13372 6.00892 3.82116 6.32148C3.5086 6.63404 3.33301 7.05797 3.33301 7.49999V15C3.33301 15.442 3.5086 15.8659 3.82116 16.1785C4.13372 16.4911 4.55765 16.6667 4.99967 16.6667H12.4997C12.9417 16.6667 13.3656 16.4911 13.6782 16.1785C13.9907 15.8659 14.1663 15.442 14.1663 15V14.1667" stroke="#1D2939" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        <path d="M13.3333 4.16666L15.8333 6.66666M16.9875 5.4875C17.3157 5.15929 17.5001 4.71415 17.5001 4.25C17.5001 3.78585 17.3157 3.3407 16.9875 3.0125C16.6593 2.68429 16.2142 2.49991 15.75 2.49991C15.2858 2.49991 14.8407 2.68429 14.5125 3.0125L7.5 10V12.5H10L16.9875 5.4875Z" stroke="#1D2939" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                     </svg>
                                 </a>
                                 
-                                <!-- Delete Icon -->
                                 <x-main.modal name="confirm-plot-deletion-{{ $plot->plot_id }}" focusable>
                                     <form method="POST" action="{{ route('plot.destroy', $plot->plot_id) }}" class="p-6">
                                         @csrf

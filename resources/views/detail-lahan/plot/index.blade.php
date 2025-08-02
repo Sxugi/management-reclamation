@@ -19,7 +19,7 @@
                     {{ session('success') }}
                 </div>
             @endif
-            <div class="bg-white overflow-hidden shadow-sm rounded-lg sm:rounded-lg">
+            <div class="bg-white overflow-hidden shadow-md rounded-lg sm:rounded-lg">
                 <div class="p-6">
                     <div class="self-stretch flex flex-row items-center justify-start gap-1 mb-6">
                         <div class="flex-1 flex flex-col items-start justify-start gap-1 text-lg text-gray">
