@@ -6,11 +6,10 @@ use App\Models\Lahan;
 use App\Models\BiayaReklamasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Providers\View;
-use App\Services\RencanaReklamasiService;
 use App\Http\Requests\RencanaBiaya\CreateRencanaBiayaRequest;
 use App\Http\Requests\RencanaBiaya\UpdateRencanaBiayaRequest;
-use Barryvdh\DomPDF\Facade\PDF;
+use App\Services\RencanaBiayaService;
+use Illuminate\Support\Facades\DB;
 
 class RencanaBiayaController extends Controller
 {
@@ -24,8 +23,9 @@ class RencanaBiayaController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $rencana_biaya = BiayaReklamasi::where('lahan_id', $lahan->lahan_id)
-            ->where('type', 'rencana')
+        $rencana_biaya = BiayaReklamasi::with('detailBiayaReklamasi')
+            ->where('lahan_id', $lahan->lahan_id)
+            ->where('tipe', 'rencana')
             ->orderBy('tahun')
             ->get()
             ->keyBy('tahun');
@@ -43,11 +43,11 @@ class RencanaBiayaController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $rencana_biaya = BiayaReklamasi::where('lahan_id', $lahan->lahan_id)
-            ->where('type', 'rencana')
+        $rencana_biaya = BiayaReklamasi::with('detailBiayaReklamasi')
+            ->where('lahan_id', $lahan->lahan_id)
+            ->where('tipe', 'rencana')
             ->orderBy('tahun')
-            ->get()
-            ->keyBy('tahun');
+            ->get();
 
         return view('detail-lahan.rencana-biaya.create', compact('lahan', 'rencana_biaya'));
     }
@@ -65,15 +65,38 @@ class RencanaBiayaController extends Controller
         // Validate the request
         $validated = $request->validated();
 
-        $validated['lahan_id'] = $lahan->lahan_id;
+        try {
+            DB::transaction(function () use ($validated, $lahan) {
+                $rencanaBiaya = BiayaReklamasi::create([
+                    'lahan_id'    => $lahan->lahan_id,
+                    'tahun'       => $validated['tahun'],
+                    'tipe'        => 'rencana',
+                    'subtotal_1'  => $validated['subtotal_1'],
+                    'subtotal_2'  => $validated['subtotal_2'],
+                ]);
 
-        $validated['type'] = 'rencana';
+                foreach ($validated['detail'] as $data) {
+                    $rencanaBiaya->detailBiayaReklamasi()->create([
+                        'kegiatan' => $data['kegiatan'],
+                        'kategori' => $data['kategori'],
+                        'biaya'    => $data['biaya'],
+                    ]);
+                }
+            });
 
-        // Create the Rencana Biaya
-        $rencana_biaya = BiayaReklamasi::create($validated);
+            return redirect()->route('lahan.rencana-biaya.index', $lahan->lahan_id)
+                ->with('success', 'Rencana Biaya tahun ' . $validated['tahun'] . ' berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            \Log::error('Error creating rencana biaya', [
+                'user' => Auth::user()->name,
+                'lahan_id' => $lahan->lahan_id,
+                'error' => $e->getMessage()
+            ]);
 
-        return redirect()->route('lahan.rencana-biaya.index', $lahan->lahan_id)
-                        ->with('success', 'Rencana Biaya ' . $validated['tahun'] . ' berhasil ditambahkan.');
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan saat menyimpan data. Silakan coba lagi.');
+        }
     }
 
     /**
@@ -91,8 +114,9 @@ class RencanaBiayaController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $rencana_biaya_collection = BiayaReklamasi::where('lahan_id', $lahan->lahan_id)
-            ->where('type', 'rencana')
+        $rencana_biaya_collection = BiayaReklamasi::with('detailBiayaReklamasi')
+            ->where('lahan_id', $lahan->lahan_id)
+            ->where('tipe', 'rencana')
             ->orderBy('tahun')
             ->get()
             ->keyBy('tahun');
@@ -124,21 +148,47 @@ class RencanaBiayaController extends Controller
 
         // Validate the request
         $validated = $request->validated();
+        
+        try {
+            DB::transaction(function () use ($validated, $rencana_biaya) {
+                $rencana_biaya->update([
+                    'tahun'      => $validated['tahun'],
+                    'subtotal_1' => $validated['subtotal_1'],
+                    'subtotal_2' => $validated['subtotal_2'],
+                ]);
 
-        $validated['lahan_id'] = $lahan->lahan_id;
+                $rencana_biaya->detailBiayaReklamasi()->delete();
 
-        $validated['type'] = 'rencana';
+                foreach ($validated['detail'] as $data) {
+                    $rencana_biaya->detailBiayaReklamasi()->create([
+                        'kegiatan' => $data['kegiatan'],
+                        'kategori' => $data['kategori'],
+                        'biaya'    => $data['biaya'],
+                    ]);
+                }
+            });
 
-        $rencana_biaya->update($validated);
+            return redirect()->route('lahan.rencana-biaya.index', $lahan->lahan_id)
+                ->with('success', 'Rencana Biaya tahun ' . $validated['tahun'] . ' berhasil diperbarui.');
 
-        return redirect()->route('lahan.rencana-biaya.index', $lahan->lahan_id)
-                         ->with('success', 'Rencana Biaya ' . $validated['tahun'] . ' berhasil diperbarui.');
+        } catch (\Exception $e) {
+            \Log::error('Error updating rencana biaya', [
+                'user' => Auth::user()->name,
+                'lahan_id' => $lahan->lahan_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan saat memperbarui data. Silakan coba lagi.');
+        }
     }
 
-    public function generatePDF(Lahan $lahan, RencanaReklamasiService $pdfService)
+    public function generatePDF(Lahan $lahan, RencanaBiayaService $pdfService)
     {
-        $data = BiayaReklamasi::where('lahan_id', $lahan->lahan_id)
-            ->where('type', 'rencana')
+        $data = BiayaReklamasi::with('detailBiayaReklamasi')
+            ->where('lahan_id', $lahan->lahan_id)
+            ->where('tipe', 'rencana')
             ->orderBy('tahun')
             ->get();
 

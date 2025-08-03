@@ -15,29 +15,21 @@ return new class extends Migration
             $table->bigIncrements('biaya_reklamasi_id');
             $table->foreignId('lahan_id')->constrained('lahan', 'lahan_id')->onDelete('cascade');
             $table->integer('tahun');
-            $table->enum('type', ['rencana', 'rekapitulasi']);
-            $table->float('penataan_tanah');
-            $table->float('penebaran_tanah_pengakaran');
-            $table->float('pengendalian_erosi');
-            $table->float('kualitas_tanah');
-            $table->float('pemupukan');
-            $table->float('pengadaan_bibit');
-            $table->float('penanaman');
-            $table->float('pemeliharaan_tanaman');
-            $table->float('pencegahan_air_asam');
-            $table->float('pekerjaan_sipil');
-            $table->float('stabilisasi_lereng');
-            $table->float('pengamanan_lubang');
-            $table->float('pemulihan_kualitas_air');
-            $table->float('pemeliharaan_lubang');
-            $table->float('subtotal_1');
-            $table->float('mobilisasi_demobilisasi_alat');
-            $table->float('perencanaan_reklamasi');
-            $table->float('administrasi_pihak_ketiga');
-            $table->float('supervisi');
-            $table->float('subtotal_2');
+            $table->enum('tipe', ['rencana', 'rekapitulasi']);
+            $table->decimal('subtotal_1', 20, 2)->default(0);
+            $table->decimal('subtotal_2', 20, 2)->default(0);
             $table->timestamps();
         });
+
+        Schema::create('detail_biaya_reklamasi', function (Blueprint $table) {
+            $table->bigIncrements('detail_biaya_reklamasi_id');
+            $table->foreignId('biaya_reklamasi_id')->constrained('biaya_reklamasi', 'biaya_reklamasi_id')->onDelete('cascade');
+            $table->string('kategori');
+            $table->string('kegiatan');
+            $table->decimal('biaya', 20, 2)->default(0);
+            $table->timestamps();
+        });
+  
     }
 
     /**
@@ -45,6 +37,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('detail_biaya_reklamasi');
         Schema::dropIfExists('biaya_reklamasi');
     }
 };

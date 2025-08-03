@@ -22,7 +22,7 @@ class RencanaReklamasiController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $rencana_reklamasi = DataReklamasi::with('detailReklamasi')
+        $rencana_reklamasi = DataReklamasi::with('detailDataReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
             ->where('tipe', 'rencana')
             ->orderBy('tahun')
@@ -41,7 +41,7 @@ class RencanaReklamasiController extends Controller
             abort(403, 'Unauthorized action.');
         }
         
-        $rencana_reklamasi = DataReklamasi::with('detailReklamasi')
+        $rencana_reklamasi = DataReklamasi::with('detailDataReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
             ->where('tipe', 'rencana')
             ->orderBy('tahun')
@@ -70,7 +70,7 @@ class RencanaReklamasiController extends Controller
                 ]);
 
                 foreach ($validated['detail'] as $data) {
-                    $dataReklamasi->detailReklamasi()->create([
+                    $dataReklamasi->detailDataReklamasi()->create([
                         'kegiatan' => $data['kegiatan'],
                         'kategori' => $data['kategori'],
                         'volume' => $data['volume'],
@@ -107,7 +107,7 @@ class RencanaReklamasiController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $rencana_reklamasi_collection = DataReklamasi::with('detailReklamasi')
+        $rencana_reklamasi_collection = DataReklamasi::with('detailDataReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
             ->where('tipe', 'rencana')
             ->orderBy('tahun')
@@ -145,11 +145,11 @@ class RencanaReklamasiController extends Controller
                     'tahun' => $validated['tahun'],
                 ]);
 
-                $rencana_reklamasi->detailReklamasi()->delete();
+                $rencana_reklamasi->detailDataReklamasi()->delete();
 
                 foreach ($validated['detail'] as $data) {
                     if (isset($data['volume']) && (float)$data['volume'] > 0) {
-                        $rencana_reklamasi->detailReklamasi()->create([
+                        $rencana_reklamasi->detailDataReklamasi()->create([
                             'kegiatan' => $data['kegiatan'],
                             'kategori' => $data['kategori'],
                             'volume' => $data['volume'],

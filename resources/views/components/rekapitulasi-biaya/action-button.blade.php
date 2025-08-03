@@ -29,7 +29,7 @@
             @endif
         </div>
 
-        <div class="rounded-lg bg-darkslategray-300 overflow-hidden flex flex-row items-center justify-center gap-2">
+        <div data-turbo="false" class="rounded-lg bg-darkslategray-300 overflow-hidden flex flex-row items-center justify-center gap-2">
             <a href="{{ route('lahan.rekapitulasi-biaya.pdf', $lahan->lahan_id) }}?tahun={{ $tahun_aktif }}" class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200">
                 <span class="relative leading-5 font-medium">Download</span>
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">

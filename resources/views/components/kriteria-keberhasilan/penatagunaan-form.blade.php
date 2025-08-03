@@ -1,240 +1,148 @@
 @props([
     'lahan',
-    'kriteria_keberhasilan',
-    'readonly',
+    'details',
+    'readonly' => false,
 ])
 
 @php
-    $kriteria = $kriteria_keberhasilan ?? null;
-
-    $penataanLahanFields = [
-        'Luas Area yang Ditata' => [
-            'rencana_luas_ditata' => 'Rencana (ha)',
-            'realisasi_luas_ditata' => 'Realisasi/Hasil Penilaian (ha)',
-            'standard_luas_ditata' => 'Standar Keberhasilan',
-            'evaluasi_luas_ditata' => 'Hasil Evaluasi',
+$sections = [
+    'Penataan Lahan' => [
+        'luas_ditata' => [
+            'label' => 'Luas Area yang Ditata',
+            'satuan' => 'ha',
+            'rencana' => 'Rencana (ha)',
+            'realisasi' => 'Realisasi/Hasil Penilaian (ha)',
+            'standar_keberhasilan' => 'Sesuai dengan Rencana',
+            'hasil_evaluasi' => 'Hasil Evaluasi',
         ],
-        'Stabilitas Timbunan' => [
-            'rencana_stabilitas_ditata' => 'Rencana',
-            'realisasi_stabilitas_ditata' => 'Realisasi/Hasil Penilaian',
-            'standard_stabilitas_ditata' => 'Standar Keberhasilan',
-            'evaluasi_stabilitas_ditata' => 'Hasil Evaluasi',
+        'stabilitas_ditata' => [
+            'label' => 'Stabilitas Timbunan',
+            'satuan' => null,
+            'rencana' => 'Rencana',
+            'realisasi' => 'Realisasi/Hasil Penilaian',
+            'standar_keberhasilan' => 'Tidak Ada Longsoran',
+            'hasil_evaluasi' => 'Hasil Evaluasi',
         ],
-    ];
-
-    $penimbunanKembaliFields = [
-        'Luas Area yang Ditimbun' => [
-            'rencana_luas_ditimbun' => 'Rencana (ha)',
-            'realisasi_luas_ditimbun' => 'Realisasi/Hasil Penilaian (ha)',
-            'standard_luas_ditimbun' => 'Standar Keberhasilan',
-            'evaluasi_luas_ditimbun' => 'Hasil Evaluasi',
+    ],
+    'Penimbunan Kembali Lahan Bekas Tambang' => [
+        'luas_ditimbun' => [
+            'label' => 'Luas Area yang Ditimbun',
+            'satuan' => 'ha',
+            'rencana' => 'Rencana (ha)',
+            'realisasi' => 'Realisasi/Hasil Penilaian (ha)',
+            'standar_keberhasilan' => 'Sesuai / Melebihi Rencana',
+            'hasil_evaluasi' => 'Hasil Evaluasi',
         ],
-        'Stabilitas Timbunan' => [
-            'rencana_stabilitas_ditimbun' => 'Rencana',
-            'realisasi_stabilitas_ditimbun' => 'Realisasi/Hasil Penilaian',
-            'standard_stabilitas_ditimbun' => 'Standar Keberhasilan',
-            'evaluasi_stabilitas_ditimbun' => 'Hasil Evaluasi',
+        'stabilitas_ditimbun' => [
+            'label' => 'Stabilitas Timbunan',
+            'satuan' => null,
+            'rencana' => 'Rencana',
+            'realisasi' => 'Realisasi/Hasil Penilaian',
+            'standar_keberhasilan' => 'Tidak Ada Longsoran',
+            'hasil_evaluasi' => 'Hasil Evaluasi',
         ],
-    ];
-
-    $penebaranTanahFields = [
-        'Luas Area yang Ditebar' => [
-            'rencana_luas_ditebar' => 'Rencana (ha)',
-            'realisasi_luas_ditebar' => 'Realisasi/Hasil Penilaian (ha)',
-            'standard_luas_ditebar' => [
-                'label' => 'Standar Keberhasilan',
+    ],
+    'Penebaran Tanah Zona Pengakaran' => [
+        'luas_ditebar' => [
+            'label' => 'Luas Area yang Ditebar',
+            'satuan' => 'ha',
+            'rencana' => 'Rencana (ha)',
+            'realisasi' => 'Realisasi/Hasil Penilaian (ha)',
+            'standar_keberhasilan' => [
+                'label' => 'Baik/Sedang',
                 'hint' => '<li>Baik (Lebih dari 75% dari luas keseluruhan areal bekas tambang)</li><li>Sedang (50% - 75% dari luas keseluruhan areal bekas tambang)</li>',
             ],
-            'evaluasi_luas_ditebar' => 'Hasil Evaluasi',
+            'hasil_evaluasi' => 'Hasil Evaluasi',
         ],
-        'pH Tanah' => [
-            'rencana_ph_tanah' => 'Rencana',
-            'realisasi_ph_tanah' => 'Realisasi/Hasil Penilaian',
-            'standard_ph_tanah' => [
-                'label' => 'Standar Keberhasilan',
+        'ph_tanah' => [
+            'label' => 'pH Tanah',
+            'satuan' => null,
+            'rencana' => 'Rencana',
+            'realisasi' => 'Realisasi/Hasil Penilaian',
+            'standar_keberhasilan' => [
+                'label' => 'Baik/Sedang',
                 'hint' => '<li>Baik (5 - 6)</li><li>Sedang (4,5 - &lt;5)</li>',
             ],
-            'evaluasi_ph_tanah' => 'Hasil Evaluasi',
+            'hasil_evaluasi' => 'Hasil Evaluasi',
         ],
-    ];
 
-    $pengendalianErosiFields = [
-        'Saluran Drainase' => [
-            'rencana_saluran_drainase' => 'Rencana',
-            'realisasi_saluran_drainase' => 'Realisasi/Hasil Penilaian',
-            'standard_saluran_drainase' => 'Standar Keberhasilan',
-            'evaluasi_saluran_drainase' => 'Hasil Evaluasi',
+    ],
+    'Pengendalian Erosi dan Sedimentasi' => [
+        'saluran_drainase' => [
+            'label' => 'Saluran Drainase',
+            'satuan' => null,
+            'rencana' => 'Rencana',
+            'realisasi' => 'Realisasi/Hasil Penilaian',
+            'standar_keberhasilan' => 'Tidak Terjadi Erosi dan Sedimentasi Aktif',
+            'hasil_evaluasi' => 'Hasil Evaluasi',
         ],
-        'Bangunan Pengendali Erosi' => [
-            'rencana_pengendalian_erosi' => 'Rencana',
-            'realisasi_pengendalian_erosi' => 'Realisasi/Hasil Penilaian',
-            'standard_pengendalian_erosi' => 'Standar Keberhasilan',
-            'evaluasi_pengendalian_erosi' => 'Hasil Evaluasi',
+        'pengendalian_erosi' => [
+            'label' => 'Bangunan Pengendali Erosi',
+            'satuan' => null,
+            'rencana' => 'Rencana',
+            'realisasi' => 'Realisasi/Hasil Penilaian',
+            'standar_keberhasilan' => 'Tidak Terjadi Alur - Alur Erosi',
+            'hasil_evaluasi' => 'Hasil Evaluasi',
         ],
-    ];
+    ],
+];
 @endphp
 
 <div class="w-full relative flex flex-col items-center justify-start gap-6 font-outfit">
     <div class="self-stretch flex flex-col items-center justify-start gap-6">
-        
-        {{-- Penataan Lahan Section --}}
+        @foreach($sections as $section => $fields)
         <div class="self-stretch rounded-2xl bg-white border-gainsboro border-solid border-[1px] flex flex-col items-center justify-start">
-            <div class="self-stretch border-gainsboro border-solid border-b-[1px] border-t-[0px] border-l-[0px] border-r-[0px] flex flex-row items-start justify-start py-5 px-6">
+            <div class="self-stretch border-gainsboro border-solid border-b-[1px] border-[0px] flex flex-row items-start justify-start py-5 px-6">
                 <div class="flex flex-col items-start justify-start">
-                    <b class="relative leading-6">Penataan Lahan</b>
+                    <b class="relative leading-6">{{ $section }}</b>
                 </div>
             </div>
             <div class="self-stretch flex flex-col items-start justify-start p-6 gap-6 text-sm">
-                @foreach($penataanLahanFields as $section => $fields)
-                    <div class="w-full flex flex-col items-start justify-start gap-6">
-                        <div class="w-full border-gainsboro border-solid border-b-[1px] border-t-[0px] border-l-[0px] border-r-[0px] box-border h-6 flex flex-row items-start justify-center py-0 px-6">
+                @foreach($fields as $indikator => $field)
+                    <div class="w-full flex flex-col items-start justify-start gap-4">
+                        <div class="w-full border-gainsboro border-solid border-b-[1px] border-[0px] h-6 flex flex-row items-start justify-center py-0 px-6">
                             <div class="flex flex-col items-start justify-start">
-                                <b class="relative leading-6">{{ $section }}</b>
+                                <b class="relative leading-6">{{ $field['label'] }}</b>
                             </div>
                         </div>
-                        <div class="w-full flex flex-row items-start justify-start gap-1.5 ">
-                            @foreach($fields as $key => $label)
+                        <div class="w-full flex flex-row items-start justify-start gap-2">
+                            @foreach(['rencana', 'realisasi', 'standar_keberhasilan', 'hasil_evaluasi'] as $col)
                                 <div class="flex-1 flex flex-col items-start justify-start gap-1.5">
-                                    <div class="relative leading-5 font-medium">{{ $label }}</div>
-                                    @if(str_contains($key, 'standard_'))
+                                    <div class="relative leading-5 font-medium">
+                                        {{ $col === 'standar_keberhasilan' 
+                                            ? ('Standar Keberhasilan')
+                                            : ($field[$col] ?? ucfirst($col)) 
+                                        }}                                    
+                                    </div>
+                                    @if($col === 'standar_keberhasilan')
                                         <div class="self-stretch h-11 flex flex-row items-center">
-                                            <div class="flex-1 flex flex-row items-center justify-start gap-2 block w-full h-11 border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit">
+                                            <div class="flex-1 flex flex-row items-center justify-start gap-2 block w-full h-11 border-solid border-[1px] border-gray-300 rounded-md shadow-sm px-3 py-2 box-border font-outfit">
                                                 <b class="flex-1 relative leading-5">
-                                                    @if($key === 'standard_luas_ditata')
-                                                        Sesuai dengan Rencana
-                                                    @elseif($key === 'standard_stabilitas_ditata')
-                                                        Tidak Ada Longsoran
-                                                    @endif
+                                                    {{ is_array($field[$col]) ? $field[$col]['label'] : $field[$col] }}
                                                 </b>
                                             </div>
                                         </div>
-                                    @else
-                                        <div class="self-stretch h-11 flex flex-row items-center">
-                                            <div class="flex-1 h-5 flex flex-row items-center justify-start gap-2">
-                                                <input 
-                                                    type="text" 
-                                                    name="{{ $key }}" 
-                                                    value="{{ old($key, $kriteria->$key ?? '') }}"
-                                                    {{ $readonly ? 'readonly' : '' }}
-                                                    class="block w-full h-11 border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
-                                                    placeholder=""
-                                                />
-                                            </div>
-                                        </div>
-                                        <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-
-        {{-- Penimbunan Kembali Lahan Bekas Tambang Section --}}
-        <div class="self-stretch rounded-2xl bg-white border-gainsboro border-solid border-[1px] flex flex-col items-center justify-start">
-            <div class="self-stretch border-gainsboro border-solid border-b-[1px] border-t-[0px] border-l-[0px] border-r-[0px] flex flex-row items-start justify-start py-5 px-6">
-                <div class="flex flex-col items-start justify-start">
-                    <b class="relative leading-6 text-gray-900">Penimbunan Kembali Lahan Bekas Tambang</b>
-                </div>
-            </div>
-            <div class="self-stretch flex flex-col items-start justify-start p-6 gap-6 text-sm">
-                @foreach($penimbunanKembaliFields as $section => $fields)
-                    <div class="w-full flex flex-col items-start justify-start gap-6">
-                        <div class="w-full border-gainsboro border-solid border-b-[1px] border-t-[0px] border-l-[0px] border-r-[0px] box-border h-6 flex flex-row items-start justify-center py-0 px-6">
-                            <div class="flex flex-col items-start justify-start">
-                                <b class="relative leading-6 text-gray-900">{{ $section }}</b>
-                            </div>
-                        </div>
-                        <div class="w-full flex flex-row items-start justify-start gap-1.5 ">
-                            @foreach($fields as $key => $label)
-                                <div class="flex-1 flex flex-col items-start justify-start gap-1.5">
-                                    <div class="relative leading-5 font-medium">{{ $label }}</div>
-                                    @if(str_contains($key, 'standard_'))
-                                        <div class="self-stretch h-11 flex flex-row items-center">
-                                            <div class="flex-1 flex flex-row items-center justify-start gap-2 block w-full h-11 border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit">
-                                                <b class="flex-1 relative leading-5">
-                                                    @if($key === 'standard_luas_ditimbun')
-                                                        Sesuai / Melebihi Rencana
-                                                    @elseif($key === 'standard_stabilitas_ditimbun')
-                                                        Tidak Ada Longsoran
-                                                    @endif
-                                                </b>
-                                            </div>
-                                        </div>
-                                    @else
-                                        <div class="self-stretch h-11 flex flex-row items-center">
-                                            <div class="flex-1 h-5 flex flex-row items-center justify-start gap-2">
-                                                <input 
-                                                    type="text" 
-                                                    name="{{ $key }}" 
-                                                    value="{{ old($key, $kriteria->$key ?? '') }}"
-                                                    {{ $readonly ? 'readonly' : '' }}
-                                                    class="block w-full h-11 border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
-                                                    placeholder=""
-                                                />
-                                            </div>
-                                        </div>
-                                        <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-
-        {{-- Penebaran Tanah Zona Pengakaran Section --}}
-        <div class="self-stretch rounded-2xl bg-white border-gainsboro border-solid border-[1px] flex flex-col items-center justify-start">
-            <div class="self-stretch border-gainsboro border-solid border-b-[1px] border-t-[0px] border-l-[0px] border-r-[0px] flex flex-row items-start justify-start py-5 px-6">
-                <div class="flex flex-col items-start justify-start">
-                    <b class="relative leading-6 text-gray-900">Penebaran Tanah Zona Pengakaran</b>
-                </div>
-            </div>
-            <div class="self-stretch flex flex-col items-start justify-start p-6 gap-6 text-sm">
-                @foreach($penebaranTanahFields as $section => $fields)
-                    <div class="w-full flex flex-col items-start justify-start gap-6">
-                        <div class="w-full border-gainsboro border-solid border-b-[1px] border-t-[0px] border-l-[0px] border-r-[0px] box-border h-6 flex flex-row items-start justify-center py-0 px-6">
-                            <div class="flex flex-col items-start justify-start">
-                                <b class="relative leading-6 text-gray-900">{{ $section }}</b>
-                            </div>
-                        </div>
-                        <div class="w-full flex flex-row items-start justify-start gap-1.5 ">
-                            @foreach($fields as $key => $fieldData)
-                                <div class="flex-1 flex flex-col items-start justify-start gap-1.5">
-                                    @php
-                                        $label = is_array($fieldData) ? $fieldData['label'] : $fieldData;
-                                        $hint = is_array($fieldData) && isset($fieldData['hint']) ? $fieldData['hint'] : null;
-                                    @endphp
-                                    <div class="relative leading-5 font-medium">{{ $label }}</div>
-                                    @if(str_contains($key, 'standard_'))
-                                        <div class="self-stretch h-11 flex flex-row items-center">
-                                            <div class="flex-1 flex flex-row items-center justify-start gap-2 block w-full h-11 border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit">
-                                                <b class="flex-1 relative leading-5">Baik / Sedang</b>
-                                            </div>
-                                        </div>
-                                        @if($hint)
+                                        @if(is_array($field[$col]) && isset($field[$col]['hint']))
                                             <div class="relative text-xs leading-[18px] text-gray-500">
                                                 <ul class="m-0 font-inherit text-[length:inherit] pl-4">
-                                                    {!! $hint !!}
+                                                    {!! $field[$col]['hint'] !!}
                                                 </ul>
                                             </div>
                                         @endif
                                     @else
                                         <div class="self-stretch h-11 flex flex-row items-center">
                                             <div class="flex-1 h-5 flex flex-row items-center justify-start gap-2">
-                                                <input 
-                                                    type="text" 
-                                                    name="{{ $key }}" 
-                                                    value="{{ old($key, $kriteria->$key ?? '') }}"
-                                                    {{ $readonly ? 'readonly' : '' }}
+                                                <input
+                                                    type="text"
+                                                    name="indikator[{{ $indikator }}][{{ $col }}]"
+                                                    value="{{ old('indikator.' . $indikator . '.' . $col, $details[$indikator][$col] ?? '') }}"
                                                     class="block w-full h-11 border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
-                                                    placeholder=""
+                                                    placeholder="{{ $field['satuan'] && in_array($col, ['rencana','realisasi']) ? $field['satuan'] : '' }}"
+                                                    @if($readonly ?? false) readonly disabled @endif
                                                 />
                                             </div>
                                         </div>
-                                        <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
+                                        <x-main.input-error :messages="$errors->get('indikator.' . $indikator . '.' . $col)" data-turbo-temporary class="mt-2" />
                                     @endif
                                 </div>
                             @endforeach
@@ -243,59 +151,6 @@
                 @endforeach
             </div>
         </div>
-
-        {{-- Pengendalian Erosi dan Sedimentasi Section --}}
-        <div class="self-stretch rounded-2xl bg-white border-gainsboro border-solid border-[1px] flex flex-col items-center justify-start">
-            <div class="self-stretch border-gainsboro border-solid border-b-[1px] border-t-[0px] border-l-[0px] border-r-[0px] flex flex-row items-start justify-start py-5 px-6">
-                <div class="flex flex-col items-start justify-start">
-                    <b class="relative leading-6 text-gray-900">Pengendalian Erosi dan Sedimentasi</b>
-                </div>
-            </div>
-            <div class="self-stretch flex flex-col items-start justify-start p-6 gap-6 text-sm">
-                @foreach($pengendalianErosiFields as $section => $fields)
-                    <div class="w-full flex flex-col items-start justify-start gap-6">
-                        <div class="w-full border-gainsboro border-solid border-b-[1px] border-t-[0px] border-l-[0px] border-r-[0px] box-border h-6 flex flex-row items-start justify-center py-0 px-6">
-                            <div class="flex flex-col items-start justify-start">
-                                <b class="relative leading-6 text-gray-900">{{ $section }}</b>
-                            </div>
-                        </div>
-                        <div class="w-full flex flex-row items-start justify-start gap-1.5 ">
-                            @foreach($fields as $key => $label)
-                                <div class="flex-1 flex flex-col items-start justify-start gap-1.5">
-                                    <div class="relative leading-5 font-medium">{{ $label }}</div>
-                                    @if(str_contains($key, 'standard_'))
-                                        <div class="self-stretch h-11 flex flex-row items-center">
-                                            <div class="flex-1 flex flex-row items-center justify-start gap-2 block w-full h-11 border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit">
-                                                <b class="flex-1 relative leading-5">
-                                                    @if($key === 'standard_saluran_drainase')
-                                                        Tidak Terjadi Erosi dan Sedimentasi Aktif
-                                                    @elseif($key === 'standard_pengendalian_erosi')
-                                                        Tidak Terjadi Alur - Alur Erosi
-                                                    @endif
-                                                </b>
-                                            </div>
-                                        </div>
-                                    @else
-                                        <div class="self-stretch h-11 flex flex-row items-center">
-                                            <div class="flex-1 h-5 flex flex-row items-center justify-start gap-2">
-                                                <input 
-                                                    type="text" 
-                                                    name="{{ $key }}" 
-                                                    value="{{ old($key, $kriteria->$key ?? '') }}"
-                                                    {{ $readonly ? 'readonly' : '' }}
-                                                    class="block w-full h-11 border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
-                                                    placeholder=""
-                                                />
-                                            </div>
-                                        </div>
-                                        <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
+        @endforeach
     </div>
 </div>

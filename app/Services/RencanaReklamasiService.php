@@ -25,7 +25,7 @@ class RencanaReklamasiService
 
     public function getDataForPDF(Lahan $lahan): ?array
     {
-        $data = DataReklamasi::with('detailReklamasi')
+        $data = DataReklamasi::with('detailDataReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
             ->where('tipe', 'rencana') 
             ->orderBy('tahun')
@@ -56,7 +56,7 @@ class RencanaReklamasiService
                 $dataPerTahun[$tahun] = $this->getDefaultFieldStructure();
             }
 
-            foreach ($item->detailReklamasi as $detail) {
+            foreach ($item->detailDataReklamasi as $detail) {
                 $field = $detail->kegiatan;
 
                 if (array_key_exists($field, $dataPerTahun[$tahun])) {

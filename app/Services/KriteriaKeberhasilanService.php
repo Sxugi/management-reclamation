@@ -6,53 +6,85 @@ use App\Models\Lahan;
 use App\Models\KriteriaKeberhasilan;
 use PDF;
 
-class KriteriaKeberhasilanService {
-
+class KriteriaKeberhasilanService
+{
+    /**
+     * Validasi kelengkapan data berdasarkan kategori secara general.
+     * @param Lahan $lahan
+     * @return array
+     */
     public function validatePDFGeneration(Lahan $lahan): array
     {
         $errors = [];
-
-        $kriteria = KriteriaKeberhasilan::where('lahan_id', $lahan->lahan_id)->first();
+        $kriteria = KriteriaKeberhasilan::where('lahan_id', $lahan->lahan_id)
+            ->with('detailKriteriaKeberhasilan')
+            ->first();
 
         if (!$kriteria) {
-            $errors[] = 'Data kriteria keberhasilan belum tersedia.';
+            $errors[] = 'Belum ada data kriteria keberhasilan.';
             return $errors;
         }
 
-        if (
-            is_null($kriteria->rencana_luas_ditata) &&
-            is_null($kriteria->realisasi_luas_ditata) &&
-            is_null($kriteria->evaluasi_luas_ditata)
-        ) {
-            $errors[] = 'Data Penatagunaan Lahan belum terisi.';
+        // List kategori
+        $kategoriList = [
+            'penatagunaan' => 'Penatagunaan Lahan',
+            'revegetasi' => 'Revegetasi',
+            'penyelesaian' => 'Penyelesaian Akhir',
+        ];
+
+        $kategoriBelumLengkap = [];
+        foreach ($kategoriList as $kategoriKey => $kategoriLabel) {
+            // Ambil semua detail pada kategori ini
+            $details = $kriteria->detailKriteriaKeberhasilan->where('kategori', $kategoriKey);
+            // Jika tidak ada satupun detail pada kategori ini, berarti belum dibuat
+            if ($details->isEmpty()) {
+                $kategoriBelumLengkap[] = $kategoriLabel;
+                continue;
+            }
+
+            // Validasi jika ada salah satu field penting yang kosong/null
+            $cek = $details->filter(function($item) {
+                return (
+                    is_null($item->rencana) ||
+                    is_null($item->realisasi) ||
+                    is_null($item->hasil_evaluasi)
+                );
+            });
+
+            if ($cek->count() > 0) {
+                $kategoriBelumLengkap[] = $kategoriLabel;
+            }
         }
 
-        if (
-            is_null($kriteria->rencana_luas_penanaman) &&
-            is_null($kriteria->realisasi_luas_penanaman) &&
-            is_null($kriteria->evaluasi_luas_penanaman)
-        ) {
-            $errors[] = 'Data Revegetasi belum terisi.';
-        }
-
-        if (
-            is_null($kriteria->rencana_penutupan_tajuk) &&
-            is_null($kriteria->realisasi_penutupan_tajuk) &&
-            is_null($kriteria->evaluasi_penutupan_tajuk)
-        ) {
-            $errors[] = 'Data Penyelesaian Akhir belum terisi.';
+        if (count($kategoriBelumLengkap) === count($kategoriList)) {
+            $errors[] = 'Belum ada data kriteria keberhasilan.';
+        } elseif (!empty($kategoriBelumLengkap)) {
+            $errors[] = 'Data kategori berikut belum lengkap: ' . implode(', ', $kategoriBelumLengkap) . '.';
         }
 
         return $errors;
     }
 
-    public function downloadPDF(Lahan $lahan)
+    /**
+     * Generate dan download PDF Kriteria Keberhasilan.
+     * @param Lahan $lahan
+     * @return mixed
+     */
+    public function generate(Lahan $lahan)
     {
-        $kriteria = KriteriaKeberhasilan::where('lahan_id', $lahan->lahan_id)->firstOrFail();
+        $kriteria = KriteriaKeberhasilan::where('lahan_id', $lahan->lahan_id)
+            ->with('detailKriteriaKeberhasilan')
+            ->firstOrFail();
+
+        $detail = [];
+        foreach ($kriteria->detailKriteriaKeberhasilan as $item) {
+            $detail[$item->kategori][$item->indikator] = $item;
+        }
 
         $html = view('reports.kriteria-keberhasilan-pdf', [
             'lahan' => $lahan,
-            'kriteria' => $kriteria
+            'kriteria' => $kriteria,
+            'detail' => $detail,
         ])->render();
 
         $pdf = PDF::loadHTML($html)->setPaper('a4', 'portrait');

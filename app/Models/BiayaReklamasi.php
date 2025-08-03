@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class BiayaReklamasi extends Model
 {
@@ -32,27 +33,8 @@ class BiayaReklamasi extends Model
     protected $fillable = [
         'lahan_id',
         'tahun',
-        'type',
-        'penataan_tanah',
-        'penebaran_tanah_pengakaran',
-        'pengendalian_erosi',
-        'kualitas_tanah',
-        'pemupukan',
-        'pengadaan_bibit',
-        'penanaman',
-        'pemeliharaan_tanaman',
-        'pencegahan_air_asam',
-        'pekerjaan_sipil',
-        'stabilisasi_lereng',
-        'pengamanan_lubang',
-        'pemulihan_kualitas_air',
-        'pemeliharaan_lubang',
+        'tipe',
         'subtotal_1',
-        'rekapitulasi_biaya_id',
-        'mobilisasi_demobilisasi_alat',
-        'perencanaan_reklamasi',
-        'administrasi_pihak_ketiga',
-        'supervisi',
         'subtotal_2',
     ];
 
@@ -63,6 +45,11 @@ class BiayaReklamasi extends Model
 
     public function lahan(): BelongsTo
     {
-        return $this->belongsTo(Lahan::class);
+        return $this->belongsTo(Lahan::class , 'lahan_id', 'lahan_id');
+    }
+
+    public function detailBiayaReklamasi(): HasMany
+    {
+        return $this->hasMany(DetailBiayaReklamasi::class, 'biaya_reklamasi_id', 'biaya_reklamasi_id');
     }
 }

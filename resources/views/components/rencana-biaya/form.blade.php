@@ -30,7 +30,7 @@
             'pengamanan_lubang' => 'Pengamanan Lubang Bekas Tambang (void)',
             'pemulihan_kualitas_air' => 'Pemulihan dan Pemantauan Kualitas Air Serta Pengelolaan Air Dalam Lubang Bekas Tambang (void) Sesuai dengan Peruntukannya',
             'pemeliharaan_lubang' => 'Pemeliharaan Lubang Bekas Tambang (void)',
-        ],         
+        ],
         'sub_total' => [
             'subtotal_1' => 'SUBTOTAL 1 (Rp/US$)'
         ],
@@ -60,6 +60,12 @@
     ];
 
     $isEdit = !is_null($biaya);
+    $details = $biaya?->detailBiayaReklamasi ?? collect();
+
+    $getExistingBiaya = function($kegiatan) use ($details) {
+        $item = $details->firstWhere('kegiatan', $kegiatan);
+        return $item ? $item->biaya : '';
+    };
 @endphp
 
 <form
@@ -77,7 +83,7 @@
 
     <input type="hidden" name="lahan_id" value="{{ $lahan->lahan_id }}">
     <input type="hidden" name="tahun" value="{{ $tahun_aktif }}">
-    <input type="hidden" name="type" value="rencana">
+    <input type="hidden" name="tipe" value="rencana">
 
     <!-- LEFT COLUMN: Biaya Langsung -->
     <div class="flex flex-col items-start justify-start gap-6">
@@ -95,13 +101,15 @@
                                 <div class="relative leading-5 font-medium">{!! $label !!}</div>
                                 <input
                                     type="number"
-                                    name="{{ $key }}"
-                                    value="{{ old($key, $biaya->{$key} ?? 0) }}"
+                                    name="detail[{{ $key }}][biaya]"
+                                    value="{{ old('detail.' . $key . '.biaya', $getExistingBiaya($key)) }}"
                                     class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                                     min="0"
                                     @if($readonly ?? false) readonly disabled @endif
                                 >
-                                <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
+                                <input type="hidden" name="detail[{{ $key }}][kegiatan]" value="{{ $key }}">
+                                <input type="hidden" name="detail[{{ $key }}][kategori]" value="biaya_langsung">
+                                <x-main.input-error :messages="$errors->get('detail.' . $key . '.biaya')" data-turbo-temporary class="mt-2" />
                             </div>
                         @endforeach
                     @elseif ($section === 'sub_total')
@@ -114,13 +122,13 @@
                             @foreach($fields as $key => $label)
                                 <input
                                     type="number"
-                                    name="{{ $key }}"
-                                    value="{{ old($key, $biaya->{$key} ?? 0) }}"
+                                    name="subtotal_1"
+                                    value="{{ old('subtotal_1', $biaya->subtotal_1 ?? '') }}"
                                     class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                                     min="0"
                                     @if($readonly ?? false) readonly disabled @endif
                                 >
-                                <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
+                                <x-main.input-error :messages="$errors->get('subtotal_1')" data-turbo-temporary class="mt-2" />
                             @endforeach
                         </div>
                     @else
@@ -135,13 +143,15 @@
                                     <div class="relative leading-5 font-medium">{!! $label !!}</div>
                                     <input
                                         type="number"
-                                        name="{{ $key }}"
-                                        value="{{ old($key, $biaya->{$key} ?? 0) }}"
+                                        name="detail[{{ $key }}][biaya]"
+                                        value="{{ old('detail.' . $key . '.biaya', $getExistingBiaya($key)) }}"
                                         class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                                         min="0"
                                         @if($readonly ?? false) readonly disabled @endif
                                     >
-                                    <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
+                                    <input type="hidden" name="detail[{{ $key }}][kegiatan]" value="{{ $key }}">
+                                    <input type="hidden" name="detail[{{ $key }}][kategori]" value="biaya_langsung">
+                                    <x-main.input-error :messages="$errors->get('detail.' . $key . '.biaya')" data-turbo-temporary class="mt-2" />
                                 </div>
                             @endforeach
                         </div>
@@ -170,29 +180,31 @@
                             </div>
                             <input
                                 type="number"
-                                name="{{ $key }}"
-                                value="{{ old($key, $biaya->{$key} ?? 0) }}"
+                                name="subtotal_2"
+                                value="{{ old('subtotal_2', $biaya->subtotal_2 ?? '') }}"
                                 class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                                 min="0"
                                 @if($readonly ?? false) readonly disabled @endif
                             >
-                            <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
+                            <x-main.input-error :messages="$errors->get('subtotal_2')" data-turbo-temporary class="mt-2" />
                         </div>
                     @else
                         <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
                             <div class="relative leading-5 font-medium">{!! $field['label'] !!}</div>
                             <input
                                 type="number"
-                                name="{{ $key }}"
-                                value="{{ old($key, $biaya->{$key} ?? 0) }}"
+                                name="detail[{{ $key }}][biaya]"
+                                value="{{ old('detail.' . $key . '.biaya', $getExistingBiaya($key)) }}"
                                 class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                                 min="0"
                                 @if($readonly ?? false) readonly disabled @endif
                             >
+                            <input type="hidden" name="detail[{{ $key }}][kegiatan]" value="{{ $key }}">
+                            <input type="hidden" name="detail[{{ $key }}][kategori]" value="biaya_tidak_langsung">
                             @if (!empty($field['hint']))
                                 <span class="self-stretch relative text-xs leading-[18px] text-darkslategray-100">{{ $field['hint'] }}</span>
                             @endif
-                            <x-main.input-error :messages="$errors->get($key)" data-turbo-temporary class="mt-2" />
+                            <x-main.input-error :messages="$errors->get('detail.' . $key . '.biaya')" data-turbo-temporary class="mt-2" />
                         </div>
                     @endif
                 @endforeach

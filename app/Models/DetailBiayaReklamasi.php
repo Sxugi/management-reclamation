@@ -5,9 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class DataReklamasi extends Model
+class DetailBiayaReklamasi extends Model
 {
     use HasFactory;
 
@@ -16,14 +15,14 @@ class DataReklamasi extends Model
      *
      * @var string
      */
-    protected $table = 'data_reklamasi';
+    protected $table = 'detail_biaya_reklamasi';
 
     /**
      * The primary key associated with the table.
      *
      * @var string
      */
-    protected $primaryKey = 'data_reklamasi_id';
+    protected $primaryKey = 'detail_biaya_reklamasi_id';
 
     /**
      * The attributes that are mass assignable.
@@ -31,23 +30,19 @@ class DataReklamasi extends Model
      * @var array
      */
     protected $fillable = [
-        'lahan_id',
-        'tahun',
-        'tipe',
+        'biaya_reklamasi_id',
+        'kategori',
+        'kegiatan',
+        'biaya',
     ];
 
     public function getRouteKeyName()
     {
-        return 'data_reklamasi_id';
+        return 'detail_biaya_reklamasi_id';
     }
 
-    public function lahan(): BelongsTo
+    public function biayaReklamasi(): BelongsTo
     {
-        return $this->belongsTo(Lahan::class, 'lahan_id', 'lahan_id');
-    }
-
-    public function detailDataReklamasi(): HasMany
-    {
-        return $this->hasMany(DetailDataReklamasi::class, 'data_reklamasi_id', 'data_reklamasi_id');
+        return $this->belongsTo(BiayaReklamasi::class, 'biaya_reklamasi_id', 'biaya_reklamasi_id');
     }
 }

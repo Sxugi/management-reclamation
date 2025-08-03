@@ -10,7 +10,7 @@ class RekapitulasiReklamasiService
 {
     public function generate(Lahan $lahan, int $tahun)
     {
-        $dataTahunanModel = DataReklamasi::with('detailReklamasi')
+        $dataTahunanModel = DataReklamasi::with('detailDataReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
             ->where('tipe', 'rekapitulasi')
             ->where('tahun', $tahun)
@@ -39,7 +39,7 @@ class RekapitulasiReklamasiService
             return $fields;
         }
 
-        foreach ($dataTahunanModel->detailReklamasi as $detail) {
+        foreach ($dataTahunanModel->detailDataReklamasi as $detail) {
             $field = $detail->kegiatan;
             if (array_key_exists($field, $fields)) {
                 $fields[$field] = (float) $detail->volume;
@@ -54,14 +54,14 @@ class RekapitulasiReklamasiService
         $defaultFields = $this->getDefaultFieldStructure();
         $dataKumulatif = $defaultFields;
 
-        $allData = DataReklamasi::with('detailReklamasi')
+        $allData = DataReklamasi::with('detailDataReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
             ->where('tipe', 'rekapitulasi')
             ->where('tahun', '<=', $tahun)
             ->get();
 
         foreach ($allData as $item) {
-            foreach ($item->detailReklamasi as $detail) {
+            foreach ($item->detailDataReklamasi as $detail) {
                 $field = $detail->kegiatan;
                 if (array_key_exists($field, $dataKumulatif)) {
                     $dataKumulatif[$field] += (float) $detail->volume;

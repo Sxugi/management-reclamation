@@ -23,7 +23,7 @@ class RekapitulasiReklamasiController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $rekapitulasi_reklamasi = DataReklamasi::with('detailReklamasi')
+        $rekapitulasi_reklamasi = DataReklamasi::with('detailDataReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
             ->where('tipe', 'rekapitulasi')
             ->orderBy('tahun')
@@ -43,7 +43,7 @@ class RekapitulasiReklamasiController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $rekapitulasi_reklamasi = DataReklamasi::with('detailReklamasi')
+        $rekapitulasi_reklamasi = DataReklamasi::with('detailDataReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
             ->where('tipe', 'rekapitulasi')
             ->orderBy('tahun')
@@ -74,7 +74,7 @@ class RekapitulasiReklamasiController extends Controller
                 ]);
 
                 foreach ($validated['detail'] as $data) {
-                    $dataReklamasi->detailReklamasi()->create([
+                    $dataReklamasi->detailDataReklamasi()->create([
                         'kegiatan' => $data['kegiatan'],
                         'kategori' => $data['kategori'],
                         'volume' => $data['volume'],
@@ -113,7 +113,7 @@ class RekapitulasiReklamasiController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $rekapitulasi_reklamasi_collection = DataReklamasi::with('detailReklamasi')
+        $rekapitulasi_reklamasi_collection = DataReklamasi::with('detailDataReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
             ->where('tipe', 'rekapitulasi')
             ->orderBy('tahun')
@@ -154,11 +154,11 @@ class RekapitulasiReklamasiController extends Controller
                     'tahun' => $validated['tahun'],
                 ]);
 
-                $rekapitulasi_reklamasi->detailReklamasi()->delete();
+                $rekapitulasi_reklamasi->detailDataReklamasi()->delete();
 
                 foreach ($validated['detail'] as $data) {
                     if (isset($data['volume']) && (float)$data['volume'] > 0) {
-                        $rekapitulasi_reklamasi->detailReklamasi()->create([
+                        $rekapitulasi_reklamasi->detailDataReklamasi()->create([
                             'kegiatan' => $data['kegiatan'],
                             'kategori' => $data['kategori'],
                             'volume' => $data['volume'],
@@ -190,7 +190,7 @@ class RekapitulasiReklamasiController extends Controller
         $tahun = $request->input('tahun');
 
         // Check if theres data for the specified lahan and year
-        $hasData = DataReklamasi::with('detailReklamasi')
+        $hasData = DataReklamasi::with('detailDataReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
             ->where('tipe', 'rekapitulasi')
             ->where('tahun', $tahun)

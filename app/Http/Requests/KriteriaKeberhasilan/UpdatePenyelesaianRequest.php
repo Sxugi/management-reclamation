@@ -22,18 +22,23 @@ class UpdatePenyelesaianRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'rencana_penutupan_tajuk' => 'required|numeric',
-            'realisasi_penutupan_tajuk' => 'required|numeric',
-            'evaluasi_penutupan_tajuk' => 'required|string|max:255',
-            'rencana_pemupukan' => 'required|string|max:255',
-            'realisasi_pemupukan' => 'required|string|max:255',
-            'evaluasi_pemupukan' => 'required|string|max:255',
-            'rencana_pengendalian_hama' => 'required|string|max:255',
-            'realisasi_pengendalian_hama' => 'required|string|max:255',
-            'evaluasi_pengendalian_hama' => 'required|string|max:255',
-            'rencana_penyulaman' => 'required|string|max:255',
-            'realisasi_penyulaman' => 'required|string|max:255',
-            'evaluasi_penyulaman' => 'required|string|max:255',
+            'indikator' => 'required|array',
+
+            'indikator.penutupan_tajuk.rencana' => 'required|numeric',
+            'indikator.penutupan_tajuk.realisasi' => 'required|numeric',
+            'indikator.penutupan_tajuk.hasil_evaluasi' => 'required|string|max:255',
+
+            'indikator.pemupukan.rencana' => 'required|string|max:255',
+            'indikator.pemupukan.realisasi' => 'required|string|max:255',
+            'indikator.pemupukan.hasil_evaluasi' => 'required|string|max:255',
+
+            'indikator.pengendalian_hama.rencana' => 'required|string|max:255',
+            'indikator.pengendalian_hama.realisasi' => 'required|string|max:255',
+            'indikator.pengendalian_hama.hasil_evaluasi' => 'required|string|max:255',
+
+            'indikator.penyulaman.rencana' => 'required|string|max:255',
+            'indikator.penyulaman.realisasi' => 'required|string|max:255',
+            'indikator.penyulaman.hasil_evaluasi' => 'required|string|max:255',
         ];
     }
 
@@ -45,30 +50,30 @@ class UpdatePenyelesaianRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'rencana_penutupan_tajuk.required' => 'Rencana penutupan tajuk harus diisi.',
-            'rencana_penutupan_tajuk.numeric' => 'Rencana penutupan tajuk harus berupa angka.',
-            'realisasi_penutupan_tajuk.required' => 'Realisasi penutupan tajuk harus diisi.',
-            'realisasi_penutupan_tajuk.numeric' => 'Realisasi penutupan tajuk harus berupa angka.',
-            'evaluasi_penutupan_tajuk.required' => 'Evaluasi penutupan tajuk harus diisi.',
-            'evaluasi_penutupan_tajuk.string' => 'Evaluasi penutupan tajuk harus berupa teks.',
-            'rencana_pemupukan.required' => 'Rencana pemupukan harus diisi.',
-            'rencana_pemupukan.string' => 'Rencana pemupukan harus berupa teks.',
-            'realisasi_pemupukan.required' => 'Realisasi pemupukan harus diisi.',
-            'realisasi_pemupukan.string' => 'Realisasi pemupukan harus berupa teks.',
-            'evaluasi_pemupukan.required' => 'Evaluasi pemupukan harus diisi.',
-            'evaluasi_pemupukan.string' => 'Evaluasi pemupukan harus berupa teks.',
-            'rencana_pengendalian_hama.required' => 'Rencana pengendalian hama harus diisi.',
-            'rencana_pengendalian_hama.string' => 'Rencana pengendalian hama harus berupa teks.',
-            'realisasi_pengendalian_hama.required' => 'Realisasi pengendalian hama harus diisi.',
-            'realisasi_pengendalian_hama.string' => 'Realisasi pengendalian hama harus berupa teks.',
-            'evaluasi_pengendalian_hama.required' => 'Evaluasi pengendalian hama harus diisi.',
-            'evaluasi_pengendalian_hama.string' => 'Evaluasi pengendalian hama harus berupa teks.',
-            'rencana_penyulaman.required' => 'Rencana penyulaman harus diisi.',
-            'rencana_penyulaman.string' => 'Rencana penyulaman harus berupa teks.',
-            'realisasi_penyulaman.required' => 'Realisasi penyulaman harus diisi.',
-            'realisasi_penyulaman.string' => 'Realisasi penyulaman harus berupa teks.',
-            'evaluasi_penyulaman.required' => 'Evaluasi penyulaman harus diisi.',
-            'evaluasi_penyulaman.string' => 'Evaluasi penyulaman harus berupa teks.',
+            'indikator.penutupan_tajuk.rencana.required' => 'Rencana penutupan tajuk harus diisi.',
+            'indikator.penutupan_tajuk.rencana.numeric' => 'Rencana penutupan tajuk harus berupa angka.',
+            'indikator.penutupan_tajuk.realisasi.required' => 'Realisasi penutupan tajuk harus diisi.',
+            'indikator.penutupan_tajuk.realisasi.numeric' => 'Realisasi penutupan tajuk harus berupa angka.',
+            'indikator.penutupan_tajuk.hasil_evaluasi.required' => 'Evaluasi penutupan tajuk harus diisi.',
+            'indikator.penutupan_tajuk.hasil_evaluasi.string' => 'Evaluasi penutupan tajuk harus berupa teks.',
+            'indikator.pemupukan.rencana.required' => 'Rencana pemupukan harus diisi.',
+            'indikator.pemupukan.rencana.string' => 'Rencana pemupukan harus berupa teks.',
+            'indikator.pemupukan.realisasi.required' => 'Realisasi pemupukan harus diisi.',
+            'indikator.pemupukan.realisasi.string' => 'Realisasi pemupukan harus berupa teks.',
+            'indikator.pemupukan.hasil_evaluasi.required' => 'Evaluasi pemupukan harus diisi.',
+            'indikator.pemupukan.hasil_evaluasi.string' => 'Evaluasi pemupukan harus berupa teks.',
+            'indikator.pengendalian_hama.rencana.required' => 'Rencana pengendalian hama harus diisi.',
+            'indikator.pengendalian_hama.rencana.string' => 'Rencana pengendalian hama harus berupa teks.',
+            'indikator.pengendalian_hama.realisasi.required' => 'Realisasi pengendalian hama harus diisi.',
+            'indikator.pengendalian_hama.realisasi.string' => 'Realisasi pengendalian hama harus berupa teks.',
+            'indikator.pengendalian_hama.hasil_evaluasi.required' => 'Evaluasi pengendalian hama harus diisi.',
+            'indikator.pengendalian_hama.hasil_evaluasi.string' => 'Evaluasi pengendalian hama harus berupa teks.',
+            'indikator.penyulaman.rencana.required' => 'Rencana penyulaman harus diisi.',
+            'indikator.penyulaman.rencana.string' => 'Rencana penyulaman harus berupa teks.',
+            'indikator.penyulaman.realisasi.required' => 'Realisasi penyulaman harus diisi.',
+            'indikator.penyulaman.realisasi.string' => 'Realisasi penyulaman harus berupa teks.',
+            'indikator.penyulaman.hasil_evaluasi.required' => 'Evaluasi penyulaman harus diisi.',
+            'indikator.penyulaman.hasil_evaluasi.string' => 'Evaluasi penyulaman harus berupa teks.',
         ];
     }
 }

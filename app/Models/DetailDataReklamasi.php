@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class DetailReklamasi extends Model
+class DetailDataReklamasi extends Model
 {
     use HasFactory;
 
@@ -15,14 +15,14 @@ class DetailReklamasi extends Model
      *
      * @var string
      */
-    protected $table = 'detail_reklamasi';
+    protected $table = 'detail_data_reklamasi';
 
     /**
      * The primary key associated with the table.
      *
      * @var string
      */
-    protected $primaryKey = 'detail_reklamasi_id';
+    protected $primaryKey = 'detail_data_reklamasi_id';
 
     /**
      * The attributes that are mass assignable.

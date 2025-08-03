@@ -29,6 +29,14 @@
         </div>
     @endif
 
+    @if ($errors->any())
+        <div data-turbo-temporary class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            @foreach ($errors->all() as $error)
+                {{ $error }}<br>
+            @endforeach
+        </div>
+    @endif
+
     @if ($tab_aktif === 'penatagunaan')
         @include('components.kriteria-keberhasilan.penatagunaan-form', ['kriteria_keberhasilan' => $kriteria, 'readonly' => true])
     @elseif ($tab_aktif === 'revegetasi')

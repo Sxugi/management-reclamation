@@ -76,11 +76,11 @@
             return '';
         }
         
-        if (!$reklamasi || !$reklamasi->detailReklamasi) {
+        if (!$reklamasi || !$reklamasi->detailDataReklamasi) {
             return 0;
         }
         
-        $detail = $reklamasi->detailReklamasi->where('kegiatan', $kegiatan)->first();
+        $detail = $reklamasi->detailDataReklamasi->where('kegiatan', $kegiatan)->first();
         return $detail ? $detail->volume : 0;
     };
 @endphp
