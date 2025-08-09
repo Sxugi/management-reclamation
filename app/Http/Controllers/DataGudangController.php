@@ -88,16 +88,6 @@ class DataGudangController extends Controller
      */
     public function update(UpdateDataGudangRequest $request, Lahan $lahan, DataGudang $gudang)
     {
-        // Check if user owns the lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        // Check if gudang belongs to this lahan
-        if ($gudang->lahan_id !== $lahan->lahan_id) {
-            abort(404, 'Data not found.');
-        }
-
         $validated = $request->validated();
         $validated['lahan_id'] = $lahan->lahan_id;
         $gudang->update($validated);

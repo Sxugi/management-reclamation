@@ -88,7 +88,7 @@ class RekapitulasiBiayaController extends Controller
                 ->with('success', 'Rekapitulasi Biaya tahun ' . $validated['tahun'] . ' berhasil ditambahkan.');
         } catch (\Exception $e) {
             \Log::error('Error creating rekapitulasi biaya', [
-                'user' => Auth::user()->name,
+                'user' => Auth::user()->username,
                 'lahan_id' => $lahan->lahan_id,
                 'error' => $e->getMessage()
             ]);
@@ -157,10 +157,8 @@ class RekapitulasiBiayaController extends Controller
                     'subtotal_2' => $validated['subtotal_2'],
                 ]);
 
-                // Hapus semua detail lama
                 $rekapitulasi_biaya->detailBiayaReklamasi()->delete();
 
-                // Simpan detail baru
                 foreach ($validated['detail'] as $data) {
                     $rekapitulasi_biaya->detailBiayaReklamasi()->create([
                         'kegiatan' => $data['kegiatan'],
@@ -175,7 +173,7 @@ class RekapitulasiBiayaController extends Controller
 
         } catch (\Exception $e) {
             \Log::error('Error updating rekapitulasi biaya', [
-                'user' => Auth::user()->name,
+                'user' => Auth::user()->username,
                 'lahan_id' => $lahan->lahan_id,
                 'error' => $e->getMessage()
             ]);

@@ -1,4 +1,4 @@
-class GudangFilterPanel {
+class PohonFilterPanel {
     constructor() {
         this.open = false;
         this.handleOutsideClickBound = this.handleOutsideClick.bind(this);
@@ -6,7 +6,7 @@ class GudangFilterPanel {
     }
 
     toggle() {
-        const panel = document.getElementById('gudangFilterPanel');
+        const panel = document.getElementById('pohonFilterPanel');
         if (this.open) {
             this.close();
         } else {
@@ -17,14 +17,14 @@ class GudangFilterPanel {
     }
 
     close() {
-        const panel = document.getElementById('gudangFilterPanel');
+        const panel = document.getElementById('pohonFilterPanel');
         if (panel) panel.classList.add('hidden');
         this.open = false;
         document.removeEventListener('click', this.handleOutsideClickBound);
     }
 
     handleOutsideClick(event) {
-        const panel = document.getElementById('gudangFilterPanel');
+        const panel = document.getElementById('pohonFilterPanel');
         const toggleBtn = event.target.closest('[data-filter-panel-toggle]');
         if (!panel.contains(event.target) && !toggleBtn) {
             this.close();
@@ -32,18 +32,19 @@ class GudangFilterPanel {
     }
 
     clear() {
-        document.getElementById('startDate').value = '';
-        document.getElementById('endDate').value = '';
-        document.getElementById('jenisBarang').value = '';
-        document.getElementById('statusBarang').value = '';
-        const form = document.getElementById('gudangFilterForm');
+        document.getElementById('startYear').value = '';
+        document.getElementById('endYear').value = '';
+        document.getElementById('tahun').value = '';
+        document.getElementById('pohonType').value = '';
+        document.getElementById('minQuantity').value = '';
+        const form = document.getElementById('pohonFilterForm');
         const url = new URL(form.action);
         Turbo.visit(url.toString());
     }
 
     bindSubmitCleanup() {
         document.addEventListener("turbo:load", () => {
-            const form = document.getElementById("gudangFilterForm");
+            const form = document.getElementById("pohonFilterForm");
             if (!form) return;
 
             form.addEventListener("submit", (e) => {
@@ -62,15 +63,15 @@ class GudangFilterPanel {
 }
 
 document.addEventListener('turbo:load', () => {
-    window.gudangFilter = new GudangFilterPanel();
+    window.pohonFilter = new PohonFilterPanel();
 });
 
-window.toggleGudangFilterPanel = function() {
-    window.gudangFilter.toggle();
+window.togglePohonFilterPanel = function() {
+    window.pohonFilter.toggle();
 };
-window.closeGudangFilterPanel = function() {
-    window.gudangFilter.close();
+window.closePohonFilterPanel = function() {
+    window.pohonFilter.close();
 };
-window.clearGudangFilters = function() {
-    window.gudangFilter.clear();
+window.clearPohonFilters = function() {
+    window.pohonFilter.clear();
 };

@@ -29,6 +29,8 @@ import './components/dokumentasi/date-filter.js';
 import './components/dokumentasi/file-upload.js';
 import './components/gudang/panel-filter.js';
 import './components/gudang/detail-modal.js';
+import './components/pohon/detail-modal.js';
+import './components/pohon/panel-filter.js';
 
 // Start Turbo
 Turbo.start()

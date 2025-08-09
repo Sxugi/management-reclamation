@@ -1,6 +1,11 @@
-<th scope="col" 
-    class="h-6 py-3 px-3 text-left leading-5 font-bold border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap group">
-    <a href="{{ $sortUrl }}" class="flex items-center justify-between w-full text-darkslategray no-underline">
+@props([
+    'rowspan' => null,
+    'colspan' => null,
+])
+
+<th scope="col" rowspan="{{ $rowspan }}" colspan="{{ $colspan }}"
+    {{ $attributes->merge(['class' => 'px-3 leading-5 font-bold border-gainsboro border-solid border-[0px] whitespace-nowrap group']) }}>
+    <a href="{{ $sortUrl }}" class="flex items-center justify-center w-full text-darkslategray no-underline">
         <span>{{ $title }}</span>
         @if($isActive)
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"

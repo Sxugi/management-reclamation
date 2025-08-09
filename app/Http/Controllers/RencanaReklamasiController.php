@@ -83,7 +83,7 @@ class RencanaReklamasiController extends Controller
                 ->with('success', 'Rencana Reklamasi tahun ' . $validated['tahun'] . ' berhasil ditambahkan.');
         } catch (\Exception $e) {
             \Log::error('Error creating rencana reklamasi', [
-                'user' => Auth::user()->name,
+                'user' => Auth::user()->username,
                 'lahan_id' => $lahan->lahan_id,
                 'error' => $e->getMessage()
             ]);
@@ -164,7 +164,7 @@ class RencanaReklamasiController extends Controller
 
         } catch (\Exception $e) {
             \Log::error('Error updating rencana reklamasi', [
-                'user' => Auth::user()->name,
+                'user' => Auth::user()->username,
                 'lahan_id' => $lahan->lahan_id,
                 'error' => $e->getMessage()
             ]);

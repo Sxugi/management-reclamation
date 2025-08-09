@@ -21,10 +21,14 @@ class DataGudangService
     {
         $query = DataGudang::where('lahan_id', $lahan->lahan_id);
 
-        if ($request->filled('startDate')) {
+        if ($request->filled('startDate') && $request->filled('endDate')) {
+            if ($request->startDate > $request->endDate) {
+                [$request->startDate, $request->endDate] = [$request->endDate, $request->startDate];
+            }
+            $query->whereBetween('tanggal_masuk', [$request->startDate, $request->endDate]);
+        } elseif ($request->filled('startDate')) {
             $query->whereDate('tanggal_masuk', '>=', $request->startDate);
-        }
-        if ($request->filled('endDate')) {
+        } elseif ($request->filled('endDate')) {
             $query->whereDate('tanggal_masuk', '<=', $request->endDate);
         }
         if ($request->filled('jenisBarang')) {

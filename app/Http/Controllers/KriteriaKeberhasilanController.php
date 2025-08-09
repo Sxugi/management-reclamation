@@ -114,7 +114,7 @@ class KriteriaKeberhasilanController extends Controller
                 ->with('success', 'Kriteria Keberhasilan Penatagunaan berhasil diperbarui.');
         } catch (\Exception $e) {
             \Log::error('Error updating Kriteria Penatagunaan', [
-                'user' => Auth::user()->name,
+                'user' => Auth::user()->username,
                 'lahan_id' => $lahan->lahan_id,
                 'error' => $e->getMessage()
             ]);
@@ -160,7 +160,7 @@ class KriteriaKeberhasilanController extends Controller
                 ->with('success', 'Kriteria Keberhasilan Revegetasi berhasil diperbarui.');
         } catch (\Exception $e) {
             \Log::error('Error updating Kriteria Revegetasi', [
-                'user' => Auth::user()->name,
+                'user' => Auth::user()->username,
                 'lahan_id' => $lahan->lahan_id,
                 'error' => $e->getMessage()
             ]);
@@ -206,7 +206,7 @@ class KriteriaKeberhasilanController extends Controller
                 ->with('success', 'Kriteria Keberhasilan Penyelesaian berhasil diperbarui.');
         } catch (\Exception $e) {
             \Log::error('Error updating Kriteria Penyelesaian', [
-                'user' => Auth::user()->name,
+                'user' => Auth::user()->username,
                 'lahan_id' => $lahan->lahan_id,
                 'error' => $e->getMessage()
             ]);

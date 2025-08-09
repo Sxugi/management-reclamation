@@ -9,16 +9,16 @@
         <table class="min-w-max w-full text-xs text-darkslategray font-outfit border-collapse table-auto">
             <thead class="border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[0px] border-l-[0px]">
                 <tr>
-                    <x-main.sortable-header column="tanggal_masuk" title="Tanggal Barang Masuk" />
-                    <x-main.sortable-header column="jenis_barang" title="Jenis Barang" />
-                    <x-main.sortable-header column="nama_barang" title="Nama Barang" />
-                    <x-main.sortable-header column="jumlah_barang" title="Jumlah" />
-                    <x-main.sortable-header column="lokasi_penyimpanan" title="Lokasi" />
-                    <x-main.sortable-header column="status_barang" title="Status" />
-                    <th scope="col" class="h-6 py-3 px-3 text-left leading-5 font-bold border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
+                    <x-main.sortable-header column="tanggal_masuk" title="Tanggal Barang Masuk" class="h-6 py-3 border-r-[1px]"/>
+                    <x-main.sortable-header column="jenis_barang" title="Jenis Barang" class="h-6 py-3 border-r-[1px]"/>
+                    <x-main.sortable-header column="nama_barang" title="Nama Barang" class="h-6 py-3 border-r-[1px]"/>
+                    <x-main.sortable-header column="jumlah_barang" title="Jumlah" class="h-6 py-3 border-r-[1px]"/>
+                    <x-main.sortable-header column="lokasi_penyimpanan" title="Lokasi" class="h-6 py-3 border-r-[1px]"/>
+                    <x-main.sortable-header column="status_barang" title="Status" class="h-6 py-3 border-r-[1px]"/>
+                    <th scope="col" class="h-6 py-3 px-3 text-center leading-5 font-bold border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
                         Catatan
                     </th>
-                    <th scope="col" class="h-6 py-3 px-3 text-left leading-5 font-bold border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[0px] border-l-[1px] whitespace-nowrap">
+                    <th scope="col" class="h-6 py-3 px-3 text-center leading-5 font-bold border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[0px] border-l-[1px] whitespace-nowrap">
                         Actions
                     </th>
                 </tr>
@@ -63,21 +63,21 @@
                         </td>
                         <td class="py-3 px-3 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[0px] border-l-[0px]">
                             <div class="flex flex-row items-center justify-center gap-3">
-                                    <a onclick="window.openInfoModal({
-                                            id: '{{ $data->data_gudang_id }}',
-                                            nama_barang: '{{ addslashes($data->nama_barang) }}',
-                                            jenis_barang: '{{ addslashes($data->jenis_barang) }}',
-                                            jumlah_barang: '{{ $data->jumlah_barang }}',
-                                            satuan: '{{ $data->satuan ?? 'unit' }}',
-                                            status_barang: '{{ $data->status_barang }}',
-                                            lokasi_penyimpanan: '{{ addslashes($data->lokasi_penyimpanan) }}',
-                                            tanggal_masuk: '{{ $data->tanggal_masuk }}',
-                                            catatan: '{{ addslashes($data->catatan ?? '') }}',
-                                            created_at: '{{ $data->created_at }}',
-                                            updated_at: '{{ $data->updated_at }}',
-                                            lahan_nama: '{{ addslashes($lahan->nama_lahan ?? 'Unknown') }}',
-                                            edit_url: '{{ route('lahan.gudang.edit', [$lahan, $data]) }}'
-                                        })"
+                                <a onclick="window.openInfoModal({
+                                        id: '{{ $data->data_gudang_id }}',
+                                        nama_barang: '{{ addslashes($data->nama_barang) }}',
+                                        jenis_barang: '{{ addslashes($data->jenis_barang) }}',
+                                        jumlah_barang: '{{ $data->jumlah_barang }}',
+                                        satuan: '{{ $data->satuan ?? 'unit' }}',
+                                        status_barang: '{{ $data->status_barang }}',
+                                        lokasi_penyimpanan: '{{ addslashes($data->lokasi_penyimpanan) }}',
+                                        tanggal_masuk: '{{ $data->tanggal_masuk }}',
+                                        catatan: '{{ addslashes($data->catatan ?? '') }}',
+                                        created_at: '{{ $data->created_at }}',
+                                        updated_at: '{{ $data->updated_at }}',
+                                        lahan_nama: '{{ addslashes($lahan->nama_lahan ?? 'Unknown') }}',
+                                        edit_url: '{{ route('lahan.gudang.edit', [$lahan, $data]) }}'
+                                    })"
                                     class="cursor-pointer">
                                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                         <rect width="20" height="20" fill="white"/>

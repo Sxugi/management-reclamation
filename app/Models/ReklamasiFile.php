@@ -32,7 +32,7 @@ class ReklamasiFile extends Model
      */
     protected $fillable = [
         'lahan_id',
-        'type',
+        'tipe',
         'file_name',
         'file_path',
         'file_size',
@@ -47,17 +47,17 @@ class ReklamasiFile extends Model
 
     public function scopeRencana($query)
     {
-        return $query->where('type', 'rencana');
+        return $query->where('tipe', 'rencana');
     }
 
     public function scopeLaporan($query)
     {
-        return $query->where('type', 'laporan');
+        return $query->where('tipe', 'laporan');
     }
 
     public function scopeLaporanByYear($query, $tahun)
     {
-        return $query->where('type', 'laporan')
+        return $query->where('tipe', 'laporan')
                      ->where('tahun', $tahun);
     }
 

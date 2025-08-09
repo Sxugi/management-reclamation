@@ -60,7 +60,7 @@ class FileLaporanController extends Controller
 
         ReklamasiFile::create([
             'lahan_id' => $lahan->lahan_id,
-            'type' => 'laporan',
+            'tipe' => 'laporan',
             'file_name' => $file->getClientOriginalName(),
             'file_path' => $path,
             'file_size' => $file->getSize(),

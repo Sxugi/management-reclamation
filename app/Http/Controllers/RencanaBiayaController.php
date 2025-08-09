@@ -88,7 +88,7 @@ class RencanaBiayaController extends Controller
                 ->with('success', 'Rencana Biaya tahun ' . $validated['tahun'] . ' berhasil ditambahkan.');
         } catch (\Exception $e) {
             \Log::error('Error creating rencana biaya', [
-                'user' => Auth::user()->name,
+                'user' => Auth::user()->username,
                 'lahan_id' => $lahan->lahan_id,
                 'error' => $e->getMessage()
             ]);
@@ -173,7 +173,7 @@ class RencanaBiayaController extends Controller
 
         } catch (\Exception $e) {
             \Log::error('Error updating rencana biaya', [
-                'user' => Auth::user()->name,
+                'user' => Auth::user()->username,
                 'lahan_id' => $lahan->lahan_id,
                 'error' => $e->getMessage()
             ]);

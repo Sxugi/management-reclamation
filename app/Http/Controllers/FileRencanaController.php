@@ -48,7 +48,7 @@ class FileRencanaController extends Controller
 
         ReklamasiFile::create([
             'lahan_id'  => $lahan->lahan_id,
-            'type'      => 'rencana',
+            'tipe'      => 'rencana',
             'file_name' => $file->getClientOriginalName(),
             'file_path' => $path,
             'file_size' => $file->getSize(),
