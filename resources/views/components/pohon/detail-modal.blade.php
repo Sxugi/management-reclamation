@@ -29,19 +29,19 @@
         <div class="flex items-center justify-end p-6 border-t border-gainsboro bg-gray-50 rounded-b-2xl">
             <div class="flex items-center space-x-3">
                 <button onclick="window.closePohonModal()" class="bg-red-500 !text-white text-sm py-3 px-4 rounded-lg font-medium font-outfit hover:bg-red-600 transition-colors no-underline border-none">
-                    Tutup
+                    Close
                 </button>
                 <x-main.primary-button id="editPohonButton" class="py-3 px-4 gap-2 font-medium hidden">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M4 13V16H7L16 7L13 4L4 13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                    Edit Data
+                    Edit
                 </x-main.primary-button>
                 <x-main.primary-button id="deletePohonButton" class="py-3 px-4 gap-2 font-medium hidden">
                     <svg width="18" height="18" viewBox="0 0 15 18" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M4.52679 1.0877L4.28571 1.5625H1.07143C0.478795 1.5625 0 2.0373 0 2.625C0 3.2127 0.478795 3.6875 1.07143 3.6875H13.9286C14.5212 3.6875 15 3.2127 15 2.625C15 2.0373 14.5212 1.5625 13.9286 1.5625H10.7143L10.4732 1.0877C10.2924 0.725781 9.92076 0.5 9.51562 0.5H5.48438C5.07924 0.5 4.70759 0.725781 4.52679 1.0877ZM13.9286 4.75H1.07143L1.78125 16.0059C1.83482 16.8459 2.53795 17.5 3.38504 17.5H11.615C12.4621 17.5 13.1652 16.8459 13.2187 16.0059L13.9286 4.75Z" fill="white"/>
                     </svg>
-                    Hapus Data
+                    Delete
                 </x-main.primary-button>
             </div>
         </div>

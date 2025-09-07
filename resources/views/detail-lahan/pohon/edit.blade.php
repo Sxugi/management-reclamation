@@ -11,18 +11,13 @@
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M5.83333 12.6667L10 8.5L5.83333 4.33333" stroke="#667085" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                <div class="relative leading-5 text-darkslategray-200 font-medium">Menambahkan Data Pohon</div>
+                <div class="relative leading-5 text-darkslategray-200 font-medium">Mengedit Data Pohon</div>
             </div>
         </div>
     </x-slot>
 
     <div class="py-6">
-        <div class="self-stretch mx-auto sm:px-6 lg:px-8">
-            @if(session('success'))
-                <div data-turbo-temporary class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                    {{ session('success') }}
-                </div>
-            @endif
+        <div class="self-stretch mx-auto">
             <div class="bg-white overflow-hidden shadow-sm rounded-lg sm:rounded-lg">
                 <div class="p-6">
                     <x-pohon.form-fields :lahan="$lahan" :jenisPohonList="$jenisPohonList" :pohon="$pohon" :dataPohon="$dataPohon" />

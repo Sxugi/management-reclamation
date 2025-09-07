@@ -17,14 +17,14 @@
                     <x-main.input-label for="startYear" class="block text-sm font-medium text-gray-700 mb-1">Tahun Mulai</x-main.input-label>
                     <x-main.text-input type="number" id="startYear" name="startYear"
                            value="{{ request('startYear') }}"
-                           min="1900" max="2100" placeholder="2024"
+                           min="1900" max="2100" placeholder="20XX"
                            class="border rounded p-2 text-sm"/>
                 </div>
                 <div class="flex flex-col w-1/2">
                     <x-main.input-label for="endYear" class="block text-sm font-medium text-gray-700 mb-1">Tahun Akhir</x-main.input-label>
                     <x-main.text-input type="number" id="endYear" name="endYear"
                            value="{{ request('endYear') }}"
-                           min="1900" max="2100" placeholder="2025"
+                           min="1900" max="2100" placeholder="20XX"
                            class="border rounded p-2 text-sm"/>
                 </div>
             </div>

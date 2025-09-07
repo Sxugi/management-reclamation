@@ -17,12 +17,7 @@
     </x-slot>
 
     <div class="py-6">
-        <div class="self-stretch mx-auto sm:px-6 lg:px-8">
-            @if(session('success'))
-                <div data-turbo-temporary class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
-                    {{ session('success') }}
-                </div>
-            @endif
+        <div class="self-stretch mx-auto">
             <div class="bg-white overflow-hidden shadow-sm rounded-lg sm:rounded-lg">
                 <div class="p-6">
                     <x-pohon.form-fields :lahan="$lahan" :jenisPohonList="$jenisPohonList" />

@@ -16,32 +16,37 @@ class DataPohonService
 
     public static function getFilteredData(Request $request, Lahan $lahan)
     {
-        $query = Pohon::where('lahan_id', $lahan->lahan_id)
-            ->whereHas('dataPohon', function($q) use ($request) {
-                if ($request->filled('tahun')) {
-                    $q->where('tahun', $request->tahun);
-                } else {
-                    if ($request->filled('startYear') && $request->filled('endYear')) {
-                        if ($request->startYear > $request->endYear) {
-                            [$request->startYear, $request->endYear] = [$request->endYear, $request->startYear];
-                        }
-                        $q->whereBetween('tahun', [$request->startYear, $request->endYear]);
-                    } elseif ($request->filled('startYear')) {
-                        $q->where('tahun', '>=', $request->startYear);
-                    } elseif ($request->filled('endYear')) {
-                        $q->where('tahun', '<=', $request->endYear);
-                    }
-                }
-                if ($request->filled('minQuantity')) {
-                    $q->where('jumlah', '>=', $request->minQuantity);
-                }
-            });
+        $query = Pohon::where('lahan_id', $lahan->lahan_id);
 
         if ($request->filled('pohonType')) {
             $query->where('jenis_pohon', $request->pohonType);
         }
 
-        $query->with('dataPohon');
+        $relationFilter = function ($q) use ($request) {
+            if ($request->filled('tahun')) {
+                $q->where('tahun', $request->tahun);
+            } else {
+                $start = $request->startYear;
+                $end   = $request->endYear;
+                if ($request->filled('startYear') && $request->filled('endYear')) {
+                    if ($start > $end) {
+                        [$start, $end] = [$end, $start];
+                    }
+                    $q->whereBetween('tahun', [$start, $end]);
+                } elseif ($request->filled('startYear')) {
+                    $q->where('tahun', '>=', $start);
+                } elseif ($request->filled('endYear')) {
+                    $q->where('tahun', '<=', $end);
+                }
+            }
+
+            if ($request->filled('minQuantity')) {
+                $q->where('jumlah', '>=', $request->minQuantity);
+            }
+        };
+
+        // Eager load filtered relation
+        $query->with(['dataPohon' => $relationFilter]);
 
         $sort = $request->get('tableSortColumn');
         $direction = $request->get('tableSortDirection');

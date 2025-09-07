@@ -13,7 +13,7 @@
     </x-slot>
 
     <div class="py-6">
-        <div class="self-stretch mx-auto sm:px-6 lg:px-8">
+        <div class="self-stretch mx-auto">
             @if(session('success'))
                 <div data-turbo-temporary class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                     {{ session('success') }}
@@ -21,7 +21,7 @@
             @endif
             <div class="bg-white shadow-md rounded-lg sm:rounded-lg">
                 <div class="p-6">
-                    <div class="w-full flex flex-col items-start justify-start shadow-sm">
+                    <div class="w-full flex flex-col items-start justify-start shadow-sm rounded-2xl">
                         <div class="rounded-t-2xl bg-white border-gainsboro border-solid border-[1px] border-b-0 box-border self-stretch flex flex-row items-center justify-between gap-1 py-4 px-6">
                             <div class="flex items-center self-stretch leading-7 font-semibold text-lg text-darkslategray font-outfit">
                                 List Pohon

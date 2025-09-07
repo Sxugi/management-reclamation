@@ -26,4 +26,10 @@ a:visited {
       transition: background-color 5000s ease-in-out 0s;
       background-color: white !important;
   }
+
+  .hover-group:hover .bulan-cell,
+  .hover-group:hover .nominal-cell {
+      background-color: #f1f5f9;
+      transition: background 0.2s;
+  }
 }

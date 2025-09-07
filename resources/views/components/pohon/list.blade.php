@@ -84,7 +84,7 @@
                         </tr>
                     @else
                         <tr class="border-none">
-                            <td colspan="2" class="py-6 px-3 text-left text-darkslategray">No data pohon available yet</td>
+                            <td colspan="2" class="py-6 px-3 text-center text-darkslategray">No data pohon available yet</td>
                         </tr>
                     @endif
                 @endforelse

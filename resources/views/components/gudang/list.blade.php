@@ -7,7 +7,7 @@
 <div class="grid flex-1 self-stretch auto-cols-fr gap-y-8 rounded-b-2xl border-gainsboro border-solid border-[1px] overflow-hidden">
     <div class="flex flex-col overflow-x-auto">
         <table class="min-w-max w-full text-xs text-darkslategray font-outfit border-collapse table-auto">
-            <thead class="border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[0px] border-l-[0px]">
+            <thead class="border-gainsboro border-solid border-b-[1px] border-[0px]">
                 <tr>
                     <x-main.sortable-header column="tanggal_masuk" title="Tanggal Barang Masuk" class="h-6 py-3 border-r-[1px]"/>
                     <x-main.sortable-header column="jenis_barang" title="Jenis Barang" class="h-6 py-3 border-r-[1px]"/>
@@ -127,7 +127,7 @@
                         </tr>
                     @else
                         <tr class="border-none">
-                            <td colspan="8" class="py-6 px-3 text-left text-darkslategray">No data gudang available yet</td>
+                            <td colspan="8" class="py-6 px-3 text-center text-darkslategray">No data gudang available yet</td>
                         </tr>
                     @endif
                 @endforelse

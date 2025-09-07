@@ -72,7 +72,7 @@ document.addEventListener("turbo:load", () => {
         // Build rich HTML content
         content.innerHTML = `
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="bg-white border border-gainsboro rounded-xl p-6 shadow-md">
+                <div class="bg-white border border-gainsboro rounded-xl p-6 shadow-lg">
                     <h3 class="text-lg font-semibold text-darkslategray mb-4 flex items-center gap-2">
                         <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-blue-600">
@@ -103,7 +103,7 @@ document.addEventListener("turbo:load", () => {
                     </div>
                 </div>
 
-                <div class="bg-white border border-gainsboro rounded-xl p-6 shadow-md">
+                <div class="bg-white border border-gainsboro rounded-xl p-6 shadow-lg">
                     <h3 class="text-lg font-semibold text-darkslategray mb-4 flex items-center gap-2">
                         <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-green-600">
@@ -139,7 +139,7 @@ document.addEventListener("turbo:load", () => {
             </div>
 
             ${data.catatan ? `
-                <div class="bg-white border border-gainsboro rounded-xl p-6 shadow-md">
+                <div class="bg-white border border-gainsboro rounded-xl p-6 shadow-lg">
                     <h3 class="text-lg font-semibold text-darkslategray mb-4 flex items-center gap-2">
                         <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-orange-600">
@@ -155,7 +155,7 @@ document.addEventListener("turbo:load", () => {
                 </div>
             ` : ''}
         
-            <div class="bg-white border border-gainsboro rounded-xl p-6 shadow-md">
+            <div class="bg-white border border-gainsboro rounded-xl p-6 shadow-lg">
                 <h3 class="text-lg font-semibold text-darkslategray mb-4 flex items-center gap-2">
                     <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
                         <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -164,7 +164,7 @@ document.addEventListener("turbo:load", () => {
                     </div>
                     Log
                 </h3>
-                <div class="flex flex-col items-start justify-start gap-6">
+                <div class="flex flex-col items-start justify-start gap-4">
                     <div class="flex flex-row items-start space-x-4">
                         <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
                             <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">

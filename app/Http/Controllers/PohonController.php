@@ -74,33 +74,34 @@ class PohonController extends Controller
         $validated['lahan_id'] = $lahan->lahan_id;
         
         try {
-            DB::transaction(function () use ($validated, $lahan) {
-                    $pohon = Pohon::where('lahan_id', $lahan->lahan_id)
-                                ->where('jenis_pohon', $validated['jenis_pohon'])
-                                ->first();
+            $pohon = null;
+            DB::transaction(function () use ($validated, $lahan, &$pohon) {
+                $pohon = Pohon::where('lahan_id', $lahan->lahan_id)
+                            ->where('jenis_pohon', $validated['jenis_pohon'])
+                            ->first();
 
-                    if (!$pohon) {
-                        $pohon = Pohon::create([
-                            'lahan_id' => $lahan->lahan_id,
-                            'jenis_pohon' => $validated['jenis_pohon'],
-                        ]);
-                    }
-
-                    $exists = $pohon->dataPohon()
-                        ->where('tahun', $validated['tahun'])
-                        ->exists();
-
-                    if ($exists) {
-                        throw new \Exception("Data untuk tahun {$validated['tahun']} sudah ada.");
-                    }
-
-                    $pohon->dataPohon()->create([
-                        'tahun' => $validated['tahun'],
-                        'jumlah' => $validated['jumlah'],
+                if (!$pohon) {
+                    $pohon = Pohon::create([
+                        'lahan_id' => $lahan->lahan_id,
+                        'jenis_pohon' => $validated['jenis_pohon'],
                     ]);
-                });
+                }
 
-            return redirect()->route('lahan.pohon.index', $lahan)
+                $exists = $pohon->dataPohon()
+                    ->where('tahun', $validated['tahun'])
+                    ->exists();
+
+                if ($exists) {
+                    throw new \Exception("Data untuk tahun {$validated['tahun']} sudah ada.");
+                }
+
+                $pohon->dataPohon()->create([
+                    'tahun' => $validated['tahun'],
+                    'jumlah' => $validated['jumlah'],
+                ]);
+            });
+
+            return redirect()->route('lahan.pohon.index', $pohon->lahan_id)
                 ->with('success', 'Data pohon ' . $pohon->jenis_pohon . ' tahun ' . $validated['tahun'] . ' berhasil ditambahkan.');
         } catch (\Exception $e) {
             \Log::error('Error creating data pohon', [

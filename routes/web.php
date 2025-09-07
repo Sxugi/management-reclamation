@@ -4,6 +4,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LahanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PlotController;
+use App\Http\Controllers\AnggaranReklamasiController;
 use App\Http\Controllers\PohonController;
 use App\Http\Controllers\DataGudangController;
 use App\Http\Controllers\RencanaReklamasiController;
@@ -41,6 +42,8 @@ Route::middleware(['auth'])->group(function () {
         ->name('detail-lahan.dashboard');
     Route::resource('lahan.plot', PlotController::class)
         ->shallow();
+    Route::resource('lahan.anggaran', AnggaranReklamasiController::class)
+        ->except('show');
     Route::resource('lahan.pohon', PohonController::class)
         ->except('show', 'edit', 'update', 'delete');
     Route::get('lahan/{lahan}/pohon/{pohon}/data-pohon/{dataPohon}/edit', [PohonController::class, 'edit'])->name('lahan.pohon.edit');

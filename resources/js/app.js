@@ -31,6 +31,8 @@ import './components/gudang/panel-filter.js';
 import './components/gudang/detail-modal.js';
 import './components/pohon/detail-modal.js';
 import './components/pohon/panel-filter.js';
+import './components/anggaran-reklamasi/detail-modal.js';
+import './components/anggaran-reklamasi/panel-filter.js';
 
 // Start Turbo
 Turbo.start()

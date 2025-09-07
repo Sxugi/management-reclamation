@@ -1,6 +1,6 @@
 @props(['lahan', 'gudang' => null])
 
-<form method="POST" action="{{ $gudang ? route('lahan.gudang.update', [$lahan, $gudang]) : route('lahan.gudang.store', $lahan) }}" class="space-y-6">
+<form method="POST" action="{{ $gudang ? route('lahan.gudang.update', [$lahan, $gudang]) : route('lahan.gudang.store', $lahan) }}">
     @csrf
     @if($gudang)
         @method('PUT')

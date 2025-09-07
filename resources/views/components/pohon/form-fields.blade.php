@@ -1,6 +1,6 @@
 @props(['lahan', 'pohon', 'dataPohon' => null, 'jenisPohonList' => []])
 
-<form method="POST" action="{{ $dataPohon ? route('lahan.pohon.update', [$lahan, $pohon, $dataPohon]) : route('lahan.pohon.store', $lahan) }}" class="space-y-6">
+<form method="POST" action="{{ $dataPohon ? route('lahan.pohon.update', [$lahan, $pohon, $dataPohon]) : route('lahan.pohon.store', $lahan) }}">
     @csrf
     @if($dataPohon)
         @method('PUT')
@@ -42,7 +42,7 @@
                     </div>  
                 </div>
                 <div class="mt-2 hidden flex flex-row gap-1" id="input-jenis-baru-wrapper">
-                    <x-main.text-input type="text" id="input-jenis-baru" class="flex-1 leading-5 bg-transparent" placeholder="Jenis pohon baru" />
+                    <x-main.text-input type="text" id="input-jenis-baru" class="flex-1 text-sm leading-5 bg-transparent" placeholder="Jenis pohon baru" />
                     <button type="button" onclick="addJenisBaru()" class="bg-green-500 !text-white text-sm px-4 rounded-lg font-medium hover:bg-green-600 transition-colors no-underline border-none text-xs font-normal font-outfit">Tambah</button>
                     <button type="button" onclick="hideInputJenisBaru()" class="bg-red-500 !text-white text-sm px-4 rounded-lg font-medium hover:bg-red-600 transition-colors no-underline border-none text-xs font-normal font-outfit">Batal</button>
                 </div>
