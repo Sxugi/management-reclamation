@@ -14,7 +14,8 @@
 
     <div class="self-stretch flex flex-row items-center justify-between text-sm font-outfit">
         <x-rekapitulasi-biaya.tab-tahun :lahan="$lahan" :rekapitulasi_biaya="$rekapitulasi_biaya" :tahun_aktif="$tahun_aktif" />
-        <x-rekapitulasi-biaya.action-button :lahan="$lahan" :rekapitulasi_biaya="$rekapitulasi_biaya" :tahun_aktif="$tahun_aktif" />
+        <span id="exchangeRateText" class="font-outfit mx-2 font-medium text-darkslategray"></span>
+        <x-rekapitulasi-biaya.action-button :lahan="$lahan" :rekapitulasi_biaya="$rekapitulasi_biaya" :tahun_aktif="$tahun_aktif" :currency="$currency" />
     </div>
 
     <x-rekapitulasi-biaya.form 
@@ -22,5 +23,6 @@
         :rekapitulasi_biaya="$rekapitulasi_biaya" 
         :tahun_aktif="$tahun_aktif" 
         :readonly="false" 
+        :currency="$currency"
     />
 </x-main-layout>

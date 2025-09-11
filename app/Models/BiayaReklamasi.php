@@ -34,6 +34,7 @@ class BiayaReklamasi extends Model
         'lahan_id',
         'tahun',
         'tipe',
+        'currency',
         'subtotal_1',
         'subtotal_2',
     ];

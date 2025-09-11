@@ -11,15 +11,11 @@
             </div>
         </div>
     </x-slot>
-
-    @php
-        $tahun_aktif = request('tahun', $lahan->tahun_awal);
-    @endphp
-
+    
     <div class="self-stretch flex flex-row items-center justify-between text-sm font-outfit">
         <x-rencana-biaya.tab-tahun :lahan="$lahan" :rencana_biaya="$rencana_biaya" :tahun_aktif="$tahun_aktif" />
-        <x-rencana-biaya.action-button :lahan="$lahan" :rencana_biaya="$rencana_biaya" :tahun_aktif="$tahun_aktif" />
+        <x-rencana-biaya.action-button :lahan="$lahan" :rencana_biaya="$rencana_biaya" :tahun_aktif="$tahun_aktif" :currency="$currency" />
     </div>
 
-    <x-rencana-biaya.form :lahan="$lahan" :rencana_biaya="$rencana_biaya" :tahun_aktif="$tahun_aktif" :readonly="false" />
+    <x-rencana-biaya.form :lahan="$lahan" :rencana_biaya="$rencana_biaya" :tahun_aktif="$tahun_aktif" :readonly="false" :currency="$currency" />
 </x-main-layout>

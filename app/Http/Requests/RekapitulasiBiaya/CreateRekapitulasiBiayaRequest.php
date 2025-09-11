@@ -35,6 +35,7 @@ class CreateRekapitulasiBiayaRequest extends FormRequest
                                  ->where('tipe', 'rekapitulasi');
                 }),
             ],
+            'currency' => 'required|in:IDR,USD',
 
             // Detail Biaya Langsung
             'detail.penataan_tanah.biaya' => 'required|numeric|min:0',
@@ -80,6 +81,10 @@ class CreateRekapitulasiBiayaRequest extends FormRequest
             'tahun.required' => 'Tahun wajib diisi.',
             'tahun.integer' => 'Tahun harus berupa angka.',
             'tahun.unique' => 'Rekapitulasi biaya reklamasi untuk tahun ini sudah ada.',
+
+            // Currency
+            'currency.required' => 'Mata uang wajib dipilih.',
+            'currency.in' => 'Mata uang harus IDR atau USD.',
 
             // Tipe & Lahan
             'tipe.required' => 'Tipe wajib diisi.',

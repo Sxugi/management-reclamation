@@ -2,6 +2,7 @@
     'lahan',
     'rekapitulasi_biaya',
     'tahun_aktif' => null,
+    'currency',
 ])
 
 @php
@@ -20,7 +21,7 @@
                     </svg>
                 </a>
             @else
-                <a href="{{ route('lahan.rekapitulasi-biaya.create', $lahan->lahan_id) }}?tahun={{ $tahun_aktif }}" class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200">
+                <a href="{{ route('lahan.rekapitulasi-biaya.create', $lahan->lahan_id) }}?tahun={{ $tahun_aktif }}&currency={{ $currency }}" class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200">
                     <span class="relative leading-5 font-medium">Add</span>
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M10 4.24951C10.4142 4.24951 10.75 4.58534 10.75 4.99951V9.24951H15.001L15.0771 9.25342C15.4553 9.29177 15.7508 9.61128 15.751 9.99951C15.751 10.3879 15.4554 10.7072 15.0771 10.7456L15.001 10.7495H10.75V15.0005L10.7461 15.0767C10.7077 15.4549 10.3884 15.7505 10 15.7505C9.61173 15.7504 9.29227 15.4548 9.25391 15.0767L9.25 15.0005V10.7495H5C4.58579 10.7495 4.25 10.4137 4.25 9.99951C4.25015 9.58543 4.58588 9.24951 5 9.24951H9.25V4.99951C9.25004 4.5854 9.58591 4.24962 10 4.24951Z" fill="white"/>
@@ -37,7 +38,23 @@
                 </svg>
             </a>
         </div>
-    @else
+    @elseif (request()->routeIs('lahan.rekapitulasi-biaya.edit'))
+        <div class="rounded-lg bg-darkslategray-300 overflow-hidden flex flex-row items-center justify-center gap-2">
+            <x-main.primary-button type="button" id="convertCurrencyBtn" class="cursor-pointer rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200">
+                Convert Currency
+            </x-main.primary-button>
+        </div>
+        <x-rekapitulasi-biaya.currency-dropdown :selected="$currency" />
+        <div class="rounded-lg bg-darkslategray-300 overflow-hidden flex flex-row items-center justify-center gap-2">
+            <a href="{{ route('lahan.rekapitulasi-biaya.index', $lahan->lahan_id) }}?tahun={{ $tahun_aktif }}" class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200">
+                <span class="relative leading-5 font-medium font-outfit">Back</span>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M3.99994 10L3.29294 10.707L2.58594 10L3.29294 9.29303L3.99994 10ZM20.9999 18C20.9999 18.2652 20.8946 18.5196 20.707 18.7071C20.5195 18.8947 20.2652 19 19.9999 19C19.7347 19 19.4804 18.8947 19.2928 18.7071C19.1053 18.5196 18.9999 18.2652 18.9999 18H20.9999ZM8.29294 15.707L3.29294 10.707L4.70694 9.29303L9.70694 14.293L8.29294 15.707ZM3.29294 9.29303L8.29294 4.29303L9.70694 5.70703L4.70694 10.707L3.29294 9.29303ZM3.99994 9.00003H13.9999V11H3.99994V9.00003ZM20.9999 16V18H18.9999V16H20.9999ZM13.9999 9.00003C15.8565 9.00003 17.6369 9.73753 18.9497 11.0503C20.2620 12.363 20.9999 14.1435 20.9999 16H18.9999C18.9999 14.6739 18.4732 13.4022 17.5355 12.4645C16.5978 11.5268 15.326 11 13.9999 11V9.00003Z" fill="white"/>
+                </svg>
+            </a>
+        </div>
+    @elseif (request()->routeIs('lahan.rekapitulasi-biaya.create'))
+        <x-rekapitulasi-biaya.currency-dropdown :selected="$currency" />
         <div class="rounded-lg bg-darkslategray-300 overflow-hidden flex flex-row items-center justify-center gap-2">
             <a href="{{ route('lahan.rekapitulasi-biaya.index', $lahan->lahan_id) }}?tahun={{ $tahun_aktif }}" class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200">
                 <span class="relative leading-5 font-medium font-outfit">Back</span>

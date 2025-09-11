@@ -30,7 +30,10 @@ class RekapitulasiBiayaController extends Controller
             ->get()
             ->keyBy('tahun');
 
-        return view('detail-lahan.rekapitulasi-biaya.index', compact('rekapitulasi_biaya', 'lahan'));
+        $tahun_aktif = request('tahun', $lahan->tahun_awal);
+        $currency = $rekapitulasi_biaya[$tahun_aktif]->currency ?? 'IDR';
+
+        return view('detail-lahan.rekapitulasi-biaya.index', compact('rekapitulasi_biaya', 'lahan', 'tahun_aktif', 'currency'));
     }
 
     /**
@@ -49,7 +52,10 @@ class RekapitulasiBiayaController extends Controller
             ->orderBy('tahun')
             ->get();
 
-        return view('detail-lahan.rekapitulasi-biaya.create', compact('lahan', 'rekapitulasi_biaya'));
+        $tahun_aktif = request('tahun', $lahan->tahun_awal);
+        $currency = request('currency', 'IDR');
+
+        return view('detail-lahan.rekapitulasi-biaya.create', compact('lahan', 'rekapitulasi_biaya', 'tahun_aktif', 'currency'));
     }
 
     /**
@@ -71,6 +77,7 @@ class RekapitulasiBiayaController extends Controller
                     'lahan_id'    => $lahan->lahan_id,
                     'tahun'       => $validated['tahun'],
                     'tipe'        => 'rekapitulasi',
+                    'currency'    => $validated['currency'],
                     'subtotal_1'  => $validated['subtotal_1'],
                     'subtotal_2'  => $validated['subtotal_2'],
                 ]);
@@ -122,11 +129,13 @@ class RekapitulasiBiayaController extends Controller
             ->keyBy('tahun');
 
         $tahun_aktif = request('tahun', $rekapitulasi_biaya->tahun);
+        $currency = request('currency', 'IDR');
 
         return view('detail-lahan.rekapitulasi-biaya.edit', [
             'rekapitulasi_biaya' => $rekapitulasi_biaya_collection,
             'lahan' => $lahan,
             'tahun_aktif' => $tahun_aktif,
+            'currency' => $currency,
             'rekapitulasi_biaya_item' => $rekapitulasi_biaya,
         ]);
     }
@@ -153,6 +162,7 @@ class RekapitulasiBiayaController extends Controller
             DB::transaction(function () use ($validated, $rekapitulasi_biaya) {
                 $rekapitulasi_biaya->update([
                     'tahun'      => $validated['tahun'],
+                    'currency'    => $validated['currency'],
                     'subtotal_1' => $validated['subtotal_1'],
                     'subtotal_2' => $validated['subtotal_2'],
                 ]);

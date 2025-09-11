@@ -33,6 +33,9 @@ import './components/pohon/detail-modal.js';
 import './components/pohon/panel-filter.js';
 import './components/anggaran-reklamasi/detail-modal.js';
 import './components/anggaran-reklamasi/panel-filter.js';
+import './components/biaya-reklamasi/currency-format.js';
+import './components/biaya-reklamasi/currency-conversion.js';
+
 
 // Start Turbo
 Turbo.start()

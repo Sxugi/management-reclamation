@@ -31,9 +31,14 @@ document.addEventListener("turbo:load", () => {
             ? items.reduce((latest, item) => (!latest || new Date(item.updated_at) > new Date(latest) ? item.updated_at : latest), null)
             : null;
 
+        const monthNames = [
+            "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+        ];
+
         // General info (from meta or first item)
         const tahun = meta.tahun || (items[0]?.tahun ?? '-');
-        const bulan = meta.bulan || (items[0]?.bulan ?? '-');
+        const bulan = meta.bulan || (monthNames[items[0]?.bulan - 1] ?? '-');
         const quarter = meta.quarter || (items[0]?.quarter ?? '-');
 
         content.innerHTML = `

@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('lahan_id')->constrained('lahan', 'lahan_id')->onDelete('cascade');
             $table->integer('tahun');
             $table->enum('tipe', ['rencana', 'rekapitulasi']);
+            $table->enum('currency', ['IDR', 'USD'])->default('IDR');
             $table->decimal('subtotal_1', 20, 2)->default(0);
             $table->decimal('subtotal_2', 20, 2)->default(0);
             $table->timestamps();

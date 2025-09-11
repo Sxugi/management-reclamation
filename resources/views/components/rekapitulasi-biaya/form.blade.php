@@ -3,6 +3,7 @@
     'rekapitulasi_biaya',
     'tahun_aktif',
     'readonly',
+    'currency',
 ])
 
 @php
@@ -75,22 +76,29 @@
         : route('lahan.rekapitulasi-biaya.store', $lahan->lahan_id)
     }}"
     class="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full font-outfit"
+    data-currency="{{ $currency }}"
 >
     @csrf
     @if($isEdit)
         @method('PUT')
     @endif
 
+    @php
+        $currency = request('currency') ?: 'default';
+        $currencyLabel = $currency === 'USD' ? 'US$' : ($currency === 'IDR' ? 'Rp' : 'Rp/US$');
+    @endphp
+
     <input type="hidden" name="lahan_id" value="{{ $lahan->lahan_id }}">
     <input type="hidden" name="tahun" value="{{ $tahun_aktif }}">
     <input type="hidden" name="tipe" value="rencana">
+    <input type="hidden" name="currency" id="currencyHidden" value="{{ $currency }}">
 
     <!-- LEFT COLUMN: Biaya Langsung -->
     <div class="flex flex-col items-start justify-start gap-6">
         <div class="self-stretch rounded-2xl bg-white border-gainsboro border-solid border-[1px] flex flex-col items-center justify-start">
             <div class="self-stretch rounded-t-2xl border-gainsboro border-solid border-b-[1px] border-t-[0px] border-l-[0px] border-r-[0px] flex flex-row items-start justify-start py-5 px-6">
                 <div class="flex flex-col items-start justify-start">
-                    <b class="relative leading-6">Biaya Langsung (Rp/US$)</b>
+                    <b class="relative leading-6">Biaya Langsung (<span id="currencyLabelLangsung">{{ $currencyLabel }}</span>)</b>
                 </div>
             </div>
             <div class="self-stretch flex flex-col items-start justify-start p-6 gap-6 text-sm text-darkslategray-200">
@@ -100,12 +108,20 @@
                             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
                                 <div class="relative leading-5 font-medium">{!! $label !!}</div>
                                 <input
-                                    type="number"
-                                    name="detail[{{ $key }}][biaya]"
-                                    value="{{ old('detail.' . $key . '.biaya', $getExistingBiaya($key)) }}"
+                                    type="text"
+                                    id="biaya-display-{{ $key }}"
                                     class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
-                                    min="0"
+                                    placeholder="{{ $currencyLabel }}"
+                                    autocomplete="off"
+                                    inputmode="numeric"
                                     @if($readonly ?? false) readonly disabled @endif
+                                >
+                                <input
+                                    type="hidden"
+                                    name="detail[{{ $key }}][biaya]"
+                                    id="biaya-input-{{ $key }}"
+                                    value="{{ old('detail.' . $key . '.biaya', $getExistingBiaya($key)) }}"
+                                    required
                                 >
                                 <input type="hidden" name="detail[{{ $key }}][kegiatan]" value="{{ $key }}">
                                 <input type="hidden" name="detail[{{ $key }}][kategori]" value="biaya_langsung">
@@ -121,12 +137,20 @@
                             </div>
                             @foreach($fields as $key => $label)
                                 <input
-                                    type="number"
-                                    name="subtotal_1"
-                                    value="{{ old('subtotal_1', $biaya->subtotal_1 ?? '') }}"
+                                    type="text"
+                                    id="subtotal-display-{{ $key }}"
                                     class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
-                                    min="0"
+                                    placeholder="{{ $currencyLabel }}"
+                                    autocomplete="off"
+                                    inputmode="numeric"
                                     @if($readonly ?? false) readonly disabled @endif
+                                >
+                                <input
+                                    type="hidden"
+                                    name="subtotal_1"
+                                    id="subtotal-input-{{ $key }}"
+                                    value="{{ old('subtotal_1', $biaya->subtotal_1 ?? '') }}"
+                                    required
                                 >
                                 <x-main.input-error :messages="$errors->get('subtotal_1')" data-turbo-temporary class="mt-2" />
                             @endforeach
@@ -142,12 +166,20 @@
                                 <div class="self-stretch flex flex-col items-start justify-start gap-1.5 text-darkslategray-200">
                                     <div class="relative leading-5 font-medium">{!! $label !!}</div>
                                     <input
-                                        type="number"
-                                        name="detail[{{ $key }}][biaya]"
-                                        value="{{ old('detail.' . $key . '.biaya', $getExistingBiaya($key)) }}"
+                                        type="text"
+                                        id="biaya-display-{{ $key }}"
                                         class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
-                                        min="0"
+                                        placeholder="{{ $currencyLabel }}"
+                                        autocomplete="off"
+                                        inputmode="numeric"
                                         @if($readonly ?? false) readonly disabled @endif
+                                    >
+                                    <input
+                                        type="hidden"
+                                        name="detail[{{ $key }}][biaya]"
+                                        id="biaya-input-{{ $key }}"
+                                        value="{{ old('detail.' . $key . '.biaya', $getExistingBiaya($key)) }}"
+                                        required
                                     >
                                     <input type="hidden" name="detail[{{ $key }}][kegiatan]" value="{{ $key }}">
                                     <input type="hidden" name="detail[{{ $key }}][kategori]" value="biaya_langsung">
@@ -166,7 +198,7 @@
         <div class="self-stretch rounded-2xl bg-white border-gainsboro border-solid border-[1px] flex flex-col items-center justify-start">
             <div class="self-stretch rounded-t-2xl border-gainsboro border-solid border-b-[1px] border-t-[0px] border-l-[0px] border-r-[0px] flex flex-row items-start justify-start py-5 px-6">
                 <div class="flex flex-col items-start justify-start">
-                    <b class="relative leading-6">Biaya Tidak Langsung (Rp/US$)</b>
+                    <b class="relative leading-6">Biaya Tidak Langsung (<span id="currencyLabelTidakLangsung">{{ $currencyLabel }}</span>)</b>
                 </div>
             </div>
             <div class="self-stretch flex flex-col items-start justify-start p-6 gap-6 text-sm text-darkslategray-200">
@@ -179,12 +211,20 @@
                                 </div>
                             </div>
                             <input
-                                type="number"
-                                name="subtotal_2"
-                                value="{{ old('subtotal_2', $biaya->subtotal_2 ?? '') }}"
+                                type="text"
+                                id="subtotal-display-{{ $key }}"
                                 class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
-                                min="0"
+                                placeholder="{{ $currencyLabel }}"
+                                autocomplete="off"
+                                inputmode="numeric"
                                 @if($readonly ?? false) readonly disabled @endif
+                            >
+                            <input
+                                type="hidden"
+                                name="subtotal_2"
+                                id="subtotal-input-{{ $key }}"
+                                value="{{ old('subtotal_2', $biaya->subtotal_2 ?? '') }}"
+                                required
                             >
                             <x-main.input-error :messages="$errors->get('subtotal_2')" data-turbo-temporary class="mt-2" />
                         </div>
@@ -192,12 +232,20 @@
                         <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
                             <div class="relative leading-5 font-medium">{!! $field['label'] !!}</div>
                             <input
-                                type="number"
-                                name="detail[{{ $key }}][biaya]"
-                                value="{{ old('detail.' . $key . '.biaya', $getExistingBiaya($key)) }}"
+                                type="text"
+                                id="biaya-tidaklang-display-{{ $key }}"
                                 class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
-                                min="0"
+                                placeholder="{{ $currencyLabel }}"
+                                autocomplete="off"
+                                inputmode="numeric"
                                 @if($readonly ?? false) readonly disabled @endif
+                            >
+                            <input
+                                type="hidden"
+                                name="detail[{{ $key }}][biaya]"
+                                id="biaya-tidaklang-input-{{ $key }}"
+                                value="{{ old('detail.' . $key . '.biaya', $getExistingBiaya($key)) }}"
+                                required
                             >
                             <input type="hidden" name="detail[{{ $key }}][kegiatan]" value="{{ $key }}">
                             <input type="hidden" name="detail[{{ $key }}][kategori]" value="biaya_tidak_langsung">

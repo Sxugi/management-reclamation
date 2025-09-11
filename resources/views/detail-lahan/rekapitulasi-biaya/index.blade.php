@@ -12,13 +12,9 @@
         </div>
     </x-slot>
 
-    @php
-        $tahun_aktif = request('tahun', $lahan->tahun_awal);
-    @endphp
-
     <div class="self-stretch flex flex-row items-center justify-between text-sm font-outfit">
         <x-rekapitulasi-biaya.tab-tahun :lahan="$lahan" :rekapitulasi_biaya="$rekapitulasi_biaya" :tahun_aktif="$tahun_aktif" />
-        <x-rekapitulasi-biaya.action-button :lahan="$lahan" :rekapitulasi_biaya="$rekapitulasi_biaya" :tahun_aktif="$tahun_aktif" />
+        <x-rekapitulasi-biaya.action-button :lahan="$lahan" :rekapitulasi_biaya="$rekapitulasi_biaya" :tahun_aktif="$tahun_aktif" :currency="$currency" />
     </div>
 
     @if(session('success'))
@@ -33,5 +29,5 @@
         </div>
     @endif
 
-    <x-rekapitulasi-biaya.form :lahan="$lahan" :rekapitulasi_biaya="$rekapitulasi_biaya" :tahun_aktif="$tahun_aktif" :readonly="true" />
+    <x-rekapitulasi-biaya.form :lahan="$lahan" :rekapitulasi_biaya="$rekapitulasi_biaya" :tahun_aktif="$tahun_aktif" :readonly="true" :currency="$currency" />
 </x-main-layout>

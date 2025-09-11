@@ -670,7 +670,7 @@ class AnggaranReklamasiService
             });
             
             // Validate sequence within the global Q1 (treat all categories as one)
-            return $this->validateSequenceWithinQuarter($uniqueMonthRecords, $bulan, $tahun, $quarter, $inputLabel);
+            return $this->validateSequenceWithinQuarter($uniqueMonthRecords, $bulan, $tahun, $quarter, $inputLabel, $kategoriAnggaran);
         }
 
         // No Q1 in this year, check if this category can start a new Q1
@@ -833,6 +833,7 @@ class AnggaranReklamasiService
         if (!$isValid) {
             $labels = collect($validMonths)->pluck('label')->join(', ');
             $q1Labels = $q1Months
+                ->unique('bulan')
                 ->map(fn($i) => self::MONTH_NAMES[$i->bulan] . " {$i->tahun}")
                 ->join(', ');
             
@@ -887,7 +888,7 @@ class AnggaranReklamasiService
         $lastIdx = $last->tahun * 12 + $last->bulan;
         $inputIdx = $tahun * 12 + $bulan;
 
-        if ($uniqueMonths->count() >= self::QUARTER_COMPLETE_THRESHOLD && !$uniqueMonths->contains($bulan)) {
+        if (!$uniqueMonths->contains($bulan)) {
             $adjacent = $inputIdx == $firstIdx - 1 || $inputIdx == $lastIdx + 1;
             if (!$adjacent) {
                 $suggestions = [];
@@ -1264,7 +1265,7 @@ class AnggaranReklamasiService
         return [
             'status' => 'complete',
             'data' => $pick['data'],
-            'label' => $pick['data']->map(fn($i) => self::MONTH_NAMES[$i->bulan] . ' ' . $i->tahun)->join(', '),
+            'label' => $pick['data']->unique('bulan')->map(fn($i) => self::MONTH_NAMES[$i->bulan] . ' ' . $i->tahun)->join(', '),
             'quarter_label' => $pick['label']
         ];
     }
@@ -1287,7 +1288,7 @@ class AnggaranReklamasiService
             $label = $q1InTargetYear->first()->quarter_label;
             $full = $allQ1Data->where('quarter_label', $label);
             $status = $full->count() >= self::QUARTER_COMPLETE_THRESHOLD ? 'complete' : 'incomplete';
-            $lbl = $full->map(fn($i) => self::MONTH_NAMES[$i->bulan] . " {$i->tahun}")->join(', ');
+            $lbl = $full->unique('bulan')->map(fn($i) => self::MONTH_NAMES[$i->bulan] . " {$i->tahun}")->join(', ');
             return ['status' => $status, 'data' => $full, 'label' => $lbl, 'quarter_label' => $label];
         }
 

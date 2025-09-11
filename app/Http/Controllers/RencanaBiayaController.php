@@ -30,7 +30,10 @@ class RencanaBiayaController extends Controller
             ->get()
             ->keyBy('tahun');
 
-        return view('detail-lahan.rencana-biaya.index', compact('rencana_biaya', 'lahan'));
+        $tahun_aktif = request('tahun', $lahan->tahun_awal);
+        $currency = $rencana_biaya[$tahun_aktif]->currency ?? 'IDR';
+
+        return view('detail-lahan.rencana-biaya.index', compact('rencana_biaya', 'lahan', 'tahun_aktif', 'currency'));
     }
 
     /**
@@ -49,7 +52,10 @@ class RencanaBiayaController extends Controller
             ->orderBy('tahun')
             ->get();
 
-        return view('detail-lahan.rencana-biaya.create', compact('lahan', 'rencana_biaya'));
+        $tahun_aktif = request('tahun', $lahan->tahun_awal);
+        $currency = request('currency', 'IDR');
+
+        return view('detail-lahan.rencana-biaya.create', compact('lahan', 'rencana_biaya', 'tahun_aktif', 'currency'));
     }
 
     /**
@@ -71,6 +77,7 @@ class RencanaBiayaController extends Controller
                     'lahan_id'    => $lahan->lahan_id,
                     'tahun'       => $validated['tahun'],
                     'tipe'        => 'rencana',
+                    'currency'    => $validated['currency'],
                     'subtotal_1'  => $validated['subtotal_1'],
                     'subtotal_2'  => $validated['subtotal_2'],
                 ]);
@@ -122,12 +129,14 @@ class RencanaBiayaController extends Controller
             ->keyBy('tahun');
 
         $tahun_aktif = request('tahun', $rencana_biaya->tahun);
+        $currency = request('currency', 'IDR');
 
         return view('detail-lahan.rencana-biaya.edit', [
             'rencana_biaya' => $rencana_biaya_collection,
             'lahan' => $lahan,
             'tahun_aktif' => $tahun_aktif,
             'rencana_biaya_item' => $rencana_biaya,
+            'currency' => $currency,
         ]);
     }
 
@@ -153,6 +162,7 @@ class RencanaBiayaController extends Controller
             DB::transaction(function () use ($validated, $rencana_biaya) {
                 $rencana_biaya->update([
                     'tahun'      => $validated['tahun'],
+                    'currency'    => $validated['currency'],
                     'subtotal_1' => $validated['subtotal_1'],
                     'subtotal_2' => $validated['subtotal_2'],
                 ]);
