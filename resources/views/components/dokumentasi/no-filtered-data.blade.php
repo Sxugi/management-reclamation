@@ -10,12 +10,12 @@
     </p>
     <div class="bg-amber-50 px-4 py-2 rounded-lg mb-6">
         <p class="text-amber-700 font-medium text-sm">
-            @if(request('start_date') && request('end_date'))
-                {{ \Carbon\Carbon::parse(request('start_date'))->format('d M Y') }} - {{ \Carbon\Carbon::parse(request('end_date'))->format('d M Y') }}
-            @elseif(request('start_date'))
-                Mulai dari {{ \Carbon\Carbon::parse(request('start_date'))->format('d M Y') }}
-            @elseif(request('end_date'))
-                Sampai {{ \Carbon\Carbon::parse(request('end_date'))->format('d M Y') }}
+            @if(request('startDate') && request('endDate'))
+                {{ \Carbon\Carbon::parse(request('startDate'))->format('d M Y') }} - {{ \Carbon\Carbon::parse(request('endDate'))->format('d M Y') }}
+            @elseif(request('startDate'))
+                Mulai dari {{ \Carbon\Carbon::parse(request('startDate'))->format('d M Y') }}
+            @elseif(request('endDate'))
+                Sampai {{ \Carbon\Carbon::parse(request('endDate'))->format('d M Y') }}
             @else
                 Filter aktif
             @endif

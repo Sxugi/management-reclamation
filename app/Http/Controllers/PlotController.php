@@ -4,12 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Plot;
 use App\Models\Lahan;
+use App\Models\PlotProgres;
+use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Providers\View;
-use App\Http\Requests\Plot\CreatePlotRequest;
+use App\Http\Requests\Plot\StorePlotRequest;
 use App\Http\Requests\Plot\UpdatePlotRequest;
 use App\Services\PlotService;
+use App\Services\ProgresReklamasiService;
 
 
 class PlotController extends Controller
@@ -53,7 +56,7 @@ class PlotController extends Controller
      * Store a newly created resource in storage.
      * Uses nested route: /lahan/{lahan}/plot (POST)
      */
-    public function store(CreatePlotRequest $request, Lahan $lahan)
+    public function store(StorePlotRequest $request, Lahan $lahan)
     {
         $validated = $request->validated();
 
@@ -73,17 +76,48 @@ class PlotController extends Controller
      * Display the specified resource.
      * Uses shallow route: /plot/{plot}
      */
-    public function show(Plot $plot)
+    public function show(Plot $plot, Request $request)
     {
-        // Get the associated lahan
-        $lahan = Lahan::findOrFail($plot->lahan_id);
-        
-        // Check if user owns the lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
+        // Load plot with related lahan and target indikator
+        $plotData = Plot::with([
+            'lahan',
+            'target.indikator', 
+            'activityLogs',
+        ])
+        ->where('plot_id', $plot->plot_id)
+        ->firstOrFail();
+
+        // Authorization check
+        if ($plotData->lahan->user_id !== Auth::id()) {
             abort(403, 'Unauthorized action.');
         }
-        
-        return view('detail-lahan.plot.show', compact('plot', 'lahan'));
+
+        // Separate query for progres with pagination
+        $progresData = ProgresReklamasiService::getFilteredData($request, $plot);
+
+        // Transform progres data for modal display
+        $progresData = PlotService::transformProgresForModal($progresData, $plot);
+
+        // Get kategori aktivitas options and filter status
+        $kategori = ProgresReklamasiService::getKategoriAktivitasOptions();
+        $hasFilter = ProgresReklamasiService::hasFilter($request);
+
+        $plotProgress = PlotProgres::where('plot_id', $plot->plot_id)->first();
+        $progressPercent = $plotProgress ? $plotProgress->percent : 0;
+
+        $progresDelta = ProgresReklamasiService::getProgresDelta($plot);
+
+        return view('detail-lahan.plot.show', [
+            'plot' => $plotData,
+            'lahan' => $plotData->lahan,
+            'target' => $plotData->target,
+            'progres' => $progresData,
+            'activityLogs' => $plotData->activityLogs,
+            'kategori' => $kategori,
+            'hasFilter' => $hasFilter,
+            'progressPercent' => $progressPercent,
+            'progresDelta' => $progresDelta,
+        ]);
     }
 
     /**
@@ -153,5 +187,15 @@ class PlotController extends Controller
         
         return redirect()->route('lahan.plot.index', $lahan_id)
                         ->with('success', 'Plot berhasil dihapus');
+    }
+
+    public function getActivityLogs(Request $request, Plot $plot)
+    {
+        $sort = $request->input('sort', 'desc');
+        $logs = ActivityLog::where('plot_id', $plot->plot_id)
+            ->orderBy('created_at', $sort)
+            ->paginate(5);
+
+        return response()->json($logs);
     }
 }

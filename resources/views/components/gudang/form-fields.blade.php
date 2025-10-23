@@ -1,6 +1,6 @@
 @props(['lahan', 'gudang' => null])
 
-<form method="POST" action="{{ $gudang ? route('lahan.gudang.update', [$lahan, $gudang]) : route('lahan.gudang.store', $lahan) }}">
+<form method="POST" action="{{ $gudang ? route('lahan.gudang.update', [$lahan, $gudang]) : route('lahan.gudang.store', $lahan) }}" class="self-stretch">
     @csrf
     @if($gudang)
         @method('PUT')
@@ -33,7 +33,7 @@
                     <x-main.input-label class="relative leading-5 font-medium">Jenis Barang</x-main.input-label>
                     <select 
                         name="jenis_barang" 
-                        class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent"
+                        class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent"
                         required
                     >
                         <option value="">Select Option</option>
@@ -55,7 +55,7 @@
                         name="nama_barang" 
                         value="{{ old('nama_barang', $gudang?->nama_barang) }}"
                         placeholder="Masukkan nama barang"
-                        class="flex-1 leading-5 bg-transparent"
+                        class="flex-1 leading-5 bg-transparent text-sm"
                         required
                     />
                     <x-main.input-error :messages="$errors->get('nama_barang')" data-turbo-temporary class="mt-2" />
@@ -70,7 +70,7 @@
                         name="jumlah_barang" 
                         value="{{ old('jumlah_barang', $gudang?->jumlah_barang) }}"
                         placeholder="Masukkan jumlah barang"
-                        class="flex-1 leading-5 bg-transparent"
+                        class="flex-1 leading-5 bg-transparent text-sm"
                         min="1"
                         required
                     />
@@ -86,7 +86,7 @@
                         name="lokasi_penyimpanan" 
                         value="{{ old('lokasi_penyimpanan', $gudang?->lokasi_penyimpanan) }}"
                         placeholder="Masukkan lokasi penyimpanan"
-                        class="flex-1 leading-5 bg-transparent"
+                        class="flex-1 leading-5 bg-transparent text-sm"
                         required
                     />
                     <x-main.input-error :messages="$errors->get('lokasi_penyimpanan')" data-turbo-temporary class="mt-2" />
@@ -98,7 +98,7 @@
                     <x-main.input-label class="relative leading-5 font-medium">Status Barang</x-main.input-label>
                     <select 
                         name="status_barang" 
-                        class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent"
+                        class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent"
                         required
                     >
                         <option value="">Select Option</option>
@@ -111,14 +111,14 @@
                 </div>
             </div>
 
-            <div class="self-stretch h-40 flex flex-col items-start justify-start gap-1.5">
+            <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
                 <div class="self-stretch flex-1 flex flex-col items-start justify-start gap-1.5">
                     <x-main.input-label class="relative leading-5 font-medium">Catatan</x-main.input-label>
-                        <div class="self-stretch flex-1 rounded-lg bg-white border-gray-300 border-solid border-[1px] overflow-hidden flex flex-row items-start justify-start text-darkgray">
+                        <div class="self-stretch flex-1 rounded-lg bg-white border-gray-300 border-solid border-[1px] overflow-hidden flex flex-row items-start justify-start">
                             <textarea 
                                 name="catatan" 
                                 placeholder="Masukan catatan..."
-                                class="flex-1 border-none outline-none resize-none leading-5 bg-transparent font-outfit"
+                                class="flex-1 border-none outline-none resize-none leading-5 bg-transparent font-outfit text-sm min-h-[120px] resize-y"
                                 rows="6"
                             >{{ old('catatan', $gudang?->catatan) }}</textarea>
                         </div>

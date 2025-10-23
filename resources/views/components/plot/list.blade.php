@@ -1,26 +1,26 @@
 <!-- Plot List -->
-<div class="mt-6 shadow-sm">
-    <div class="w-full relative rounded-t-2xl bg-white border-gainsboro border-solid border-[1px] border-b-0 box-border overflow-hidden flex flex-row items-center justify-between py-4 px-6">
+<div class="mt-6 bg-white rounded-2xl border border-gainsboro shadow-sm">
+    <div class="w-full relative overflow-hidden flex flex-row items-center justify-between py-4 px-6">
         <div class="flex flex-col items-start justify-start">
             <div class="self-stretch relative leading-7 font-semibold text-lg text-darkslategray font-outfit">Daftar Plot</div>
         </div>
     </div>
 
-    <div class="overflow-x-auto rounded-b-2xl border-gainsboro border-solid border-[1px]">
+    <div class="overflow-x-auto">
     <table class="w-full text-xs text-darkslategray font-outfit table-auto border-collapse">
-            <thead class="border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[0px] border-l-[0px]">
+            <thead class="border-gainsboro border-t border-b">
                 <tr>
-                    <th class="h-6 py-3 px-6 text-center leading-5 font-bold border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[1px] border-l-[0px]">Nama Plot</th>
-                    <th class="h-6 py-3 px-6 text-center leading-5 font-bold border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[1px] border-l-[0px]">Luas Area (Ha)</th>
-                    <th class="h-6 py-3 px-6 text-center leading-5 font-bold border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[0px] border-l-[1px]">Actions</th>
+                    <th class="h-6 py-3 px-6 text-center text-sm leading-5 font-bold border-gainsboro border-r">Nama Plot</th>
+                    <th class="h-6 py-3 px-6 text-center text-sm leading-5 font-bold border-gainsboro border-r">Luas Area (Ha)</th>
+                    <th class="h-6 py-3 px-6 text-center text-sm leading-5 font-bold border-gainsboro border-l">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @forelse($plot ?? [] as $plot)
                     <tr>
-                        <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[1px] border-l-[0px]">{{ $plot->nama_plot }}</td>
-                        <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[1px] border-l-[0px]">{{ $plot->luas_area }}</td>
-                        <td class="py-3 px-6 border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[0px] border-l-[1px]">
+                        <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-t border-r">{{ $plot->nama_plot }}</td>
+                        <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-t border-r">{{ $plot->luas_area }}</td>
+                        <td class="py-3 px-6 border-gainsboro border-t border-l">
                             <div class="flex flex-row items-center justify-center gap-3">
                                 <a href="{{ route('plot.show', $plot->plot_id) }}">
                                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">

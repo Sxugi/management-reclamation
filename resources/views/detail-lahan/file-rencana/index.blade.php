@@ -29,13 +29,13 @@
                 <div class="flex flex-col space-y-6">
                     <div class="rounded-2xl bg-white border-gainsboro border-solid border-[1px] box-border flex flex-col">
                         <div class="border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[0px] border-l-[0px] flex flex-row items-center justify-start px-6">
-                            <h3 class="text-base font-medium leading-6">File Input</h3>
+                            <div class="text-base font-medium leading-6 p-3 pl-0">File Input</div>
                         </div>
                         
                         <div class="p-6">
                             <form action="{{ route('lahan.file-rencana.store', $lahan) }}" method="POST" enctype="multipart/form-data" id="file-upload-form">
                                 @csrf
-                                <div class="space-y-4">
+                                <div class="space-y-4 text-sm">
                                     <div>
                                         <label class="block text-sm font-medium text-darkslategray-200 mb-2">Upload file</label>
                                         <div class="rounded-lg bg-white border-gainsboro border-solid border-[1px] overflow-hidden flex">

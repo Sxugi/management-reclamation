@@ -23,9 +23,9 @@ class DataPohonService
         }
 
         $relationFilter = function ($q) use ($request) {
-            if ($request->filled('tahun')) {
-                $q->where('tahun', $request->tahun);
-            } else {
+            if ($request->filled('year')) {
+                $q->where('tahun', $request->year);
+            } else {    
                 $start = $request->startYear;
                 $end   = $request->endYear;
                 if ($request->filled('startYear') && $request->filled('endYear')) {
@@ -46,7 +46,9 @@ class DataPohonService
         };
 
         // Eager load filtered relation
-        $query->with(['dataPohon' => $relationFilter]);
+        $query->whereHas('dataPohon', function($q) use ($relationFilter) {
+            $relationFilter($q);
+        });
 
         $sort = $request->get('tableSortColumn');
         $direction = $request->get('tableSortDirection');
@@ -101,7 +103,7 @@ class DataPohonService
 
     public static function hasFilter(Request $request)
     {
-        return $request->filled('tahun') ||
+        return $request->filled('year') ||
                $request->filled('pohonType') ||
                $request->filled('minQuantity') ||
                $request->filled('startYear') ||

@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Lahan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\Lahan\CreateLahanRequest;
+use App\Http\Requests\Lahan\StoreLahanRequest;
 use App\Http\Requests\Lahan\UpdateLahanRequest;
 use Clickbar\Magellan\Data\Geometries\Point;
 
@@ -35,7 +35,7 @@ class LahanController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CreateLahanRequest $request)
+    public function store(StoreLahanRequest $request)
     {     
         // Validate the request data
         $validated = $request->validated();

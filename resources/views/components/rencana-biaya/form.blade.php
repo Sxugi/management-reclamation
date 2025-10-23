@@ -110,7 +110,7 @@
                                 <input
                                     type="text"
                                     id="biaya-display-{{ $key }}"
-                                    class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
+                                    class="block w-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                                     placeholder="{{ $currencyLabel }}"
                                     autocomplete="off"
                                     inputmode="numeric"
@@ -139,7 +139,7 @@
                                 <input
                                     type="text"
                                     id="subtotal-display-{{ $key }}"
-                                    class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
+                                    class="block w-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                                     placeholder="{{ $currencyLabel }}"
                                     autocomplete="off"
                                     inputmode="numeric"
@@ -168,7 +168,7 @@
                                     <input
                                         type="text"
                                         id="biaya-display-{{ $key }}"
-                                        class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
+                                        class="block w-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                                         placeholder="{{ $currencyLabel }}"
                                         autocomplete="off"
                                         inputmode="numeric"
@@ -213,7 +213,7 @@
                             <input
                                 type="text"
                                 id="subtotal-display-{{ $key }}"
-                                class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
+                                class="block w-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                                 placeholder="{{ $currencyLabel }}"
                                 autocomplete="off"
                                 inputmode="numeric"
@@ -234,7 +234,7 @@
                             <input
                                 type="text"
                                 id="biaya-tidaklang-display-{{ $key }}"
-                                class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
+                                class="block w-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                                 placeholder="{{ $currencyLabel }}"
                                 autocomplete="off"
                                 inputmode="numeric"

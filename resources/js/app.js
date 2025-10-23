@@ -25,6 +25,10 @@ window.turf = turf;
 
 import './components/lahan/map-component.js';
 import './components/plot/map-plot-component.js';
+import './components/plot/activity/detail-modal.js';
+import './components/plot/progres/form.js';
+import './components/plot/progres/panel-filter.js';
+import './components/plot/progres/detail-modal.js';
 import './components/dokumentasi/date-filter.js';
 import './components/dokumentasi/file-upload.js';
 import './components/gudang/panel-filter.js';

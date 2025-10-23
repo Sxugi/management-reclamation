@@ -1,5 +1,5 @@
 document.addEventListener('alpine:init', () => {
-    // Register the map component with polygon support and fixed center
+    // Register the map component with polygon support
     Alpine.data('mapPlotComponent', (initialData = {}) => ({
         map: null,
         draw: null, 
@@ -18,11 +18,7 @@ document.addEventListener('alpine:init', () => {
         },
         
         // Set up the map with fixed center
-        initMap() {
-            console.log('Initializing map with polygon support and fixed center...');
-
-            console.log('polygonData:', this.polygonData);
-            
+        initMap() {            
             if (!window.maplibregl) {
                 console.error('MapLibre GL JS is not loaded!');
                 return;
@@ -237,7 +233,7 @@ document.addEventListener('alpine:init', () => {
                 
                 // Create a popup but don't add it to the map yet
                 const popup = new maplibregl.Popup({
-                    closeButton: true,
+                    closeButton: false,
                     closeOnClick: true
                 });
 
@@ -256,15 +252,21 @@ document.addEventListener('alpine:init', () => {
                         
                         // Create popup HTML content with better formatting
                         const html = `
-                            <div class="plot-popup-content">
-                                <h3 class="text-lg font-bold mb-2">${properties.nama_plot}</h3>
-                                <div class="flex justify-between mb-2">
-                                    <span>Luas Area:</span>
-                                    <span class="font-semibold">${properties.luas_area} Ha</span>
+                            <div class="plot-popup-content p-2 relative">
+                                <button class="absolute cursor-pointer top-3 right-1 w-4 h-4 bg-transparent text-red-500 flex items-center justify-center text-lg font-bold transition-all duration-200 hover:scale-110" 
+                                        onclick="document.querySelector('.maplibregl-popup').remove()">
+                                    ×
+                                </button>
+                                <h3 class="text-lg font-bold mb-2 text-gray-800 pr-10">${properties.nama_plot}</h3>
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="text-sm text-gray-600">Luas Area:</span>
+                                    <span class="font-semibold text-blue-700">${properties.luas_area} Ha</span>
                                 </div>
                                 <div class="mt-2 text-center">
-                                    <a href="/plot/${plotId}/edit" class="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded">
-                                        View Details
+                                    <a href="/plot/${plotId}" 
+                                    class="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded shadow transition no-underline"
+                                    aria-label="Lihat detail plot ${properties.nama_plot}">
+                                        Lihat Detail
                                     </a>
                                 </div>
                             </div>
@@ -330,14 +332,14 @@ document.addEventListener('alpine:init', () => {
             const bounds = new maplibregl.LngLatBounds();
 
             this.polygonData.forEach(plot => {
-                // Pastikan format GeoJSON Polygon
+                // Ensure GeoJSON Polygon format
                 if (
                     plot.polygon &&
                     plot.polygon.coordinates &&
                     Array.isArray(plot.polygon.coordinates) &&
                     Array.isArray(plot.polygon.coordinates[0])
                 ) {
-                    // Ambil ring pertama (umumnya outline polygon)
+                    // Get the outer ring coordinates
                     plot.polygon.coordinates[0].forEach(coord => {
                         if (Array.isArray(coord) && coord.length >= 2) {
                             bounds.extend([coord[0], coord[1]]);
@@ -346,7 +348,7 @@ document.addEventListener('alpine:init', () => {
                 }
             });
 
-            if (bounds.isEmpty()) return; // Jangan fit jika bounds kosong
+            if (bounds.isEmpty()) return; // Don't fit if bounds is empty
             this.map.fitBounds(bounds, { padding: 50 });
         },
         
@@ -698,13 +700,16 @@ document.addEventListener('alpine:init', () => {
             const coordinates = this.polygons?.polygon?.coordinates;
 
             if (Array.isArray(coordinates) && Array.isArray(coordinates[0])) {
-                const coords = coordinates[0]; // Ambil ring pertama
+                const coords = coordinates[0]; // Use the first ring of the polygon
+
+                // Remove duplicate last point if it matches the first
                 const uniqueCoords = coords.length > 1 &&
                     coords[0][0] === coords[coords.length - 1][0] &&
                     coords[0][1] === coords[coords.length - 1][1]
                     ? coords.slice(0, -1)
                     : coords;
 
+                // Map coordinates to points array
                 this.points = uniqueCoords.map(coord => ({
                     lng: parseFloat(coord[0]),
                     lat: parseFloat(coord[1])

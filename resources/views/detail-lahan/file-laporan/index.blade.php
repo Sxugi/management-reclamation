@@ -23,7 +23,7 @@
                 <div class="flex flex-col space-y-6">
                     <div class="rounded-2xl bg-white border-gainsboro border-solid border-[1px] box-border flex flex-col">
                         <div class="border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[0px] border-l-[0px] flex flex-row items-center justify-start px-6">
-                            <h3 class="text-base font-medium leading-6">File Input</h3>
+                            <div class="text-base font-medium leading-6 p-3 pl-0">File Input</div>
                         </div>
 
                         <div class="p-6">
@@ -32,8 +32,8 @@
                                 <div class="space-y-4">
                                     <div>
                                         <label class="block text-sm font-medium mb-2">Pilih Tahun</label>
-                                        <select name="tahun" id="tahun-select" class="border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm block w-full font-outfit" onchange="handleYearChange()" required>
-                                            <option value="">-- Pilih Tahun Laporan --</option>
+                                        <select name="tahun" id="tahun-select" class="border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md block w-full font-outfit text-sm" onchange="handleYearChange()" required>
+                                            <option value="">- Pilih Tahun Laporan -</option>
                                             @for($year = $lahan->tahun_awal; $year <= $lahan->tahun_akhir; $year++)
                                                 <option value="{{ $year }}">{{ $year }}</option>
                                             @endfor

@@ -4,7 +4,7 @@ namespace App\Http\Requests\Gudang;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateDataGudangRequest extends FormRequest
+class StoreDataGudangRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

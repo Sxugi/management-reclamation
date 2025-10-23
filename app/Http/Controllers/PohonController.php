@@ -7,7 +7,7 @@ use App\Models\Pohon;
 use App\Models\DataPohon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\Pohon\CreatePohonRequest;
+use App\Http\Requests\Pohon\StorePohonRequest;
 use App\Http\Requests\Pohon\UpdatePohonRequest;
 use App\Services\DataPohonService;
 use Illuminate\Support\Facades\DB;
@@ -68,7 +68,7 @@ class PohonController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CreatePohonRequest $request, Lahan $lahan)
+    public function store(StorePohonRequest $request, Lahan $lahan)
     {
         $validated = $request->validated();
         $validated['lahan_id'] = $lahan->lahan_id;

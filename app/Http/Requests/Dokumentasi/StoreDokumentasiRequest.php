@@ -4,7 +4,7 @@ namespace App\Http\Requests\Dokumentasi;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateDokumentasiRequest extends FormRequest
+class StoreDokumentasiRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

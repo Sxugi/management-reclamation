@@ -1,13 +1,37 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
 
-a:visited {
-  color: inherit; /* Keeps the same color as non-visited */
+/* Define custom theme colors untuk v4 */
+@theme {
+  /* Custom colors */
+  --color-whitesmoke: #f5f5f5;
+  --color-almostgray: #F2F4F7;
+  --color-darkslategray: #27374d;
+  --color-darkgray: #b3b3b3;
+  --color-tomato: #f04438;
+  --color-cornflowerblue: #9cb9ff;
+  --color-lightgray: lightgray;
+  --color-mediumslateblue: #465fff;
+  --color-gainsboro: #dde6ed;
+  
+  /* Gray variants */
+  --color-gray-100: #757575;
+  --color-gray-200: #1d2939;
+  
+  /* Slategray variants */
+  --color-slategray-100: #667085;
+  --color-slategray-200: #526d82;
+  
+  /* Font family */
+  --font-family-outfit: 'Outfit', ui-sans-serif, system-ui, sans-serif;
 }
 
+@utility font-outfit {
+  font-family: theme(--font-family-outfit);
+}
+
+/* Layer components */
 @layer components {
-  /* Remove all borders and outlines in normal and focus states */
   input,
   input:focus,
   input:active {
@@ -17,7 +41,6 @@ a:visited {
       -webkit-appearance: none;
   }
 
-  /* Override browser autofill styles */
   input:-webkit-autofill,
   input:-webkit-autofill:hover, 
   input:-webkit-autofill:focus,
@@ -29,7 +52,7 @@ a:visited {
 
   .hover-group:hover .bulan-cell,
   .hover-group:hover .nominal-cell {
-      background-color: #f1f5f9;
+      background-color: lightgray;
       transition: background 0.2s;
   }
 }

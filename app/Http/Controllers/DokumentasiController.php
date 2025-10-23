@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use App\Http\Requests\Dokumentasi\CreateDokumentasiRequest;
+use App\Http\Requests\Dokumentasi\StoreDokumentasiRequest;
 use App\Http\Requests\Dokumentasi\UpdateDokumentasiRequest;
 
 class DokumentasiController extends Controller
@@ -63,7 +63,7 @@ class DokumentasiController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Lahan $lahan, CreateDokumentasiRequest $request)
+    public function store(Lahan $lahan, StoreDokumentasiRequest $request)
     {
         $validated = $request->validated();
 

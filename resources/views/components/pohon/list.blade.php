@@ -16,16 +16,16 @@
                     @endforeach
                 </colgroup>
                 <tr>
-                    <x-main.sortable-header :rowspan="2" column="jenis_pohon" title="Jenis Pohon" class="h-6 py-3 border-b-[1px]" />
+                    <x-main.sortable-header :rowspan="2" column="jenis_pohon" title="Jenis Pohon" class="h-6 py-3 border-b-[1px] text-sm" />
                     @if(empty($tahunList))
                         <th scope="col" class="h-6 py-3 px-3 text-center leading-5 font-bold border-gainsboro border-solid border-[0px] border-b-[1px] border-l-[1px]">Tahun</th>
                     @else
-                        <x-main.sortable-header :colspan="count($tahunList)" column="tahun" title="Tahun" class="text-center border-l-[1px]" />
+                        <x-main.sortable-header :colspan="count($tahunList)" column="tahun" title="Tahun" class="text-center border-l-[1px] text-sm p-2" />
                     @endif
                 </tr>
                 <tr>
                     @foreach($tahunList as $tahun)
-                        <th scope="col" class="px-3 text-center leading-5 font-bold border-gainsboro border-solid border-[1px] border-r-[0px]">{{ $tahun }}</th>
+                        <th scope="col" class="px-3 text-center leading-5 font-bold border-gainsboro border-solid border-[1px] border-r-[0px] text-xs p-2">{{ $tahun }}</th>
                     @endforeach
                 </tr>
             </thead>

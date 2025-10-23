@@ -6,7 +6,7 @@ use App\Models\Lahan;
 use App\Models\BiayaReklamasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\RencanaBiaya\CreateRencanaBiayaRequest;
+use App\Http\Requests\RencanaBiaya\StoreRencanaBiayaRequest;
 use App\Http\Requests\RencanaBiaya\UpdateRencanaBiayaRequest;
 use App\Services\RencanaBiayaService;
 use Illuminate\Support\Facades\DB;
@@ -61,7 +61,7 @@ class RencanaBiayaController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CreateRencanaBiayaRequest $request, Lahan $lahan)
+    public function store(StoreRencanaBiayaRequest $request, Lahan $lahan)
     {
         // Check if user owns this lahan
         if ($lahan->user_id !== Auth::user()->user_id) {

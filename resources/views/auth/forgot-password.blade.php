@@ -20,7 +20,7 @@
                 <div>
                     <label for="email" class="block text-sm/6 font-medium text-gray-900">{{ __('Email address') }}</label>
                     <div class="mt-2">
-                        <x-main.text-input type="email" name="email" id="email" :value="old('email')" required autofocus autocomplete="email" />
+                        <x-main.text-input type="email" name="email" id="email" :value="old('email')" class="text-gray-900" required autofocus autocomplete="email" />
                     </div>
                     <x-main.input-error :messages="$errors->get('email')" data-turbo-temporary class="mt-2" />
                 </div>

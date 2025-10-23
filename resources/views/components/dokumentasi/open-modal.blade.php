@@ -1,12 +1,12 @@
 <div class="flex flex-col items-center justify-start">
-    <div class="w-full rounded-xl overflow-hidden bg-gray-50 border border-gray-200 shadow-sm">
+    <div class="w-full rounded-xl overflow-hidden bg-gray-50 shadow-sm">
         @if($dokumentasi->image_path)
             <div class="relative group">
                 <img src="{{ Storage::url($dokumentasi->image_path) }}" 
                         alt="{{ $dokumentasi->nama }}" 
                         class="w-full h-auto object-cover rounded-xl transition-transform duration-300 group-hover:scale-105"
                         onerror="this.src='{{ asset('images/default-placeholder.png') }}'">
-                <div class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 rounded-xl flex items-center justify-center">
+                <div class="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 rounded-xl flex items-center justify-center">
                     <button onclick="openImageModal()" 
                             class="flex flex-row items-center font-bold text-sm border-none opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-white text-darkslategray-200 py-3 px-4 gap-2 rounded-lg shadow-lg hover:bg-gray-100">
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -30,10 +30,10 @@
 </div>
 
 @if($dokumentasi->image_path)
-<div id="imageModal" class="hidden fixed inset-0 bg-black bg-opacity-75 z-50 flex items-center justify-center p-4">
+<div id="imageModal" class="hidden fixed inset-0 bg-black/75 z-50 flex items-center justify-center p-4">
     <div class="relative max-w-4xl max-h-full">
         <button onclick="closeImageModal()" 
-                class="absolute rounded-lg border-none text-darkslategray-200 hover:text-white hover:bg-gray-600 transition-colors m-2 p-2 right-0">
+                class="absolute rounded-lg border-none text-darkslategray-200 bg-white hover:text-white hover:bg-gray-600 transition-colors m-2 p-2 right-0">
             <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>

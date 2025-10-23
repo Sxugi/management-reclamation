@@ -6,7 +6,7 @@ use App\Models\AnggaranReklamasi;
 use App\Models\Lahan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\AnggaranReklamasi\CreateAnggaranReklamasiRequest;
+use App\Http\Requests\AnggaranReklamasi\StoreAnggaranReklamasiRequest;
 use App\Http\Requests\AnggaranReklamasi\UpdateAnggaranReklamasiRequest;
 use App\Services\AnggaranReklamasiService;
 
@@ -85,7 +85,7 @@ class AnggaranReklamasiController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(AnggaranReklamasiService $service, CreateAnggaranReklamasiRequest $request, Lahan $lahan)
+    public function store(AnggaranReklamasiService $service, StoreAnggaranReklamasiRequest $request, Lahan $lahan)
     {
         $validated = $request->validated();
         $validated['lahan_id'] = $lahan->lahan_id;

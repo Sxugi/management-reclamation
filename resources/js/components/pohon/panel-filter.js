@@ -34,7 +34,7 @@ class PohonFilterPanel {
     clear() {
         document.getElementById('startYear').value = '';
         document.getElementById('endYear').value = '';
-        document.getElementById('tahun').value = '';
+        document.getElementById('year').value = '';
         document.getElementById('pohonType').value = '';
         document.getElementById('minQuantity').value = '';
         const form = document.getElementById('pohonFilterForm');

@@ -6,7 +6,7 @@ use App\Models\DataGudang;
 use App\Models\Lahan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\Gudang\CreateDataGudangRequest;
+use App\Http\Requests\Gudang\StoreDataGudangRequest;
 use App\Http\Requests\Gudang\UpdateDataGudangRequest;
 use App\Services\DataGudangService;
 
@@ -52,7 +52,7 @@ class DataGudangController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CreateDataGudangRequest $request, Lahan $lahan)
+    public function store(StoreDataGudangRequest $request, Lahan $lahan)
     {
         $validated = $request->validated();
         $validated['lahan_id'] = $lahan->lahan_id;

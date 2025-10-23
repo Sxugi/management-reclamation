@@ -1,4 +1,3 @@
-// Enhanced File Upload Handler with Fixed Drag Events
 class FileUploadHandler {
     constructor() {
         this.dropzone = document.getElementById('dropzone');
@@ -35,7 +34,7 @@ class FileUploadHandler {
             this.dropzone.addEventListener(eventName, this.preventDefaults, false);
         });
 
-        // Drag events dengan counter untuk fix masalah child elements
+        // Drag events 
         this.dropzone.addEventListener('dragenter', (e) => {
             this.dragCounter++;
             this.highlight();
@@ -43,7 +42,6 @@ class FileUploadHandler {
 
         this.dropzone.addEventListener('dragleave', (e) => {
             this.dragCounter--;
-            // Hanya unhighlight jika counter = 0 (benar-benar keluar dari dropzone)
             if (this.dragCounter === 0) {
                 this.unhighlight();
             }

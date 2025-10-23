@@ -126,7 +126,7 @@
                                     step="0.01"
                                     name="detail[{{ $items['kegiatan'] }}][volume]"
                                     value="{{ old('detail.' . $items['kegiatan'] . '.volume', $getExistingVolume($items['kegiatan'])) }}"
-                                    class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
+                                    class="block w-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                                     @if($readonly ?? false) readonly disabled @endif
                                     min="0"
                                 >
@@ -156,7 +156,7 @@
                             step="0.01"
                             name="detail[{{ $items['kegiatan'] }}][volume]"
                             value="{{ old('detail.' . $items['kegiatan'] . '.volume', $getExistingVolume($items['kegiatan'])) }}"
-                            class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
+                            class="block w-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                             @if($readonly ?? false) readonly disabled @endif
                             min="0"
                         >
@@ -184,7 +184,7 @@
                             step="0.01"
                             name="detail[{{ $items['kegiatan'] }}][volume]"
                             value="{{ old('detail.' . $items['kegiatan'] . '.volume', $getExistingVolume($items['kegiatan'])) }}"
-                            class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
+                            class="block w-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                             @if($readonly ?? false) readonly disabled @endif
                             min="0"
                         >
@@ -222,7 +222,7 @@
                                     step="0.01"
                                     name="detail[{{ $items['kegiatan'] }}][volume]"
                                     value="{{ old('detail.' . $items['kegiatan'] . '.volume', $getExistingVolume($items['kegiatan'])) }}"
-                                    class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
+                                    class="block w-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                                     @if($readonly ?? false) readonly disabled @endif
                                     min="0"
                                 >
@@ -247,7 +247,7 @@
                             step="0.01"
                             name="detail[{{ $items['kegiatan'] }}][volume]"
                             value="{{ old('detail.' . $items['kegiatan'] . '.volume', $getExistingVolume($items['kegiatan'])) }}"
-                            class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
+                            class="block w-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                             @if($readonly ?? false) readonly disabled @endif
                         >
                         <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kegiatan]" value="{{ $items['kegiatan'] }}">
@@ -265,7 +265,7 @@
                             step="0.01"
                             name="detail[{{ $items['kegiatan'] }}][volume]"
                             value="{{ old('detail.' . $items['kegiatan'] . '.volume', $getExistingVolume($items['kegiatan'])) }}"
-                            class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
+                            class="block w-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                             @if($readonly ?? false) readonly disabled @endif
                             min="0"
                         >
@@ -293,7 +293,7 @@
                             step="0.01"
                             name="detail[{{ $items['kegiatan'] }}][volume]"
                             value="{{ old('detail.' . $items['kegiatan'] . '.volume', $getExistingVolume($items['kegiatan'])) }}"
-                            class="block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
+                            class="block w-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                             @if($readonly ?? false) readonly disabled @endif
                             min="0"
                         >

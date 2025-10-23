@@ -35,6 +35,6 @@
 
 @if(isset($plot))
     <script>
-        window.plotData = @json($plot);
+        window.plotData = @json($plot instanceof \Illuminate\Support\Collection ? $plot : [$plot]);
     </script>
 @endif

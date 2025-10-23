@@ -2,7 +2,7 @@
 
 <div class="rounded-xl bg-darkslategray text-white shadow">
     <!-- Card for mobile view: stacked layout -->
-    <div class="block md:hidden">
+    <div class="block lg:hidden">
         <div class="p-4 space-y-4">
             <!-- Land Name -->
             <div>
@@ -46,7 +46,7 @@
     </div>
     
     <!-- Card for desktop: row layout -->
-    <div class="hidden md:flex items-center py-4 px-6 gap-3">
+    <div class="hidden lg:flex items-center py-4 px-6 gap-3">
         <!-- Icon/Initial -->
         <div class="w-12 h-12 rounded-full bg-slategray flex-shrink-0 flex items-center justify-center mr-6border border-white border-solid border-[1px] rounded-lg">
             <span class="text-xl font-bold">{{ $index }}</span>

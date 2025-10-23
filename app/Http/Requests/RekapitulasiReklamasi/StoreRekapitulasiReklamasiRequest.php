@@ -5,7 +5,7 @@ namespace App\Http\Requests\RekapitulasiReklamasi;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class CreateRekapitulasiReklamasiRequest extends FormRequest
+class StoreRekapitulasiReklamasiRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

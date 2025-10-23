@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Http\Requests\RekapitulasiBiaya;
+namespace App\Http\Requests\RencanaBiaya;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class CreateRekapitulasiBiayaRequest extends FormRequest
+class StoreRencanaBiayaRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -32,7 +32,7 @@ class CreateRekapitulasiBiayaRequest extends FormRequest
                 'integer',
                 Rule::unique('biaya_reklamasi')->where(function ($query) use ($lahan) {
                     return $query->where('lahan_id', $lahan->lahan_id)
-                                 ->where('tipe', 'rekapitulasi');
+                                 ->where('tipe', 'rencana');
                 }),
             ],
             'currency' => 'required|in:IDR,USD',
@@ -80,7 +80,7 @@ class CreateRekapitulasiBiayaRequest extends FormRequest
             // Tahun
             'tahun.required' => 'Tahun wajib diisi.',
             'tahun.integer' => 'Tahun harus berupa angka.',
-            'tahun.unique' => 'Rekapitulasi biaya reklamasi untuk tahun ini sudah ada.',
+            'tahun.unique' => 'Rencana biaya reklamasi untuk tahun ini sudah ada.',
 
             // Currency
             'currency.required' => 'Mata uang wajib dipilih.',

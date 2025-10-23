@@ -6,7 +6,7 @@ use App\Models\Lahan;
 use App\Models\DataReklamasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\RencanaReklamasi\CreateRencanaReklamasi;
+use App\Http\Requests\RencanaReklamasi\StoreRencanaReklamasi;
 use App\Http\Requests\RencanaReklamasi\UpdateRencanaReklamasi;
 use App\Services\RencanaReklamasiService;
 use Illuminate\Support\Facades\DB;
@@ -53,7 +53,7 @@ class RencanaReklamasiController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CreateRencanaReklamasi $request, Lahan $lahan)
+    public function store(StoreRencanaReklamasi $request, Lahan $lahan)
     {
         if ($lahan->user_id !== Auth::user()->user_id) {
             abort(403, 'Unauthorized action.');

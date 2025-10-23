@@ -12,7 +12,7 @@
     $isEdit ? route('lahan.dokumentasi.update', [$lahan->lahan_id, $doc->dokumentasi_id]) : route('lahan.dokumentasi.store', $lahan->lahan_id) }}" 
     method="POST" 
     enctype="multipart/form-data" 
-    class="w-full flex flex-col gap-6">
+    class="self-stretch flex flex-col gap-6">
 
     @csrf
     @if($isEdit)
@@ -22,7 +22,7 @@
     <div class="self-stretch rounded-2xl bg-white border-gainsboro border-solid border-[1px] box-border flex flex-col items-start justify-start">
         <div class="self-stretch flex flex-col items-start justify-start p-6 text-center text-xl">
             <div id="dropzone" class="self-stretch rounded-xl bg-whitesmoke border-lightgray border-dashed border-[1px] overflow-hidden flex flex-col items-center justify-center p-10 gap-[22px] relative min-w-[405px] min-h-[215px]">
-                <div class="w-2xl bg-blue-100 flex items-center justify-center rounded-full p-4 mb-4">
+                <div class="w-fit bg-blue-100 flex items-center justify-center rounded-full p-4 mb-4">
                     <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                     </svg>
@@ -82,42 +82,40 @@
         </div>
     </div>
 
-    <div class="relative rounded-2xl bg-white border-gainsboro border-solid border-[1px] box-border flex flex-col items-center justify-start text-sm text-darkslategray">
+    <div class="self-stretch rounded-2xl bg-white border-gainsboro border-solid border-[1px] box-border flex flex-col items-center justify-start text-sm">
         <div class="self-stretch flex flex-col items-start justify-start p-6">
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
                 <x-main.input-label class="relative leading-5 font-medium">Nama Dokumentasi</x-main.input-label>
                 <x-main.text-input type="text"
-                        name="nama" 
-                        value="{{ old('nama', $doc->nama ?? '') }}"
-                        placeholder="Masukkan judul dokumentasi..." 
-                        class="flex-1 leading-5 bg-transparent"/>
+                    name="nama" 
+                    value="{{ old('nama', $doc->nama ?? '') }}"
+                    placeholder="Masukkan judul dokumentasi..." 
+                    class="flex-1 leading-5 bg-transparent text-sm"/>
                 <x-main.input-error :messages="$errors->get('nama')" data-turbo-temporary class="mt-2" />
             </div>
         </div>
     </div>
 
-    <div class="relative rounded-2xl bg-white border-gainsboro border-solid border-[1px] box-border flex flex-col items-center justify-start text-sm text-darkslategray">
+    <div class="self-stretch rounded-2xl bg-white border-gainsboro border-solid border-[1px] box-border flex flex-col items-center justify-start text-sm">
         <div class="self-stretch flex flex-col items-start justify-start p-6">
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
                 <x-main.input-label class="relative leading-5 font-medium">Deskripsi</x-main.input-label>
-                <div class="self-stretch flex-1 rounded-lg bg-white border-gray-300 border-solid border-[1px] overflow-hidden flex flex-row items-start justify-start text-darkgray">
-                    <textarea name="deskripsi" 
-                                rows="5" 
-                                placeholder="Masukkan deskripsi..." 
-                                class="flex-1 border-none outline-none resize-none leading-5 bg-transparent font-outfit">{{ old('deskripsi', $doc->deskripsi ?? '') }}</textarea>
-                    <x-main.input-error :messages="$errors->get('deskripsi')" data-turbo-temporary class="mt-2" />
-                </div>
+                <textarea name="deskripsi" 
+                    rows="5" 
+                    placeholder="Masukkan deskripsi..." 
+                    class="self-stretch border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-0 rounded-md px-3 py-2 resize-none leading-5 bg-transparent font-outfit text-sm min-h-[120px] resize-y">{{ old('deskripsi', $doc->deskripsi ?? '') }}</textarea>
+                <x-main.input-error :messages="$errors->get('deskripsi')" data-turbo-temporary class="mt-2" />
             </div>
         </div>
     </div>
 
     <div class="self-stretch flex flex-row items-center justify-end gap-3">
         <a href="{{ route('lahan.dokumentasi.index', $lahan) }}" 
-            class="bg-red-500 !text-white text-sm py-3 px-4 rounded-lg font-medium hover:bg-red-600 transition-colors no-underline">
+            class="bg-red-500 !text-white text-sm py-3 px-4 rounded-lg font-semibold hover:bg-red-600 transition-colors no-underline">
             Cancel
         </a>
         <x-main.primary-button type="submit" 
-                class="py-3 px-4 gap-2 font-medium">
+                class="py-3 px-4 gap-2">
             {{ $isEdit ? 'Update' : 'Save' }}
         </x-main.primary-button>
     </div>

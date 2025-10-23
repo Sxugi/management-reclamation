@@ -26,7 +26,7 @@ class Plot extends Model
     protected $table = 'plot';
 
     /**
-     * The attributes that should be cast to native types.
+     * The attributes that should be mass-assignable.
      *
      * @var array
      */
@@ -70,6 +70,21 @@ class Plot extends Model
 
     public function lahan(): BelongsTo
     {
-        return $this->belongsTo(Lahan::class);
+        return $this->belongsTo(Lahan::class, 'lahan_id', 'lahan_id');
+    }
+
+    public function target()
+    {
+        return $this->hasMany(TargetProgresReklamasi::class, 'plot_id', 'plot_id');
+    }
+
+    public function progres()
+    {
+        return $this->hasMany(ProgresReklamasi::class, 'plot_id', 'plot_id');
+    }
+
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class, 'plot_id', 'plot_id');
     }
 }

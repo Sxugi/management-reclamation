@@ -22,8 +22,8 @@
             <div class="bg-white overflow-hidden shadow-md rounded-lg sm:rounded-lg">
                 <div class="p-6">
                     <div class="self-stretch flex flex-row items-center justify-start gap-1 mb-6">
-                        <div class="flex-1 flex flex-col items-start justify-start gap-1 text-lg text-gray">
-                            <div class="self-stretch relative leading-7 font-semibold">Area Lahan Reklamasi</div>
+                        <div class="flex-1 flex flex-col items-start justify-start text-lg text-gray">
+                            <div class="self-stretch relative leading-7 font-semibold text-lg text-darkslategray">Area Lahan Reklamasi</div>
                             <div class="self-stretch relative text-sm leading-5 text-slategray">Plot lahan menjadi beberapa bagian.</div>
                         </div>
                         <a href=" {{ route('lahan.plot.create', $lahan->lahan_id) }} " class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200">

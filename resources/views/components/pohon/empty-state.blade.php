@@ -20,8 +20,8 @@
                 } elseif(request('endYear')) {
                     $parts[] = 'Sampai tahun ' . request('endYear');
                 }
-                if(request('tahun')) {
-                    $parts[] = 'Tahun: ' . request('tahun');
+                if(request('year')) {
+                    $parts[] = 'Tahun: ' . request('year');
                 }
                 if(request('jenis_pohon')) {
                     $parts[] = 'Jenis Pohon: ' . e(request('jenis_pohon'));

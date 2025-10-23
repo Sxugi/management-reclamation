@@ -30,9 +30,9 @@
             </div>
 
             <div>
-                <x-main.input-label for="tahun" class="block text-sm font-medium text-gray-700 mb-1">Tahun Spesifik</x-main.input-label>
-                <x-main.text-input type="number" id="tahun" name="tahun"
-                       value="{{ request('tahun') }}"
+                <x-main.input-label for="year" class="block text-sm font-medium text-gray-700 mb-1">Tahun Spesifik</x-main.input-label>
+                <x-main.text-input type="number" id="year" name="year"
+                       value="{{ request('year') }}"
                        min="1900" max="2100" placeholder="Pilih tahun tertentu"
                        class="border rounded p-2 text-sm"/>
             </div>

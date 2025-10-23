@@ -7,7 +7,7 @@ use Illuminate\Validation\Rule;
 use App\Models\AnggaranReklamasi;
 use App\Services\AnggaranReklamasiService;
 
-class CreateAnggaranReklamasiRequest extends FormRequest
+class StoreAnggaranReklamasiRequest extends FormRequest
 {
     public function authorize(): bool
     {

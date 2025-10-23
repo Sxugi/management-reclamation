@@ -19,7 +19,6 @@
                                     Email / Username
                                     <span class="text-tomato">*</span>
                                 </label>
-                                <div class="input-container w-full shadow-[0px_1px_2px_rgba(16,_24,_40,_0.05)] rounded-lg bg-white border-lightgray border-solid border-[1px] box-border h-11 overflow-hidden flex flex-row items-center py-2.5 px-4 text-gray-200">
                                     <x-main.text-input 
                                         id="email" 
                                         name="email" 
@@ -27,9 +26,8 @@
                                         placeholder="Enter your email or username" 
                                         required autofocus 
                                         autocomplete="username" 
-                                        class="flex-1 relative leading-5 bg-transparent border-none focus:ring-0 p-0 text-gray-200 w-full"
+                                        class="flex-1 relative leading-5 focus:ring-0 py-3 text-gray-200 w-full"
                                     />
-                                </div>
                                 <x-main.input-error :messages="$errors->get('email')" data-turbo-temporary class="mt-2" />
                             </div>
                         </div>
@@ -41,18 +39,15 @@
                                     Password
                                     <span class="text-tomato">*</span>
                                 </label>
-                                <div class="input-container w-full shadow-[0px_1px_2px_rgba(16,_24,_40,_0.05)] rounded-lg bg-white border-lightgray border-solid border-[1px] box-border h-11 overflow-hidden flex flex-row items-center py-2.5 px-4 gap-2 text-gray-200">
-                                    <x-main.text-input 
+                                    <x-main.password-input 
                                         id="password" 
                                         name="password" 
                                         type="password" 
                                         placeholder="Enter your password" 
                                         required 
                                         autocomplete="current-password" 
-                                        class="flex-1 relative leading-5 bg-transparent border-none focus:ring-0 p-0 text-gray-200 w-full"
+                                        class="flex-1 relative leading-5 focus:ring-0 py-3 text-gray-200 w-full"
                                     />
-                                    <img class="w-5 relative h-5 object-cover cursor-pointer toggle-password shrink-0" alt="Toggle password visibility" src="{{ asset('images/eye-enabled.svg') }}">
-                                </div>
                                 <x-main.input-error :messages="$errors->get('password')" data-turbo-temporary class="mt-2" />
                             </div>
                         </div>

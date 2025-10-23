@@ -3,8 +3,9 @@
 namespace App\Http\Requests\Plot;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class CreatePlotRequest extends FormRequest
+class StorePlotRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -21,7 +22,13 @@ class CreatePlotRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nama_plot' => 'required|string|max:255',
+            'nama_plot' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique('plot', 'nama_plot')
+                    ->where('lahan_id', $this->route('lahan')->lahan_id ?? request()->input('lahan_id'))
+            ],
             'polygon' => ['required', 'json', function ($attribute, $value, $fail) {
                 $data = json_decode($value, true);
 
@@ -70,6 +77,7 @@ class CreatePlotRequest extends FormRequest
     {
         return [
             'nama_plot.required' => 'Nama Plot harus diisi.',
+            'nama_plot.unique' => 'Nama Plot sudah digunakan dalam lahan ini. Silakan gunakan nama yang berbeda.',
             'polygon.required' => 'Polygon harus diisi.',
             'luas_area.required' => 'Luas Area harus diisi.',
             'luas_area.numeric' => 'Luas Area harus berupa angka.',

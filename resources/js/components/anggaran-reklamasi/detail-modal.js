@@ -78,7 +78,7 @@ document.addEventListener("turbo:load", () => {
                     </div>
                 </div>
             </div>
-            <div class="bg-white border border-gainsboro rounded-xl p-6 shadow-lg space-y-4">
+            <div class="bg-white border border-gainsboro rounded-xl p-6 pt-3 shadow-lg space-y-4">
                 <h3 class="text-sm font-semibold text-darkslategray mt-2 mb-2">Rincian Anggaran</h3>
                 ${items.map(item => `
                     <li class="flex flex-row items-center justify-between bg-gray-50 border border-gainsboro rounded-lg px-3 py-2">

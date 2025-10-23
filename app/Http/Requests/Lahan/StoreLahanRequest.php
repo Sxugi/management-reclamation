@@ -4,7 +4,7 @@ namespace App\Http\Requests\Lahan;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class CreateLahanRequest extends FormRequest
+class StoreLahanRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.

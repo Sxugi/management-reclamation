@@ -59,7 +59,7 @@
                             </span>
                         </td>
                         <td class="py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px]">
-                             <x-main.tooltip :content="$data->catatan" :max-length="30" position="top" />
+                             <x-main.tooltip :content="$data->catatan" :max-length="40" position="bottom" />
                         </td>
                         <td class="py-3 px-3 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[0px] border-l-[0px]">
                             <div class="flex flex-row items-center justify-center gap-3">

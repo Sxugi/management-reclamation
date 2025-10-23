@@ -4,6 +4,8 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LahanController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PlotController;
+use App\Http\Controllers\TargetProgresReklamasiController;
+use App\Http\Controllers\ProgresReklamasiController;
 use App\Http\Controllers\AnggaranReklamasiController;
 use App\Http\Controllers\PohonController;
 use App\Http\Controllers\DataGudangController;
@@ -42,13 +44,28 @@ Route::middleware(['auth'])->group(function () {
         ->name('detail-lahan.dashboard');
     Route::resource('lahan.plot', PlotController::class)
         ->shallow();
+    Route::prefix('plot')->name('plot.')->group(function () {
+        Route::post('{plot}/target', [TargetProgresReklamasiController::class, 'store'])
+            ->name('target.store');
+        Route::resource('{plot}/progres', ProgresReklamasiController::class)
+            ->parameters(['progres' => 'progres']) 
+            ->except('index', 'show');
+        Route::get('{plot}/activity-logs', [PlotController::class, 'getActivityLogs']);
+    });
     Route::resource('lahan.anggaran', AnggaranReklamasiController::class)
         ->except('show');
-    Route::resource('lahan.pohon', PohonController::class)
-        ->except('show', 'edit', 'update', 'delete');
-    Route::get('lahan/{lahan}/pohon/{pohon}/data-pohon/{dataPohon}/edit', [PohonController::class, 'edit'])->name('lahan.pohon.edit');
-    Route::put('lahan/{lahan}/pohon/{pohon}/data-pohon/{dataPohon}', [PohonController::class, 'update'])->name('lahan.pohon.update');
-    Route::delete('/lahan/{lahan}/pohon/{pohon}/tahun/{tahun}', [PohonController::class, 'destroy'])->name('lahan.pohon.destroy');
+    Route::prefix('lahan/{lahan}/pohon')->name('lahan.pohon.')->group(function () {
+        Route::resource('/', PohonController::class)
+            ->parameters(['' => 'pohon'])
+            ->only(['index', 'create', 'store']);
+
+        Route::get('{pohon}/data-pohon/{dataPohon}/edit', [PohonController::class, 'edit'])
+            ->name('edit');
+        Route::put('{pohon}/data-pohon/{dataPohon}', [PohonController::class, 'update'])
+            ->name('update');
+        Route::delete('{pohon}/tahun/{tahun}', [PohonController::class, 'destroy'])
+            ->name('destroy');
+    });
     Route::resource('lahan.gudang', DataGudangController::class)
         ->except('show');
 });

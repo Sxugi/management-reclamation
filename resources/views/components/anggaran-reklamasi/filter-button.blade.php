@@ -93,7 +93,7 @@
             </div>
 
             <div>
-                <x-main.input-label for="minTotal" class="block text-sm font-medium text-gray-700 mb-1">Total Min</x-main.input-label>
+                <x-main.input-label for="minTotal-display" class="block text-sm font-medium text-gray-700 mb-1">Total Min</x-main.input-label>
                 <x-main.text-input 
                     type="text" 
                     id="minTotal-display" 

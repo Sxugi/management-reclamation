@@ -54,20 +54,20 @@
                         @method('DELETE')
 
                         <h2 class="text-lg font-medium text-gray-900">
-                            {{ __('Apakah Anda yakin ingin menghapus dokumentasi ini?') }}
+                            {{ __('Are you sure you want to delete this documentation?') }}
                         </h2>
 
                         <p class="mt-1 text-sm text-gray-600">
-                            {{ __('Setelah dokumentasi ini dihapus, semua data terkait akan hilang secara permanen. Tindakan ini tidak dapat dibatalkan.') }}
+                            {{ __('Once deleted, all data related to this documentation will be permanently lost. This action cannot be undone.') }}
                         </p>
 
                         <div class="mt-6 flex justify-end font-outfit">
                             <x-main.secondary-button @click="$dispatch('close')">
-                                {{ __('Batal') }}
+                                {{ __('Cancel') }}
                             </x-main.secondary-button>
-                            <x-main.primary-button class="ml-3">
-                                {{ __('Hapus') }}
-                            </x-main.primary-button>
+                            <x-main.danger-button type="submit" class="ml-3">
+                                {{ __('Delete') }}
+                            </x-main.danger-button>
                         </div>
                     </form>
                 </x-main.modal>

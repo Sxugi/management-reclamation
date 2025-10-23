@@ -6,7 +6,7 @@ use App\Models\Lahan;
 use App\Models\BiayaReklamasi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Http\Requests\RekapitulasiBiaya\CreateRekapitulasiBiayaRequest;
+use App\Http\Requests\RekapitulasiBiaya\StoreRekapitulasiBiayaRequest;
 use App\Http\Requests\RekapitulasiBiaya\UpdateRekapitulasiBiayaRequest;
 use App\Services\RekapitulasiBiayaService;
 use Illuminate\Support\Facades\DB;
@@ -61,7 +61,7 @@ class RekapitulasiBiayaController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(CreateRekapitulasiBiayaRequest $request, Lahan $lahan)
+    public function store(StoreRekapitulasiBiayaRequest $request, Lahan $lahan)
     {
         // Check if user owns this lahan
         if ($lahan->user_id !== Auth::user()->user_id) {
