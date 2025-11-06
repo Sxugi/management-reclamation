@@ -1,0 +1,83 @@
+<div class="relative inline-block">
+    <button class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white hover:bg-slategray-200 transition-colors"
+        data-chart-filter-toggle
+        onclick="toggleDashboardChartFilter()">
+        <span class="relative leading-5 font-medium">Chart Options</span>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M7.91699 10.7754C9.49286 10.7754 10.812 11.8731 11.1523 13.3457H17.708C18.1219 13.346 18.4578 13.6818 18.458 14.0957C18.458 14.5098 18.122 14.8454 17.708 14.8457H11.1523C10.8122 16.3185 9.49308 17.417 7.91699 17.417C6.3411 17.4168 5.0226 16.3183 4.68262 14.8457H2.29102L2.21484 14.8418C1.83657 14.8035 1.54004 14.4841 1.54004 14.0957C1.54022 13.7075 1.83668 13.3879 2.21484 13.3496L2.29102 13.3457H4.68262C5.02284 11.8733 6.34133 10.7756 7.91699 10.7754ZM7.91699 12.2754C6.91159 12.2756 6.09668 13.0912 6.09668 14.0967C6.09714 15.1018 6.91187 15.9167 7.91699 15.917C8.92232 15.917 9.73782 15.1019 9.73828 14.0967C9.73828 13.0911 8.92261 12.2754 7.91699 12.2754ZM12.083 2.58301C13.6588 2.58322 14.9772 3.68177 15.3174 5.1543H17.707L17.7832 5.1582C18.1615 5.19654 18.457 5.51592 18.457 5.9043C18.4568 6.29252 18.1614 6.61208 17.7832 6.65039L17.707 6.6543H15.3174C14.9773 8.1268 13.6588 9.2244 12.083 9.22461C10.507 9.22461 9.18787 8.12694 8.84766 6.6543H2.29004C1.87595 6.6543 1.54024 6.31834 1.54004 5.9043C1.54004 5.49008 1.87583 5.1543 2.29004 5.1543H8.84766C9.18793 3.68162 10.5071 2.58301 12.083 2.58301ZM12.083 4.08301C11.0775 4.08301 10.2619 4.89883 10.2617 5.9043C10.262 6.90971 11.0775 7.72461 12.083 7.72461C13.0883 7.72436 13.9031 6.90955 13.9033 5.9043C13.9031 4.89898 13.0883 4.08325 12.083 4.08301Z" fill="white"/>
+        </svg>
+    </button>
+
+    <div id="dashboardChartFilterPanel" class="absolute right-0 z-50 mt-2 p-4 bg-white border border-gray-300 rounded-lg shadow-lg hidden" style="min-width:350px;">
+        <div class="space-y-4">
+            <!-- Basic Controls - Always Visible -->
+            <div class="bg-gray-50 rounded-lg p-3">
+                <h4 class="text-sm font-medium text-darkslategray mb-3">Basic Settings</h4>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <x-main.input-label for="chart-view-filter" class="block text-sm font-medium text-gray-700 mb-1">Chart View</x-main.input-label>
+                        <select id="chart-view-filter" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit flex-1 leading-5 bg-white">
+                            <option value="overall">Overall Progress</option>
+                            <option value="indicator">Indicator Analysis</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <x-main.input-label for="chart-period-filter" class="block text-sm font-medium text-gray-700 mb-1">Time Period</x-main.input-label>
+                        <select id="chart-period-filter" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit flex-1 leading-5 bg-white">
+                            <option value="7days">7 Days</option>
+                            <option value="30days" selected>30 Days</option>
+                            <option value="90days">90 Days</option>
+                            <option value="1year">1 Year</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Overall Mode Controls -->
+            <div id="overall-controls" class="bg-blue-50 rounded-lg p-3">
+                <h4 class="text-sm font-medium text-darkslategray mb-3">Overall View Settings</h4>
+                
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="show-individual-blocks-filter" class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                    <x-main.input-label for="show-individual-blocks-filter" class="text-sm font-medium text-gray-700 mb-0">Show Individual Blocks</x-main.input-label>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">Display progress for each block separately instead of overall average</p>
+            </div>
+
+            <!-- Indicator Mode Controls -->
+            <div id="indicator-controls" class="bg-green-50 rounded-lg p-3 hidden">
+                <h4 class="text-sm font-medium text-darkslategray mb-3">Indicator Analysis Settings</h4>
+                
+                <div class="space-y-3">
+                    <div>
+                        <x-main.input-label for="indicator-selector-filter" class="block text-sm font-medium text-gray-700 mb-1">Select Indicator</x-main.input-label>
+                        <select id="indicator-selector-filter" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit flex-1 leading-5 bg-white">
+                            <option value="">Choose Indicator...</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Select which indicator to analyze in detail</p>
+                    </div>
+
+                    <div id="block-selector-container" class="hidden">
+                        <x-main.input-label for="block-selector-filter" class="block text-sm font-medium text-gray-700 mb-1">Focus on Block (Optional)</x-main.input-label>
+                        <select id="block-selector-filter" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit flex-1 leading-5 bg-white">
+                            <option value="all">All Blocks (Weighted Average)</option>
+                        </select>
+                        <p class="text-xs text-gray-500 mt-1">Optionally focus on a specific block's progress</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex justify-between pt-3 border-t border-gray-200">
+                <button type="button" onclick="resetDashboardChartFilter()" class="px-4 py-2 text-sm font-medium text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
+                    Reset
+                </button>
+                <button type="button" onclick="closeDashboardChartFilter()" class="px-4 py-2 text-sm font-medium text-white bg-darkslategray rounded-md hover:bg-slategray-200 transition-colors">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

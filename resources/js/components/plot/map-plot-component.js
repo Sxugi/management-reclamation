@@ -244,6 +244,8 @@ document.addEventListener('alpine:init', () => {
                         const feature = e.features[0];
                         const properties = feature.properties;
                         const plotId = properties.plot_id;
+                        const plotName = properties.nama_plot || "-";
+                        const truncatedName = properties.nama_plot.length > 12 ? properties.nama_plot.substring(0, 12) + '...' : properties.nama_plot;
 
                         let coordinates;
                         coordinates = this.getPolygonCenter(
@@ -257,7 +259,7 @@ document.addEventListener('alpine:init', () => {
                                         onclick="document.querySelector('.maplibregl-popup').remove()">
                                     ×
                                 </button>
-                                <h3 class="text-lg font-bold mb-2 text-gray-800 pr-10">${properties.nama_plot}</h3>
+                                <h3 class="text-lg font-bold mb-2 text-gray-800 pr-10" title="${plotName}">${truncatedName}</h3>
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="text-sm text-gray-600">Luas Area:</span>
                                     <span class="font-semibold text-blue-700">${properties.luas_area} Ha</span>

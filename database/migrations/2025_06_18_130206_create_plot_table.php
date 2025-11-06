@@ -20,6 +20,8 @@ return new class extends Migration
                 ->constrained('lahan', 'lahan_id')
                 ->cascadeOnDelete();
             $table->timestamps();
+
+            $table->index('lahan_id');
         });
 
         Schema::create('indikator', function (Blueprint $table) {
@@ -105,6 +107,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['plot_id', 'date'], 'plot_date_unique');
+            $table->index(['plot_id', 'date']);
         });
 
         Schema::create('plot_progres', function (Blueprint $table) {
@@ -116,6 +119,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique('plot_id');
+            $table->index('plot_id');
         });
 
         Schema::create('progres_field_values', function (Blueprint $table) {

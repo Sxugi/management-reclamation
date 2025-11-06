@@ -56,3 +56,55 @@
       transition: background 0.2s;
   }
 }
+
+/* Dashboard Progress Block Styles */
+.slide-transition {
+    animation: slideInFromRight 0.3s ease-out;
+}
+
+@keyframes slideInFromRight {
+    0% {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+#progress-dots {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 24px;
+    gap: 12px;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #d1d5db;
+    cursor: pointer;
+    border: none;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    transition: all 0.3s ease;
+}
+
+.dot.active {
+    width: 12px;
+    height: 12px;
+    background-color: #2563eb;
+}
+
+.dot:hover {
+    transform: scale(1.2);
+    background-color: #9ca3af;
+}
+
+.dot.active:hover {
+    background-color: #1d4ed8;
+}

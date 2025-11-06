@@ -83,6 +83,11 @@ class Plot extends Model
         return $this->hasMany(ProgresReklamasi::class, 'plot_id', 'plot_id');
     }
 
+    public function plotProgres(): HasOne
+    {
+        return $this->hasOne(PlotProgres::class, 'plot_id', 'plot_id');
+    }
+
     public function activityLogs()
     {
         return $this->hasMany(ActivityLog::class, 'plot_id', 'plot_id');

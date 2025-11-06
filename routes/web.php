@@ -40,8 +40,43 @@ Route::middleware(['auth'])->group(function () {
 
 // Route for progress management
 Route::middleware(['auth'])->group(function () {
+    // Dashboard routes
     Route::get('lahan/{lahan}/dashboard', [DashboardController::class, 'dashboard'])
         ->name('detail-lahan.dashboard');
+    Route::prefix('lahan/{lahan}/dashboard')->name('dashboard.')->group(function () {
+        // Consolidated dashboard data endpoint
+        Route::get('/data', [DashboardController::class, 'getDashboardData'])
+            ->name('data');
+        Route::get('/historical', [DashboardController::class, 'getHistoricalData'])
+            ->name('historical');
+        Route::get('/indicators', [DashboardController::class, 'getIndicatorData'])
+            ->name('indicators');
+        // Individual endpoints for backward compatibility
+        Route::get('/stats', [DashboardController::class, 'getStats'])
+            ->name('stats');
+        Route::get('/progress', [DashboardController::class, 'getProgressPerBlok'])
+            ->name('progress');
+        Route::get('/history', [DashboardController::class, 'getHistoricalProgress'])
+            ->name('history');
+        Route::get('/indicator', [DashboardController::class, 'getIndicatorProgress'])
+            ->name('indicator');
+        Route::get('/all-indicators', [DashboardController::class, 'getAllIndicators'])
+            ->name('all-indicators');
+        Route::get('/specific', [DashboardController::class, 'getSpecificIndicatorProgress'])
+            ->name('specific');
+        Route::get('/block-history', [DashboardController::class, 'getBlockHistorical'])
+            ->name('block-history');
+        Route::get('/map', [DashboardController::class, 'getMapData'])
+            ->name('map');
+        Route::get('/summary', [DashboardController::class, 'getProgressSummary'])
+            ->name('summary');
+        Route::get('/enhanced', [DashboardController::class, 'getEnhancedIndicatorProgress'])
+            ->name('enhanced');
+        Route::get('/blocks', [DashboardController::class, 'getEnhancedBlocksForIndicator'])
+            ->name('blocks');
+    });
+
+    // Plot and related resources
     Route::resource('lahan.plot', PlotController::class)
         ->shallow();
     Route::prefix('plot')->name('plot.')->group(function () {
@@ -52,8 +87,12 @@ Route::middleware(['auth'])->group(function () {
             ->except('index', 'show');
         Route::get('{plot}/activity-logs', [PlotController::class, 'getActivityLogs']);
     });
+
+    // Anggaran Reklamasi routes
     Route::resource('lahan.anggaran', AnggaranReklamasiController::class)
         ->except('show');
+
+    // Pohon and related resources
     Route::prefix('lahan/{lahan}/pohon')->name('lahan.pohon.')->group(function () {
         Route::resource('/', PohonController::class)
             ->parameters(['' => 'pohon'])
@@ -66,28 +105,39 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('{pohon}/tahun/{tahun}', [PohonController::class, 'destroy'])
             ->name('destroy');
     });
+
+    // Data Gudang routes
     Route::resource('lahan.gudang', DataGudangController::class)
         ->except('show');
 });
 
 // Route for administration
 Route::middleware(['auth'])->group(function () {
+    // Rencana and Rekapitulasi routes
     Route::resource('lahan.rencana-reklamasi', RencanaReklamasiController::class)
         ->except('show', 'destroy');
     Route::get('lahan/{lahan}/rencana-reklamasi/pdf', [RencanaReklamasiController::class, 'generatePDF'])
         ->name('lahan.rencana-reklamasi.pdf');
+
+    // Rencana Biaya routes
     Route::resource('lahan.rencana-biaya', RencanaBiayaController::class)
         ->except('show', 'destroy');
     Route::get('lahan/{lahan}/rencana-biaya/pdf', [RencanaBiayaController::class, 'generatePDF'])
         ->name('lahan.rencana-biaya.pdf');
+
+    // Rekapitulasi routes
     Route::resource('lahan.rekapitulasi-reklamasi', RekapitulasiReklamasiController::class)
         ->except('show', 'destroy');
     Route::get('lahan/{lahan}/rekapitulasi-reklamasi/pdf', [RekapitulasiReklamasiController::class, 'generatePDF'])
         ->name('lahan.rekapitulasi-reklamasi.pdf');
+
+    // Rekapitulasi Biaya routes
     Route::resource('lahan.rekapitulasi-biaya', RekapitulasiBiayaController::class)
         ->except('show', 'destroy');
     Route::get('lahan/{lahan}/rekapitulasi-biaya/pdf', [RekapitulasiBiayaController::class, 'generatePDF'])
         ->name('lahan.rekapitulasi-biaya.pdf');
+
+    // Kriteria Keberhasilan routes
     Route::prefix('lahan/{lahan}/kriteria-keberhasilan')
         ->name('lahan.kriteria-keberhasilan.')->group(function () {
             Route::get('/', [KriteriaKeberhasilanController::class, 'show'])
@@ -103,6 +153,8 @@ Route::middleware(['auth'])->group(function () {
             Route::get('/pdf', [KriteriaKeberhasilanController::class, 'generatePDF'])
                 ->name('pdf');
     });
+
+    // Dokumentasi and File routes
     Route::resource('lahan.dokumentasi', DokumentasiController::class);
     Route::resource('lahan.file-rencana', FileRencanaController::class)
         ->only(['index', 'store', 'destroy']);
