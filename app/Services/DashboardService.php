@@ -13,23 +13,187 @@ use Carbon\Carbon;
 
 class DashboardService
 {
+    // Cache duration constants
+    private const CACHE_HISTORICAL_LONG = 1800;
+    private const CACHE_HISTORICAL_SHORT = 300;   
+    private const CACHE_STATS_SHORT = 60;       
+    private const CACHE_STATS_LONG = 300; 
+
+    /**
+     * Smart cache key generation based on data freshness
+     */
+    private static function getCacheConfig(int $lahanId, string $period, bool $hasRecentActivity = null): array
+    {
+        // Check if there's recent activity (last 24 hours) if not provided
+        if ($hasRecentActivity === null) {
+            $hasRecentActivity = DB::table('progres')
+                ->join('plot', 'progres.plot_id', '=', 'plot.plot_id')
+                ->where('plot.lahan_id', $lahanId)
+                ->where('progres.created_at', '>=', Carbon::now()->subDay())
+                ->exists();
+        }
+
+        // Determine cache duration based on activity and period
+        if ($hasRecentActivity) {
+            // Recent activity = shorter cache for real-time feel
+            $duration = match($period) {
+                '7days' => 60,
+                '30days' => 180,
+                '90days' => 300,
+                '1year' => 600, 
+                default => 180
+            };
+        } else {
+            // No recent activity = longer cache for stability
+            $duration = match($period) {
+                '7days' => 300,     
+                '30days' => 600, 
+                '90days' => 900,   
+                '1year' => 1800, 
+                default => 600
+            };
+        }
+
+        $cacheKey = "historical_progress_{$lahanId}_{$period}_" . ($hasRecentActivity ? 'active' : 'stable');
+        
+        return [
+            'key' => $cacheKey,
+            'duration' => $duration,
+            'has_recent_activity' => $hasRecentActivity
+        ];
+    }
+
+    /**
+     * Enhanced method to check if lahan is truly new/empty
+     */
+    public static function isNewLahan(int $lahanId): bool
+    {
+        // Check if any plots have progress records
+        $hasProgress = DB::table('progres')
+            ->join('plot', 'progres.plot_id', '=', 'plot.plot_id')
+            ->where('plot.lahan_id', $lahanId)
+            ->exists();
+
+        // Check if any plots have targets set
+        $hasTargets = DB::table('target')
+            ->join('plot', 'target.plot_id', '=', 'plot.plot_id')
+            ->where('plot.lahan_id', $lahanId)
+            ->exists();
+
+        // Check if any plots have non-zero progress
+        $hasNonZeroProgress = DB::table('plot_progres')
+            ->join('plot', 'plot_progres.plot_id', '=', 'plot.plot_id')
+            ->where('plot.lahan_id', $lahanId)
+            ->where('plot_progres.percent', '>', 0)
+            ->exists();
+
+        return !($hasProgress || $hasTargets || $hasNonZeroProgress);
+    }
+
     /**
      * Get comprehensive dashboard statistics for a lahan
      */
     public static function getDashboardStats(int $lahanId): array
     {
-        $cacheKey = "dashboard_stats_{$lahanId}";
+        $isNew = self::isNewLahan($lahanId);
+        
+        // Check for recent activity to determine cache duration
+        $hasRecentActivity = DB::table('progres')
+            ->join('plot', 'progres.plot_id', '=', 'plot.plot_id')
+            ->where('plot.lahan_id', $lahanId)
+            ->where('progres.created_at', '>=', Carbon::now()->subHours(2))
+            ->exists();
 
-        return Cache::remember($cacheKey, 300, function () use ($lahanId) {
-            return [
+        $cacheKey = "dashboard_stats_{$lahanId}" . ($hasRecentActivity ? '_active' : '_stable');
+        $cacheTime = match(true) {
+            $isNew => 30, 
+            $hasRecentActivity => 60, 
+            default => 300      
+        };
+
+        return Cache::remember($cacheKey, $cacheTime, function () use ($lahanId, $isNew, $hasRecentActivity) {
+            $stats = [
                 'jumlah_blok_lahan' => self::getJumlahBlokLahan($lahanId),
                 'total_progres_reklamasi' => self::getTotalProgresReklamasi($lahanId),
                 'progres_hari_ini' => self::calculateDailyProgress($lahanId),
                 'progres_minggu_ini' => self::calculateWeeklyProgress($lahanId),
                 'jumlah_blok_selesai' => self::getJumlahBlokSelesai($lahanId),
-                'luas_area' => self::calculateAreaStats($lahanId)
+                'luas_area' => self::calculateAreaStats($lahanId),
+                'is_new_lahan' => $isNew,
+                'has_recent_activity' => $hasRecentActivity,
+                'cache_info' => [
+                    'generated_at' => now()->toISOString(),
+                    'cache_type' => $hasRecentActivity ? 'active' : 'stable'
+                ]
             ];
+
+            // Add helpful messages for new lahan
+            if ($isNew) {
+                $stats['messages'] = [
+                    'status' => 'new_lahan',
+                    'title' => 'Lahan Baru',
+                    'description' => 'Belum ada data progres. Mulai dengan menambahkan target dan aktivitas reklamasi.',
+                    'next_steps' => [
+                        'Atur target indikator untuk setiap blok',
+                        'Mulai mencatat aktivitas reklamasi',
+                        'Upload dokumentasi progres'
+                    ]
+                ];
+            }
+
+            return $stats;
         });
+    }
+
+    /**
+     * Clear cache for specific lahan when new data is added
+     */
+    public static function clearLahanCache(int $lahanId): void
+    {
+        $patterns = [
+            "dashboard_stats_{$lahanId}_active",
+            "dashboard_stats_{$lahanId}_stable",
+            "historical_progress_{$lahanId}_7days_active",
+            "historical_progress_{$lahanId}_7days_stable", 
+            "historical_progress_{$lahanId}_30days_active",
+            "historical_progress_{$lahanId}_30days_stable",
+            "historical_progress_{$lahanId}_90days_active",
+            "historical_progress_{$lahanId}_90days_stable",
+            "historical_progress_{$lahanId}_1year_active",
+            "historical_progress_{$lahanId}_1year_stable",
+            "indicator_progress_{$lahanId}",
+            "block_historical_{$lahanId}_*"
+        ];
+
+        foreach ($patterns as $pattern) {
+            if (strpos($pattern, '*') !== false) {
+                // Clear wildcard patterns (you might need to implement tag-based cache)
+                $baseKey = str_replace('*', '', $pattern);
+                // Clear known variations
+                for ($i = 1; $i <= 50; $i++) { // Assuming max 50 plots per lahan
+                    Cache::forget($baseKey . $i . '_7days');
+                    Cache::forget($baseKey . $i . '_30days');
+                    Cache::forget($baseKey . $i . '_90days');
+                    Cache::forget($baseKey . $i . '_1year');
+                }
+            } else {
+                Cache::forget($pattern);
+            }
+        }
+    }
+
+    /**
+     * Force refresh cache when new progress is added
+     */
+    public static function refreshCacheAfterProgressUpdate(int $lahanId): void
+    {
+        // Clear existing cache
+        self::clearLahanCache($lahanId);
+        
+        // Pre-warm important caches with fresh data
+        self::getDashboardStats($lahanId);
+        self::getHistoricalProgress($lahanId, '7days');
+        self::getHistoricalProgress($lahanId, '30days');
     }
 
     /**
@@ -81,22 +245,12 @@ class DashboardService
         $today = Carbon::today();
         $yesterday = Carbon::yesterday();
 
-        \Log::info('Calculating daily progress', [
-            'lahan_id' => $lahanId,
-            'today' => $today->format('Y-m-d'),
-            'yesterday' => $yesterday->format('Y-m-d')
-        ]);
-
         // Check if there's any progress activity today
         $todayProgressCount = DB::table('progres')
             ->join('plot', 'progres.plot_id', '=', 'plot.plot_id')
             ->where('plot.lahan_id', $lahanId)
             ->whereDate('progres.created_at', $today)
             ->count();
-
-        \Log::info('Today progress activity', [
-            'count' => $todayProgressCount
-        ]);
 
         // If no activity today, return 0% for today's progress
         if ($todayProgressCount === 0) {
@@ -178,10 +332,6 @@ class DashboardService
                     ]
                 );
             }
-
-            \Log::info('Created snapshots for today', [
-                'plots_count' => $plots->count()
-            ]);
         }
 
         // If no yesterday snapshot, try to find the most recent one
@@ -195,16 +345,9 @@ class DashboardService
 
             if ($latestSnapshot) {
                 $yesterdayAvg = $latestSnapshot->percent;
-                \Log::info('Using latest snapshot as yesterday', [
-                    'date' => $latestSnapshot->date,
-                    'percent' => $latestSnapshot->percent
-                ]);
             } else {
                 // If no historical data, assume yesterday was slightly lower
                 $yesterdayAvg = max(0, $todayAvg - 0.5);
-                \Log::info('No historical data, estimating yesterday', [
-                    'estimated_yesterday' => $yesterdayAvg
-                ]);
             }
         }
 
@@ -220,9 +363,7 @@ class DashboardService
             'is_fallback' => false,
             'activity_count' => $todayProgressCount
         ];
-
-        \Log::info('Daily progress result', $result);
-
+        
         return $result;
     }
 
@@ -318,6 +459,18 @@ class DashboardService
     public static function getMapData(int $lahanId): array
     {
         try {
+            // Get lahan center coordinates first
+            $lahanCenter = DB::table('lahan')
+                ->where('lahan_id', $lahanId)
+                ->selectRaw('
+                    nama_lahan,
+                    ST_X(location) as longitude, 
+                    ST_Y(location) as latitude,
+                    ST_AsText(location) as location_text
+                ')
+                ->first();
+
+            // Get plot data
             $rows = DB::table('plot')
                 ->leftJoin('plot_progres', 'plot.plot_id', '=', 'plot_progres.plot_id')
                 ->where('plot.lahan_id', $lahanId)
@@ -343,16 +496,45 @@ class DashboardService
                 ];
             }
 
+            // Extract longitude and latitude from PostGIS results
+            $longitude = null;
+            $latitude = null;
+            $hasCoordinates = false;
+
+            if ($lahanCenter) {
+                $longitude = (float)$lahanCenter->longitude;
+                $latitude = (float)$lahanCenter->latitude;
+                $hasCoordinates = !is_null($longitude) && !is_null($latitude) && 
+                                $longitude != 0 && $latitude != 0;
+            }
+
             return [
                 'type' => 'FeatureCollection',
-                'features' => $features
+                'features' => $features,
+                'lahan_center' => [
+                    'longitude' => $longitude,
+                    'latitude' => $latitude,
+                    'nama_lahan' => $lahanCenter ? $lahanCenter->nama_lahan : null,
+                    'has_coordinates' => $hasCoordinates,
+                    'location_text' => $lahanCenter ? $lahanCenter->location_text : null  // For debugging
+                ]
             ];
         } catch (\Exception $e) {
-            Log::error('DashboardService getMapData error: ' . $e->getMessage());
+            Log::error('DashboardService getMapData error: ' . $e->getMessage(), [
+                'lahan_id' => $lahanId,
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return [
                 'type' => 'FeatureCollection',
                 'features' => [],
-                'error' => 'Failed to load map data'
+                'lahan_center' => [
+                    'longitude' => null,
+                    'latitude' => null,
+                    'nama_lahan' => null,
+                    'has_coordinates' => false
+                ],
+                'error' => 'Failed to load map data: ' . $e->getMessage()
             ];
         }
     }
@@ -362,9 +544,9 @@ class DashboardService
      */
     public static function getHistoricalProgress(int $lahanId, string $period = '30days', string $groupBy = 'daily'): array
     {
-        $cacheKey = "historical_progress_{$lahanId}_{$period}_{$groupBy}";
-
-        return Cache::remember($cacheKey, 600, function () use ($lahanId, $period, $groupBy) {
+        $cacheConfig = self::getCacheConfig($lahanId, $period);
+        
+        return Cache::remember($cacheConfig['key'], $cacheConfig['duration'], function () use ($lahanId, $period, $groupBy, $cacheConfig) {
             $days = match ($period) {
                 '7days' => 7,
                 '30days' => 30,
@@ -382,6 +564,28 @@ class DashboardService
                 default => "DATE(date)",
             };
 
+            // Check if this lahan has any progress data at all
+            $hasAnyProgress = DB::table('progres')
+                ->join('plot', 'progres.plot_id', '=', 'plot.plot_id')
+                ->where('plot.lahan_id', $lahanId)
+                ->exists();
+
+            if (!$hasAnyProgress) {
+                Log::info('No historical progress data found for new lahan', [
+                    'lahan_id' => $lahanId,
+                    'period' => $period
+                ]);
+                
+                return []; // Return empty array instead of fake data
+            }
+
+            // For recent periods with recent activity, include today's data even if no snapshot exists
+            if ($cacheConfig['has_recent_activity'] && in_array($period, ['7days', '30days'])) {
+                // Ensure today's snapshot exists if there's recent activity
+                self::ensureTodaySnapshot($lahanId);
+            }
+
+            // Query for actual snapshots
             $snapshots = DB::table('progres_snapshots')
                 ->join('plot', 'progres_snapshots.plot_id', '=', 'plot.plot_id')
                 ->where('plot.lahan_id', $lahanId)
@@ -400,8 +604,59 @@ class DashboardService
                 })->values()->toArray();
             }
 
-            return self::generateSyntheticHistoricalData($lahanId, $days, $groupBy);
+            // If lahan has progress but no snapshots in date range, return empty
+            Log::info('Lahan has progress but no snapshots in date range', [
+                'lahan_id' => $lahanId,
+                'period' => $period,
+                'date_range' => [$startDate, $endDate]
+            ]);
+
+            return [];
         });
+    }
+
+    private static function ensureTodaySnapshot(int $lahanId): void
+    {
+        $today = Carbon::today();
+        
+        // Check if today's snapshots already exist
+        $hasTodaySnapshot = DB::table('progres_snapshots')
+            ->join('plot', 'progres_snapshots.plot_id', '=', 'plot.plot_id')
+            ->where('plot.lahan_id', $lahanId)
+            ->whereDate('date', $today)
+            ->exists();
+
+        if (!$hasTodaySnapshot) {
+            // Check if there was activity today
+            $hasActivityToday = DB::table('progres')
+                ->join('plot', 'progres.plot_id', '=', 'plot.plot_id')
+                ->where('plot.lahan_id', $lahanId)
+                ->whereDate('progres.created_at', $today)
+                ->exists();
+
+            if ($hasActivityToday) {
+                // Create snapshots for all plots for today
+                $plots = DB::table('plot')
+                    ->leftJoin('plot_progres', 'plot.plot_id', '=', 'plot_progres.plot_id')
+                    ->where('plot.lahan_id', $lahanId)
+                    ->select('plot.plot_id', DB::raw('COALESCE(plot_progres.percent, 0) as percent'))
+                    ->get();
+
+                foreach ($plots as $plot) {
+                    DB::table('progres_snapshots')->updateOrInsert(
+                        [
+                            'plot_id' => $plot->plot_id,
+                            'date' => $today->format('Y-m-d')
+                        ],
+                        [
+                            'percent' => $plot->percent,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]
+                    );
+                }
+            }
+        }
     }
 
     /**
@@ -593,34 +848,49 @@ class DashboardService
      */
     public static function getBlockHistorical(int $plotId, string $period = '30days'): array
     {
-        $days = match ($period) {
-            '7days' => 7,
-            '30days' => 30,
-            '90days' => 90,
-            '1year' => 365,
-            default => 30,
-        };
-
-        $rows = DB::table('progres_snapshots')
+        // Get lahan_id for this plot
+        $lahanId = DB::table('plot')->where('plot_id', $plotId)->value('lahan_id');
+        
+        // Check for recent activity on this specific plot
+        $hasRecentActivity = DB::table('progres')
             ->where('plot_id', $plotId)
-            ->whereBetween('date', [now()->subDays($days - 1)->toDateString(), now()->toDateString()])
-            ->selectRaw('DATE(date) as date, AVG(percent) as percent')
-            ->groupByRaw('DATE(date)')
-            ->orderBy('date')
-            ->get();
+            ->where('created_at', '>=', Carbon::now()->subDay())
+            ->exists();
 
-        if ($rows->isEmpty()) {
-            return [];
-        }
+        $cacheKey = "block_historical_{$plotId}_{$period}" . ($hasRecentActivity ? '_active' : '_stable');
+        $cacheTime = $hasRecentActivity ? 120 : 600; // 2 minutes vs 10 minutes
 
-        $result = [];
-        $map = $rows->keyBy('date')->map(fn($r) => round((float)$r->percent, 2))->toArray();
-        for ($i = $days - 1; $i >= 0; $i--) {
-            $d = now()->subDays($i)->format('Y-m-d');
-            $result[] = ['date' => $d, 'percent' => $map[$d] ?? 0.0];
-        }
+        return Cache::remember($cacheKey, $cacheTime, function () use ($plotId, $period) {
+            $days = match ($period) {
+                '7days' => 7,
+                '30days' => 30,
+                '90days' => 90,
+                '1year' => 365,
+                default => 30,
+            };
 
-        return $result;
+            $rows = DB::table('progres_snapshots')
+                ->where('plot_id', $plotId)
+                ->whereBetween('date', [now()->subDays($days - 1)->toDateString(), now()->toDateString()])
+                ->selectRaw('DATE(date) as date, AVG(percent) as percent')
+                ->groupByRaw('DATE(date)')
+                ->orderBy('date')
+                ->get();
+
+            if ($rows->isEmpty()) {
+                return [];
+            }
+
+            $result = [];
+            $map = $rows->keyBy('date')->map(fn($r) => round((float)$r->percent, 2))->toArray();
+            
+            for ($i = $days - 1; $i >= 0; $i--) {
+                $d = now()->subDays($i)->format('Y-m-d');
+                $result[] = ['date' => $d, 'percent' => $map[$d] ?? 0.0];
+            }
+
+            return $result;
+        });
     }
 
     /**
@@ -654,25 +924,26 @@ class DashboardService
      */
     private static function generateSyntheticHistoricalData(int $lahanId, int $days, string $groupBy): array
     {
+        // Only generate if there's actual current progress
         $currentAvg = DB::table('plot_progres')
             ->join('plot', 'plot_progres.plot_id', '=', 'plot.plot_id')
             ->where('plot.lahan_id', $lahanId)
             ->avg('plot_progres.percent') ?? 0;
 
-        $historicalData = [];
-        $step = $groupBy === 'weekly' ? 7 : ($groupBy === 'monthly' ? 30 : 1);
-        
-        for ($i = $days - 1; $i >= 0; $i -= $step) {
-            $date = Carbon::now()->subDays($i)->format('Y-m-d');
-            $progress = max(0, min(100, ($currentAvg / $days) * ($days - $i) + rand(-2, 3)));
-            
-            $historicalData[] = [
-                'date' => $date,
-                'avg_percent' => round($progress, 2)
-            ];
+        // If no current progress, don't generate fake history
+        if ($currentAvg <= 0) {
+            return [];
         }
 
-        return $historicalData;
+        // Only generate very minimal recent history if current progress exists
+        $today = Carbon::now()->format('Y-m-d');
+        
+        return [
+            [
+                'date' => $today,
+                'avg_percent' => round($currentAvg, 2)
+            ]
+        ];
     }
 
     /**

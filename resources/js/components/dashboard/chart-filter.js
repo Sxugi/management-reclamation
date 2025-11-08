@@ -7,23 +7,11 @@ class DashboardChartFilter {
         this.syncTimeouts = new Map();
         
         this.handleOutsideClickBound = this.handleOutsideClick.bind(this);
-        this.init();
     }
 
     init() {
         console.log('Initializing dashboard chart filter');
-        this.bindInitializationEvents();
-    }
-
-    bindInitializationEvents() {
-        // Use a single initialization approach
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', () => this.setup());
-        } else {
-            this.setup();
-        }
-        
-        document.addEventListener('turbo:load', () => this.setup());
+        this.setup();
     }
 
     setup() {
@@ -143,6 +131,16 @@ class DashboardChartFilter {
     handleIndicatorChange(e) {
         const indicatorId = e.target.value;
         console.log('Indicator changed to:', indicatorId);
+        
+        // Show/hide helper text
+        const helperDiv = document.getElementById('indicator-helper');
+        if (helperDiv) {
+            if (indicatorId) {
+                helperDiv.classList.add('hidden');
+            } else {
+                helperDiv.classList.remove('hidden');
+            }
+        }
         
         this.updateMainControl('indicator-selector', indicatorId);
         this.toggleBlockSelector(indicatorId);
@@ -288,28 +286,14 @@ class DashboardChartFilter {
 
     toggleBlockSelector(indicatorId) {
         const blockContainer = document.getElementById('block-selector-container');
+        
         if (!blockContainer) return;
 
         if (indicatorId && indicatorId !== '') {
             blockContainer.classList.remove('hidden');
-            this.ensureBlockOptionsLoaded(indicatorId);
         } else {
             blockContainer.classList.add('hidden');
         }
-    }
-
-    ensureBlockOptionsLoaded(indicatorId) {
-        // Trigger main indicator change if needed
-        const mainIndicator = document.getElementById('indicator-selector');
-        if (mainIndicator && mainIndicator.value !== indicatorId) {
-            mainIndicator.value = indicatorId;
-            mainIndicator.dispatchEvent(new Event('change'));
-        }
-
-        // Wait for blocks to load
-        this.debounce('block_options_sync', () => {
-            this.syncBlockOptions();
-        }, 200);
     }
 
     // Reset method
@@ -405,41 +389,16 @@ class DashboardChartFilter {
     }
 }
 
-// Global initialization
-let dashboardChartFilterInstance = null;
-
-function initializeDashboardChartFilter() {
-    if (dashboardChartFilterInstance) {
-        dashboardChartFilterInstance.destroy();
-    }
-    
-    dashboardChartFilterInstance = new DashboardChartFilter();
-    window.dashboardChartFilter = dashboardChartFilterInstance;
-}
-
-// Initialize on page load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeDashboardChartFilter);
-} else {
-    initializeDashboardChartFilter();
-}
-
-document.addEventListener('turbo:load', initializeDashboardChartFilter);
-
-// Global functions
 window.toggleDashboardChartFilter = function() {
-    window.dashboardChartFilter?.toggle();
+    window.dashboardInstance?.chartFilter?.toggle();
 };
 
 window.closeDashboardChartFilter = function() {
-    window.dashboardChartFilter?.close();
+    window.dashboardInstance?.chartFilter?.close();
 };
 
 window.resetDashboardChartFilter = function() {
-    window.dashboardChartFilter?.reset();
+    window.dashboardInstance?.chartFilter?.reset();
 };
 
-// Cleanup on page unload
-window.addEventListener('beforeunload', () => {
-    dashboardChartFilterInstance?.destroy();
-});
+export { DashboardChartFilter };

@@ -7,10 +7,6 @@
 				<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
 					<path d="M5.83333 12.6667L10 8.5L5.83333 4.33333" stroke="#667085" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
 				</svg>
-				<div class="relative leading-5 text-darkslategray-200 font-medium">{{ $lahan->nama_lahan }}</div>
-					<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path d="M5.83333 12.6667L10 8.5L5.83333 4.33333" stroke="#667085" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
-					</svg>
 				<div class="relative leading-5 text-darkslategray-200 font-medium">Dashboard</div>
 			</div>
 		</div>
@@ -76,7 +72,7 @@
 							</div>
 
 							<select id="indicator-selector">
-								<option value="">Pilih Indikator...</option>
+								<option value="">Pilih Indikator</option>
 							</select>
 
 							<select id="block-selector">

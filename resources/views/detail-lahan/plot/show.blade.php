@@ -43,7 +43,7 @@
                         <div class="self-stretch relative leading-7 font-semibold">Area Lahan Reklamasi</div>
                         <div class="self-stretch relative text-sm leading-5 text-slategray">Plot lahan menjadi beberapa bagian.</div>
                     </div>
-                    <a href=" {{ route('plot.edit', [$lahan->lahan_id, $plot->plot_id]) }} " class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200">
+                    <a href=" {{ route('plot.edit', [$plot->plot_id]) }} " class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200">
                         <span class="relative leading-5 font-medium">Edit</span>
                         <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M5.83301 5.83333H4.99967C4.55765 5.83333 4.13372 6.00892 3.82116 6.32148C3.5086 6.63404 3.33301 7.05797 3.33301 7.49999V15C3.33301 15.442 3.5086 15.8659 3.82116 16.1785C4.13372 16.4911 4.55765 16.6667 4.99967 16.6667H12.4997C12.9417 16.6667 13.3656 16.4911 13.6782 16.1785C13.9907 15.8659 14.1663 15.442 14.1663 15V14.1667" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

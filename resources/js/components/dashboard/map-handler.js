@@ -6,6 +6,7 @@ class DashboardMapHandler {
         this.mapElementId = mapElementId;
         this.map = null;
         this.lahanCenter = null;
+        this.cachedMapData = null;
         this.mapState = {
             popupAdded: false,
             dataLoaded: false,
@@ -25,28 +26,84 @@ class DashboardMapHandler {
         }
     }
 
-    // Map initialization methods
+    /**
+     * Load plot polygon data and add to map
+     */
     async loadLahanCenter() {
         try {
+            // Get map data which now includes lahan center coordinates
             const mapRes = await fetch(`/lahan/${this.lahanId}/dashboard/data?type=map-data`);
             if (mapRes.ok) {
-                const geojson = await mapRes.json();
-                if (geojson.features && geojson.features.length > 0) {
-                    this.lahanCenter = this.calculateGeojsonCenter(geojson);
+                const mapData = await mapRes.json();
+                
+                // Check if lahan has center coordinates
+                if (mapData.lahan_center?.has_coordinates) {
+                    this.lahanCenter = {
+                        lng: mapData.lahan_center.longitude,
+                        lat: mapData.lahan_center.latitude,
+                        zoom: 16 // Close zoom for lahan center
+                    };
+                    console.log('Using lahan center coordinates:', this.lahanCenter);
+                    
+                    // Store map data for later use to avoid duplicate fetch
+                    this.cachedMapData = mapData;
+                    return;
+                }
+                
+                // Fallback: calculate center from plot polygons
+                if (mapData.features && mapData.features.length > 0) {
+                    this.lahanCenter = this.calculateGeojsonCenter(mapData);
+                    console.log('Using calculated polygon center:', this.lahanCenter);
+                    this.cachedMapData = mapData;
                     return;
                 }
             }
+            
+            // Final fallback
             this.setDefaultCenter();
+            
         } catch (err) {
             console.warn('Could not load lahan center, using default:', err);
             this.setDefaultCenter();
         }
     }
 
-    setDefaultCenter() {
-        this.lahanCenter = { lng: 118.0149, lat: -2.5489, zoom: 5 };
+    /**
+     * Fallback method to calculate center from plot polygons
+     */
+    async calculateCenterFromPolygons() {
+        try {
+            const mapRes = await fetch(`/lahan/${this.lahanId}/dashboard/data?type=map-data`);
+            if (mapRes.ok) {
+                const geojson = await mapRes.json();
+                if (geojson.features && geojson.features.length > 0) {
+                    this.lahanCenter = this.calculateGeojsonCenter(geojson);
+                    console.log('Using calculated polygon center:', this.lahanCenter);
+                    return;
+                }
+            }
+            this.setDefaultCenter();
+        } catch (err) {
+            console.warn('Could not calculate center from polygons:', err);
+            this.setDefaultCenter();
+        }
     }
 
+    /**
+     * Set default center for Indonesia
+     */
+    setDefaultCenter() {
+        this.lahanCenter = { 
+            lng: 118.0149, 
+            lat: -2.5489, 
+            zoom: 5 
+        };
+        console.log('Using default Indonesia center:', this.lahanCenter);
+    }
+
+    /**
+     * Initialize MapLibre map with lahan center
+     */
     initMap() {
         const el = document.getElementById(this.mapElementId);
         if (!el) {
@@ -54,6 +111,8 @@ class DashboardMapHandler {
         }
 
         const center = this.lahanCenter || { lng: 118.0149, lat: -2.5489, zoom: 5 };
+        
+        console.log('Creating map with center:', center);
         
         this.map = new maplibregl.Map({
             container: this.mapElementId,
@@ -70,6 +129,9 @@ class DashboardMapHandler {
         this.bindMapEvents();
     }
 
+    /**
+     * Add map navigation controls
+     */
     addMapControls() {
         this.map.addControl(new maplibregl.NavigationControl({
             showCompass: true,
@@ -77,9 +139,12 @@ class DashboardMapHandler {
         }));
     }
 
+    /**
+     * Bind map event handlers
+     */
     bindMapEvents() {
         this.map.on('load', () => {
-            console.log('Map loaded, loading data...');
+            console.log('Map loaded, loading plot data...');
             if (!this.mapState.dataLoaded && !this.mapState.isLoadingData) {
                 this.loadMapData();
             }
@@ -92,6 +157,9 @@ class DashboardMapHandler {
         this.bindMapMovementEvents();
     }
 
+    /**
+     * Bind map movement events (no reload on movement)
+     */
     bindMapMovementEvents() {
         this.map.on('movestart', () => {
             console.log('Map movement started - no data reload');
@@ -110,7 +178,9 @@ class DashboardMapHandler {
         });
     }
 
-    // Data loading methods
+    /**
+     * Load plot polygon data and add to map
+     */
     async loadMapData() {
         if (!this.map || this.mapState.dataLoaded || this.mapState.isLoadingData) {
             console.log('Skipping map data load - already loaded or loading');
@@ -118,13 +188,13 @@ class DashboardMapHandler {
         }
         
         this.mapState.isLoadingData = true;
-        console.log('Loading map data for the first time...');
+        console.log('Loading plot polygon data...');
         
         try {
             const geojson = await this.fetchMapData();
 
             if (!geojson || !geojson.features || geojson.features.length === 0) {
-                console.warn('No features found in map data');
+                console.warn('No plot features found');
                 this.updateProgressSummary([]);
                 return;
             }
@@ -132,19 +202,43 @@ class DashboardMapHandler {
             this.processFeatures(geojson);
             this.addMapLayers(geojson);
             this.addMapPopup();
-            this.fitMapToPolygons(geojson);
+            
+            // Only fit to polygons if we don't have lahan center coordinates
+            if (!this.hasLahanCenterCoordinates()) {
+                this.fitMapToPolygons(geojson);
+            }
+            
             this.updateProgressSummary(geojson.features);
 
             this.mapState.dataLoaded = true;
-            console.log('Map data loaded successfully - will not reload on map interactions');
+            console.log('Plot data loaded successfully');
         } catch (err) {
-            console.error('Error loading map data:', err);
+            console.error('Error loading plot data:', err);
             this.updateProgressSummary([]);
         } finally {
             this.mapState.isLoadingData = false;
         }
     }
 
+    /**
+     * Check if we have lahan center coordinates (not calculated from polygons)
+     */
+    hasLahanCenterCoordinates(mapData = null) {
+        // If we have map data, check the lahan_center property
+        if (mapData?.lahan_center?.has_coordinates) {
+            return true;
+        }
+        
+        // Otherwise check our stored center
+        return this.lahanCenter && 
+            this.lahanCenter.lng !== 118.0149 && 
+            this.lahanCenter.lat !== -2.5489 &&
+            this.lahanCenter.zoom === 16; // This indicates it came from lahan table
+    }
+
+    /**
+     * Fetch plot polygon data from backend
+     */
     async fetchMapData() {
         const res = await fetch(`/lahan/${this.lahanId}/dashboard/data?type=map-data`);
         if (!res.ok) {
@@ -153,13 +247,14 @@ class DashboardMapHandler {
         return await res.json();
     }
 
+    /**
+     * Process polygon features and calculate centers
+     */
     processFeatures(geojson) {
-        console.log('Processing features and calculating centers...');
+        console.log('Processing plot features...');
         geojson.features.forEach((feature, index) => {
             if (this.isValidPolygonFeature(feature)) {
                 const center = this.getPolygonCenter(feature.geometry.coordinates[0]);
-                console.log(`Feature ${index} (${feature.properties?.nama_plot}) center:`, center);
-                
                 if (center) {
                     feature.properties._calculatedCenter = center;
                 }
@@ -167,6 +262,9 @@ class DashboardMapHandler {
         });
     }
 
+    /**
+     * Check if feature is a valid polygon
+     */
     isValidPolygonFeature(feature) {
         return feature.geometry && 
                feature.geometry.type === 'Polygon' && 
@@ -174,7 +272,9 @@ class DashboardMapHandler {
                feature.geometry.coordinates[0];
     }
 
-    // Progress summary methods
+    /**
+     * Update progress summary display
+     */
     updateProgressSummary(features) {
         const progressSummary = document.getElementById('progress-summary');
         if (!progressSummary) return;
@@ -190,6 +290,9 @@ class DashboardMapHandler {
         console.log('Progress summary updated:', stats);
     }
 
+    /**
+     * Show empty state for progress summary
+     */
     showEmptyProgressSummary(container) {
         container.innerHTML = `
             <div class="text-center py-4">
@@ -198,6 +301,9 @@ class DashboardMapHandler {
         `;
     }
 
+    /**
+     * Calculate statistics from plot features
+     */
     calculateSummaryStats(features) {
         let totalProgress = 0;
         const blocks = [];
@@ -224,6 +330,9 @@ class DashboardMapHandler {
         };
     }
 
+    /**
+     * Render progress summary HTML
+     */
     renderProgressSummary(container, stats) {
         container.innerHTML = `
             <div class="flex items-center justify-center gap-6 text-sm flex-wrap">
@@ -254,13 +363,18 @@ class DashboardMapHandler {
         `;
     }
 
-    // Map layer methods
+    /**
+     * Add map layers for plot polygons
+     */
     addMapLayers(geojson) {
         this.addMapSource(geojson);
         this.addFillLayer();
         this.addOutlineLayer();
     }
 
+    /**
+     * Add or update map source with plot data
+     */
     addMapSource(geojson) {
         if (this.map.getSource('plots-source')) {
             this.map.getSource('plots-source').setData(geojson);
@@ -272,6 +386,9 @@ class DashboardMapHandler {
         }
     }
 
+    /**
+     * Add polygon fill layer
+     */
     addFillLayer() {
         if (!this.map.getLayer('plots-fill')) {
             this.map.addLayer({
@@ -286,6 +403,9 @@ class DashboardMapHandler {
         }
     }
 
+    /**
+     * Add polygon outline layer
+     */
     addOutlineLayer() {
         if (!this.map.getLayer('plots-outline')) {
             this.map.addLayer({
@@ -300,7 +420,9 @@ class DashboardMapHandler {
         }
     }
 
-    // Popup methods
+    /**
+     * Add interactive popup functionality
+     */
     addMapPopup() {
         if (this.mapState.popupAdded) return;
 
@@ -315,12 +437,18 @@ class DashboardMapHandler {
         this.mapState.popupAdded = true;
     }
 
+    /**
+     * Bind popup click events
+     */
     bindPopupEvents(popup) {
         this.map.on('click', 'plots-fill', (e) => {
             this.handlePlotClick(e, popup);
         });
     }
 
+    /**
+     * Bind cursor hover events
+     */
     bindCursorEvents() {
         this.map.on('mouseenter', 'plots-fill', () => {
             this.map.getCanvas().style.cursor = 'pointer';
@@ -331,6 +459,9 @@ class DashboardMapHandler {
         });
     }
 
+    /**
+     * Handle plot click and show popup
+     */
     handlePlotClick(e, popup) {
         if (!e.features || e.features.length === 0) return;
         
@@ -342,6 +473,10 @@ class DashboardMapHandler {
         popup.setLngLat(coordinates).setHTML(html).addTo(this.map);
     }
 
+
+    /**
+     * Create popup HTML content
+     */
     createPopupContent(properties) {
         const progressPercent = Math.round(properties.progress_percent || 0);
         const status = properties.status === 'completed' ? 'Selesai' : 'Dalam Proses';
@@ -381,6 +516,9 @@ class DashboardMapHandler {
         `;
     }
 
+    /**
+     * Get color class based on progress percentage
+     */
     getProgressColor(percent) {
         if (percent >= 100) return 'text-green-600';
         if (percent >= 75) return 'text-blue-600';
@@ -388,7 +526,9 @@ class DashboardMapHandler {
         return 'text-red-600';
     }
 
-    // Utility methods
+    /**
+     * Calculate center from GeoJSON features
+     */
     calculateGeojsonCenter(geojson) {
         if (!geojson || !geojson.features || geojson.features.length === 0) {
             return { lng: 118.0149, lat: -2.5489, zoom: 5 };
@@ -414,6 +554,9 @@ class DashboardMapHandler {
         return { lng: 118.0149, lat: -2.5489, zoom: 5 };
     }
 
+    /**
+     * Get polygon center point
+     */
     getPolygonCenter(coordinates) {
         if (!coordinates || !Array.isArray(coordinates) || coordinates.length === 0) {
             return null;
@@ -442,6 +585,9 @@ class DashboardMapHandler {
         return [totalLng / count, totalLat / count];
     }
 
+    /**
+     * Fit map to show all polygons (fallback method)
+     */
     fitMapToPolygons(geojson) {
         if (!geojson || !geojson.features || geojson.features.length === 0) return;
 
@@ -462,6 +608,9 @@ class DashboardMapHandler {
         }
     }
 
+    /**
+     * Get hybrid style configuration
+     */
     getHybridStyle() {
         return {
             version: 8,
@@ -509,6 +658,9 @@ class DashboardMapHandler {
         };
     }
 
+    /**
+     * Clean up and destroy map instance
+     */
     destroy() {
         console.log('Destroying dashboard map handler');
         

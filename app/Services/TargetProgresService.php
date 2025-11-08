@@ -7,6 +7,8 @@ use App\Models\TargetProgresReklamasi;
 use App\Models\IndikatorProgresReklamasi;
 use App\Models\ActivityLog;
 use App\Models\ProgresReklamasi;
+use App\Models\PlotProgres;
+use App\Models\ProgresSnapshot;
 use App\Services\ProgresReklamasiService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -65,6 +67,7 @@ class TargetProgresService
     {
         $indikators = IndikatorProgresReklamasi::whereIn('nama', $selectedKeys)->get()->keyBy('nama');
         $selectedIds = [];
+        $hasTargetChanges = false;
 
         foreach ($selectedKeys as $key) {
             if (!isset($indikators[$key])) {
@@ -74,23 +77,37 @@ class TargetProgresService
 
             $indicator = $indikators[$key];
             $selectedIds[] = $indicator->indikator_id;
-            $this->updateOrCreateTarget($plot, $indicator, $values[$key]);
+            
+            $targetChanged = $this->updateOrCreateTarget($plot, $indicator, $values[$key]);
+            if ($targetChanged) {
+                $hasTargetChanges = true;
+            }
         }
 
         // Remove targets that are not selected anymore
-        $this->removeUnselectedTargets($plot, $selectedIds);
+        $deletedCount = $this->removeUnselectedTargets($plot, $selectedIds);
+        if ($deletedCount > 0) {
+            $hasTargetChanges = true;
+        }
+
+        // Only recalculate if there were actual target changes
+        if ($hasTargetChanges) {
+            $this->recalculateProgressAfterTargetChange($plot);
+        }
     }
 
     /**
      * Create or update a target for a plot and indicator.
      * Also, add activity log and update plot progress snapshot.
      */
-    protected function updateOrCreateTarget(Plot $plot, IndikatorProgresReklamasi $indicator, $value): void
+    protected function updateOrCreateTarget(Plot $plot, IndikatorProgresReklamasi $indicator, $value): bool
     {
         $target = TargetProgresReklamasi::where([
             'plot_id' => $plot->plot_id,
             'indikator_id' => $indicator->indikator_id,
         ])->first();
+
+        $hasChanged = false;
 
         if (!$target) {
             // Create new target
@@ -107,6 +124,8 @@ class TargetProgresService
                 $target->target_id, 
                 $description
             );
+
+            $hasChanged = true;
         } else {
             // Only update & log if value changes
             if ($target->value != (float) $value) {
@@ -121,18 +140,18 @@ class TargetProgresService
                     $target->target_id, 
                     $description
                 );
+
+                $hasChanged = true;
             }
         }
-
-        // Update plot progress snapshot
-        ProgresReklamasiService::updatePlotProgress($plot, now()->toDateString());
+        return $hasChanged;
     }
 
     /**
      * Remove targets that are not selected anymore.
      * Prevent deletion if progres exists.
      */
-    protected function removeUnselectedTargets(Plot $plot, array $selectedIds): void
+    protected function removeUnselectedTargets(Plot $plot, array $selectedIds): int
     {
         // Get targets to delete (not in selected indicators)
         $query = TargetProgresReklamasi::where('plot_id', $plot->plot_id);
@@ -156,7 +175,36 @@ class TargetProgresService
             );
         }
 
-        TargetProgresReklamasi::whereIn('target_id', $targetsToDelete->pluck('target_id'))->delete();
+        $deletedCount = $targetsToDelete->count();
+        if ($deletedCount > 0) {
+            TargetProgresReklamasi::whereIn('target_id', $targetsToDelete->pluck('target_id'))->delete();
+        }
+
+        return $deletedCount;
+    }
+
+    /**
+     * Recalculate progress after target changes without creating new snapshots
+     * Only updates current progress and recalculates existing snapshots
+     */
+    protected function recalculateProgressAfterTargetChange(Plot $plot): void
+    {
+        // Update current overall progress
+        $currentPercent = ProgresReklamasiService::calculateOverallProgress($plot);
+        PlotProgres::updateOrCreate(
+            ['plot_id' => $plot->plot_id],
+            ['percent' => $currentPercent]
+        );
+
+        // Recalculate ALL existing snapshots with new targets
+        $existingSnapshots = ProgresSnapshot::where('plot_id', $plot->plot_id)
+            ->orderBy('date', 'asc')
+            ->get();
+
+        foreach ($existingSnapshots as $snapshot) {
+            $recalculatedPercent = ProgresReklamasiService::calculateProgressAtDate($plot, $snapshot->date);
+            $snapshot->update(['percent' => $recalculatedPercent]);
+        }
     }
 
     /**

@@ -1,6 +1,8 @@
 import { DashboardMapHandler } from './map-handler.js';
 import { DashboardDataService } from './data-service.js';
 import { DashboardChartRenderer } from './chart-renderer.js';
+import { DashboardChartFilter } from './chart-filter.js';
+
 
 class ReclamationDashboard {
     constructor(config) {
@@ -9,6 +11,7 @@ class ReclamationDashboard {
         this.mapHandler = null;
         this.dataService = null;
         this.chartRenderer = null;
+        this.chartFilter = null;
         this.isLoading = false;
         this.progressBlocks = [];
         this.currentBlockIndex = 0;
@@ -28,11 +31,17 @@ class ReclamationDashboard {
             this.dataService = new DashboardDataService(this.lahanId);
             this.chartRenderer = new DashboardChartRenderer(this.dataService);
             this.mapHandler = new DashboardMapHandler(this.lahanId);
+            this.chartFilter = new DashboardChartFilter();
 
             // Initialize components
             await this.mapHandler.initialize();
             await this.loadDashboardData();
             await this.chartRenderer.renderChart('main-chart', 'overall', '30days');
+            const filterPanel = document.getElementById('dashboardChartFilterPanel');
+            if (filterPanel) {
+                this.chartFilter = new DashboardChartFilter();
+                await this.chartFilter.init();
+            }
             this.bindEvents();
             
             console.log('Dashboard initialized successfully');
@@ -534,6 +543,11 @@ class ReclamationDashboard {
         if (this.dataService) {
             this.dataService.destroy();
             this.dataService = null;
+        }
+
+        if (this.chartFilter) {
+            this.chartFilter.destroy();
+            this.chartFilter = null;
         }
         
         window.dashboardInstance = null;

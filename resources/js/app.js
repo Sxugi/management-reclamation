@@ -24,7 +24,6 @@ window.MapboxDraw = MapboxDraw;
 window.turf = turf;
 
 import './components/dashboard/dashboard.js';
-import './components/dashboard/chart-filter.js';
 import './components/lahan/map-component.js';
 import './components/plot/map-plot-component.js';
 import './components/plot/activity/detail-modal.js';
