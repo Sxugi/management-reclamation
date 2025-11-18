@@ -34,7 +34,7 @@
                 <div class="flex flex-col w-1/2">
                     <x-main.input-label for="startMonth" class="block text-sm font-medium text-gray-700 mb-1">Bulan Dari</x-main.input-label>
                     <select id="startMonth" name="startMonth"
-                            class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
+                            class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
                         <option value="">Pilih Bulan</option>
                         @foreach(['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] as $i => $bulan)
                             <option value="{{ $i+1 }}" @selected(request('startMonth') == $i+1)>{{ $bulan }}</option>
@@ -44,7 +44,7 @@
                 <div class="flex flex-col w-1/2">
                     <x-main.input-label for="endMonth" class="block text-sm font-medium text-gray-700 mb-1">Bulan Sampai</x-main.input-label>
                     <select id="endMonth" name="endMonth"
-                            class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
+                            class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
                         <option value="">Pilih Bulan</option>
                         @foreach(['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'] as $i => $bulan)
                             <option value="{{ $i+1 }}" @selected(request('endMonth') == $i+1)>{{ $bulan }}</option>
@@ -113,7 +113,7 @@
 
             <div>
                 <x-main.input-label for="kategori_anggaran" class="block text-sm font-medium text-gray-700 mb-1">Kategori Anggaran</x-main.input-label>
-                <select id="kategori_anggaran" name="kategori_anggaran" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
+                <select id="kategori_anggaran" name="kategori_anggaran" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
                     <option value="">Pilih Kategori</option>
                     @foreach($kategoriAnggaranList as $kategori)
                         <option value="{{ $kategori }}" @selected(request('kategori_anggaran') === $kategori)>
@@ -126,7 +126,7 @@
             <div class="flex justify-between gap-2">
                 <div class="flex flex-col w-1/2">
                     <x-main.input-label for="startQuarter" class="block text-sm font-medium text-gray-700 mb-1">Quarter Awal</x-main.input-label>
-                    <select id="startQuarter" name="startQuarter" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
+                    <select id="startQuarter" name="startQuarter" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
                         <option value="">Pilih Quarter</option>
                         <option value="Q1" @selected(request('startQuarter') === 'Q1')>Q1</option>
                         <option value="Q2" @selected(request('startQuarter') === 'Q2')>Q2</option>
@@ -136,7 +136,7 @@
                 </div>
                 <div class="flex flex-col w-1/2">
                     <x-main.input-label for="endQuarter" class="block text-sm font-medium text-gray-700 mb-1">Quarter Akhir</x-main.input-label>
-                    <select id="endQuarter" name="endQuarter" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
+                    <select id="endQuarter" name="endQuarter" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
                         <option value="">Pilih Quarter</option>
                         <option value="Q1" @selected(request('endQuarter') === 'Q1')>Q1</option>
                         <option value="Q2" @selected(request('endQuarter') === 'Q2')>Q2</option>

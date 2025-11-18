@@ -22,7 +22,6 @@
                         id="jenis_pohon_select"
                         name="jenis_pohon"
                         class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent"
-                        required
                     >
                         <option value="">Pilih Jenis Pohon</option>
                         @foreach($jenisPohonList as $jenis)
@@ -46,7 +45,7 @@
                     <button type="button" onclick="addJenisBaru()" class="bg-green-500 !text-white text-sm px-4 rounded-lg font-medium hover:bg-green-600 transition-colors no-underline border-none text-xs font-normal font-outfit">Tambah</button>
                     <button type="button" onclick="hideInputJenisBaru()" class="bg-red-500 !text-white text-sm px-4 rounded-lg font-medium hover:bg-red-600 transition-colors no-underline border-none text-xs font-normal font-outfit">Batal</button>
                 </div>
-                <x-main.input-error :messages="$errors->get('jenis_pohon')" data-turbo-temporary class="mt-2" />
+                <x-main.input-error :messages="$errors->get('jenis_pohon')" data-turbo-temporary />
             </div>
 
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
@@ -58,9 +57,8 @@
                     min="1900" max="2100"
                     placeholder="Masukkan tahun"
                     class="flex-1 leading-5 bg-transparent text-sm"
-                    required
                 />
-                <x-main.input-error :messages="$errors->get('tahun')" data-turbo-temporary class="mt-2" />
+                <x-main.input-error :messages="$errors->get('tahun')" data-turbo-temporary />
             </div>
 
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
@@ -72,9 +70,8 @@
                     min="1"
                     placeholder="Masukkan jumlah pohon"
                     class="flex-1 leading-5 bg-transparent text-sm"
-                    required
                 />
-                <x-main.input-error :messages="$errors->get('jumlah')" data-turbo-temporary class="mt-2" />
+                <x-main.input-error :messages="$errors->get('jumlah')" data-turbo-temporary />
             </div>
 
             <div class="self-stretch flex flex-row items-center justify-end gap-3">

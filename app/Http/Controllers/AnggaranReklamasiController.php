@@ -105,7 +105,7 @@ class AnggaranReklamasiController extends Controller
         }
 
         return redirect()->route('lahan.anggaran.index', $lahan)
-            ->with('success', 'Anggaran Reklamasi created successfully.');
+            ->with('success', 'Anggaran Reklamasi berhasil ditambahkan.');
     }
     
 
@@ -156,7 +156,7 @@ class AnggaranReklamasiController extends Controller
         }
 
         return redirect()->route('lahan.anggaran.index', $lahan)
-            ->with('success', 'Anggaran Reklamasi updated successfully.');
+            ->with('success', 'Anggaran Reklamasi berhasil diperbarui.');
     }
 
     /**
@@ -177,8 +177,18 @@ class AnggaranReklamasiController extends Controller
             $quarter = $anggaran->quarter;
             $tahun = $anggaran->tahun;
             $bulan = $anggaran->bulan;
+            $lahanId = $lahan->lahan_id;
+            $jenisAnggaran = $anggaran->jenis_anggaran;
+            $oldLabel = $anggaran->quarter_label;
 
             $anggaran->delete();
+
+            $service->regenerateQuarterLabelAfterDeletion(
+                $quarter,
+                $lahanId,
+                $jenisAnggaran,
+                $oldLabel
+            );
             
             return redirect()->route('lahan.anggaran.index', $lahan)
                 ->with('success', "Anggaran dengan kategori $kategori untuk $quarter $tahun-$bulan berhasil dihapus.");

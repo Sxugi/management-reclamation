@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Lahan;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreLahanRequest extends FormRequest
 {
@@ -20,7 +21,7 @@ class StoreLahanRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'nama_lahan' => 'required|string|max:255',
+            'nama_lahan' => ['required', 'string', 'max:255', Rule::unique('lahan', 'nama_lahan')],
             'luas_lahan' => 'required|numeric|min:0.01',
             'tahun_awal' => 'required|integer|min:' . (date('Y') - 5) . '|max:' . (date('Y') + 5),
             'tahun_akhir' => [
@@ -64,6 +65,12 @@ class StoreLahanRequest extends FormRequest
     {
         return [
             'longitude.required' => 'Silakan pilih lokasi lahan pada peta.',
+            'nama_lahan.required' => 'Nama Lahan wajib diisi.',
+            'nama_lahan.unique' => 'Nama Lahan sudah digunakan. Silakan gunakan nama lain.',
+            'luas_lahan.required' => 'Luas Lahan wajib diisi.',
+            'tahun_awal.required' => 'Tahun Awal wajib diisi.',
+            'tahun_akhir.required' => 'Tahun Akhir wajib diisi.',
+            'pic_reklamasi.required' => 'PIC Reklamasi wajib diisi.',
         ];
     }
 }

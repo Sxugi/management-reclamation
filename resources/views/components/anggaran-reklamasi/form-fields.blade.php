@@ -21,7 +21,6 @@
                     name="quarter" 
                     id="quarter_select"
                     class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent"
-                    required
                 >
                     <option value="">Pilih Quarter</option>
                     @foreach($quarterList as $q)
@@ -30,7 +29,7 @@
                         </option>
                     @endforeach
                 </select>
-                <x-main.input-error :messages="$errors->get('quarter')" data-turbo-temporary class="mt-2" />
+                <x-main.input-error :messages="$errors->get('quarter')" data-turbo-temporary />
             </div>
 
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
@@ -39,14 +38,13 @@
                     name="jenis_anggaran"
                     id="jenis_anggaran_select"
                     class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent"
-                    required
                 >
                     <option value="">Pilih Jenis Anggaran</option>
                     <option value="actual" {{ old('jenis_anggaran', $anggaran?->jenis_anggaran ?? '') == 'actual' ? 'selected' : '' }}>Actual Cost</option>
                     <option value="projection" {{ old('jenis_anggaran', $anggaran?->jenis_anggaran ?? '') == 'projection' ? 'selected' : '' }}>Projection Cost</option>
                     <option value="forecast" {{ old('jenis_anggaran', $anggaran?->jenis_anggaran ?? '') == 'forecast' ? 'selected' : '' }}>Forecast Cost</option>
                 </select>
-                <x-main.input-error :messages="$errors->get('jenis_anggaran')" data-turbo-temporary class="mt-2" />
+                <x-main.input-error :messages="$errors->get('jenis_anggaran')" data-turbo-temporary />
             </div>
 
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
@@ -56,7 +54,6 @@
                         name="kategori_anggaran"
                         id="kategori_anggaran_select"
                         class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent"
-                        required
                     >
                         <option value="">Pilih Kategori Anggaran</option>
                         @foreach($kategoriAnggaranList as $kategori)
@@ -77,7 +74,7 @@
                     <button type="button" onclick="addKategoriAnggaranBaru()" class="bg-green-500 !text-white text-sm px-4 rounded-lg font-medium hover:bg-green-600 transition-colors no-underline border-none text-xs font-normal font-outfit">Tambah</button>
                     <button type="button" onclick="hideInputKategoriAnggaranBaru()" class="bg-red-500 !text-white text-sm px-4 rounded-lg font-medium hover:bg-red-600 transition-colors no-underline border-none text-xs font-normal font-outfit">Batal</button>
                 </div>
-                <x-main.input-error :messages="$errors->get('kategori_anggaran')" data-turbo-temporary class="mt-2" />
+                <x-main.input-error :messages="$errors->get('kategori_anggaran')" data-turbo-temporary />
             </div>
 
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
@@ -89,9 +86,8 @@
                     min="2000" max="2100"
                     placeholder="Masukkan tahun"
                     class="flex-1 leading-5 bg-transparent text-sm"
-                    required
                 />
-                <x-main.input-error :messages="$errors->get('tahun')" data-turbo-temporary class="mt-2" />
+                <x-main.input-error :messages="$errors->get('tahun')" data-turbo-temporary />
             </div>
             @php
                 $months = [
@@ -106,7 +102,6 @@
                     name="bulan"
                     id="bulan_select"
                     class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent"
-                    required
                 >
                     <option value="">Pilih Bulan</option>
                         @for($i = 1; $i <= 12; $i++)
@@ -115,7 +110,7 @@
                             </option>
                         @endfor
                 </select>
-                <x-main.input-error :messages="$errors->get('bulan')" data-turbo-temporary class="mt-2" />
+                <x-main.input-error :messages="$errors->get('bulan')" data-turbo-temporary />
             </div>
 
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
@@ -134,9 +129,8 @@
                     name="nominal"
                     id="nominal-input"
                     value="{{ old('nominal', $anggaran?->nominal) }}"
-                    required
                 />
-                <x-main.input-error :messages="$errors->get('nominal')" data-turbo-temporary class="mt-2" />
+                <x-main.input-error :messages="$errors->get('nominal')" data-turbo-temporary />
             </div>
 
             <div class="self-stretch flex flex-row items-center justify-end gap-3">
@@ -213,24 +207,11 @@
             }
         });
 
-        // Handle focus
         displayInput.addEventListener('focus', function(e) {
             setTimeout(() => {
                 e.target.setSelectionRange(e.target.value.length, e.target.value.length);
             }, 10);
         });
-
-        // Validate hidden input on form submit
-        let form = hiddenInput.closest('form');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                if (!hiddenInput.value || isNaN(parseFloat(hiddenInput.value))) {
-                    e.preventDefault();
-                    displayInput.focus();
-                    return false;
-                }
-            });
-        }
     }
 
     document.addEventListener('DOMContentLoaded', initializeNominalInput);

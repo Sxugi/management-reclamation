@@ -45,15 +45,17 @@ class UpdatePlotRequest extends FormRequest
                     return is_array($coord)
                         && count($coord) === 2
                         && is_numeric($coord[0])
-                        && is_numeric($coord[1]);
+                        && is_numeric($coord[1])
+                        && $coord[0] >= -180 && $coord[0] <= 180
+                        && $coord[1] >= -90 && $coord[1] <= 90;
                 });
+
+                if (count($validCoords) !== count($coords)) {
+                    return $fail('Semua koordinat harus berisi coordinat valid latitude (-90 sampai 90) dan longitude (-180 sampai 180).');
+                }
 
                 if (count($validCoords) < 3) {
                     return $fail('Polygon harus memiliki minimal 3 koordinat yang valid.');
-                }
-
-                if (count($validCoords) !== count($coords)) {
-                    return $fail('Semua koordinat harus berisi nilai angka yang valid.');
                 }
             }],
             'luas_area' => 'required|numeric',

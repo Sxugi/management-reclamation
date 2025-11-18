@@ -12,6 +12,7 @@ class DataPohonService
         'jenis_pohon',
         'tahun',
         'jumlah',
+        'total'
     ];
 
     public static function getFilteredData(Request $request, Lahan $lahan)
@@ -45,6 +46,10 @@ class DataPohonService
             }
         };
 
+        $query->whereHas('dataPohon', function($q) use ($relationFilter) {
+            $relationFilter($q);
+        });
+
         // Eager load filtered relation
         $query->whereHas('dataPohon', function($q) use ($relationFilter) {
             $relationFilter($q);
@@ -56,6 +61,11 @@ class DataPohonService
         if ($sort && in_array($sort, self::$allowedSorts) && in_array($direction, ['asc', 'desc'])) {
             if ($sort === 'jenis_pohon') {
                 $query->orderBy($sort, $direction);
+            } elseif ($sort === 'total') {
+                $query->withCount(['dataPohon as total' => function($q) use ($relationFilter) {
+                    $relationFilter($q);
+                    $q->select(\DB::raw('COALESCE(SUM(jumlah), 0)'));
+                }])->orderBy('total', $direction);
             } else {
                 $query->with(['dataPohon' => function($q) use ($sort, $direction) {
                     $q->orderBy($sort, $direction);
@@ -66,18 +76,30 @@ class DataPohonService
         return $query->paginate(8)->appends($request->query());
     }
 
-    public static function mapDataPohonByTahun($pohonCollection, $sortDirection)
+    public static function mapDataPohonByTahun($pohonCollection, $sortDirection = 'asc')
     {
+        // If paginator passed, transform its collection externally; caller typically passes getCollection()
         foreach ($pohonCollection as $pohon) {
-            $tahunMap = [];
+            // Ensure relation exists
+            $dataPohon = $pohon->dataPohon ?? collect();
+
+            // sort relation by tahun
             $sortedDataPohon = $sortDirection === 'desc'
-                ? $pohon->dataPohon->sortByDesc('tahun')
-                : $pohon->dataPohon->sortBy('tahun');
+                ? $dataPohon->sortByDesc('tahun')
+                : $dataPohon->sortBy('tahun');
+
+            $tahunMap = [];
             foreach ($sortedDataPohon as $dp) {
-                $tahunMap[$dp->tahun] = $dp;
+                $tahunMap[(int)$dp->tahun] = $dp;
             }
             $pohon->dataPohonByTahun = $tahunMap;
+
+            // Compute SUM total jumlah across all loaded dataPohon for this jenis pohon
+            $pohon->SUM = (int) $dataPohon->sum(function ($r) {
+                return (int) ($r->jumlah ?? 0);
+            });
         }
+
         return $pohonCollection;
     }
 
@@ -107,7 +129,8 @@ class DataPohonService
                $request->filled('pohonType') ||
                $request->filled('minQuantity') ||
                $request->filled('startYear') ||
-               $request->filled('endYear');
+               $request->filled('endYear') ||
+               $request->filled('total');
     }
 
     public static function getJenisPohonList($lahan_id)

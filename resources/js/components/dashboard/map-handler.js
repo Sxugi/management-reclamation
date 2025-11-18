@@ -201,6 +201,7 @@ class DashboardMapHandler {
 
             this.processFeatures(geojson);
             this.addMapLayers(geojson);
+            this.fitMapToPolygons(geojson);
             this.addMapPopup();
             
             // Only fit to polygons if we don't have lahan center coordinates

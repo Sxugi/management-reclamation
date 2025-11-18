@@ -19,6 +19,7 @@ class AnggaranReklamasiService
     private const Q1_ALLOW_FORCE_NEW = false;
 
     private const QUARTER_OFFSETS = [
+        'Q1' => -3,
         'Q2' => 0,
         'Q3' => 3,
         'Q4' => 6
@@ -258,14 +259,31 @@ class AnggaranReklamasiService
             (int)$bulan
         );
 
-        $relevantYears = $relevantSequence->pluck('tahun')
+        // Include the new input in the sequence to check cross-year
+        $allRecordsWithInput = $relevantSequence->push((object)[
+            'tahun' => (int)$tahun,
+            'bulan' => (int)$bulan,
+            'quarter' => $quarter,
+            'quarter_label' => null,
+            'kategori_anggaran' => $kategoriAnggaran,
+            'anggaran_reklamasi_id' => null 
+        ]);
+
+        $relevantYears = $allRecordsWithInput->pluck('tahun')
             ->map(fn($y) => (int)$y)
-            ->push((int)$tahun)
             ->unique()
             ->sort()
             ->values();
 
-        $allYears = $relevantYears;
+        // Also check globally for this quarter
+        $globalYears = $quarterRecordsAll->pluck('tahun')
+            ->push((int)$tahun)
+            ->map(fn($y) => (int)$y)
+            ->unique()
+            ->sort()
+            ->values();
+
+        $allYears = $relevantYears->count() > 1 ? $relevantYears : $globalYears;
 
         return [
             'quarter' => $quarter,
@@ -305,7 +323,7 @@ class AnggaranReklamasiService
                 $context['jenisAnggaran'], 
                 null // ALL categories
             );
-            $globalCycles = array_filter($globalCycles, fn($c) => $c['quarter'] === $quarter);
+            $globalCycles = array_filter($globalCyclesAll, fn($c) => $c['quarter'] === $quarter);
             
             $newStartCycle = collect($globalCycles)->first(fn($c) => $c['start'] === $yearInt);
             
@@ -341,12 +359,6 @@ class AnggaranReklamasiService
                     
                     if ($shouldAdopt && !$alreadyExists) {
                         $cycles[] = $covering;
-                        \Log::info('STEP 3B: ✅ ADOPTED GLOBAL CYCLE', [
-                            'quarter' => $context['quarter'],
-                            'tahun' => $context['tahun'],
-                            'kategori' => $context['kategoriAnggaran'],
-                            'cycle' => $covering
-                        ]);
                     }
                 }
             }
@@ -358,6 +370,11 @@ class AnggaranReklamasiService
     // Determine if global cycle should be adopted
     private function shouldAdoptGlobalCycle($context, $globalCycle): bool
     {
+        // Basic validation
+        if (!isset($globalCycle['start']) || !isset($globalCycle['end']) || !isset($globalCycle['quarter'])) {
+            return false;
+        }
+
         $quarter = $context['quarter'];
         $yearInt = $context['tahun'];
         $isMultiYear = $context['isMultiYear'];
@@ -448,9 +465,15 @@ class AnggaranReklamasiService
         $quarterCycles = array_filter($cycles, fn($c) => $c['quarter'] === $quarter);
 
         if ($context['isMultiYear']) {
-            $candidate = ['start' => $context['yearsSet']->first(), 'end' => $context['yearsSet']->last()];
+            $candidate = [
+                'quarter' => $quarter,
+                'start' => $context['yearsSet']->first(), 
+                'end' => $context['yearsSet']->last()
+            ];
+            
             $exists = collect($quarterCycles)->first(
                 fn($c) => $c['start'] === $candidate['start'] && $c['end'] === $candidate['end']
+                && $c['quarter'] === $quarter
             );
             
             if (!$exists) {
@@ -529,21 +552,136 @@ class AnggaranReklamasiService
     }
 
     // Update all categories for a cross-year quarter
-    private function updateAllCategoriesForCrossYearQuarter($quarter, $lahanId, $jenisAnggaran, $finalLabel, $quarterRecordsAll)
+    private function updateAllCategoriesForCrossYearQuarter($quarter, $lahanId, $jenisAnggaran, $finalLabel, array $yearsSet)
     {
-        // Get all records for this quarter across all categories
-        $allQuarterRecords = AnggaranReklamasi::where('quarter', $quarter)
-            ->where('lahan_id', $lahanId)
-            ->where('jenis_anggaran', $jenisAnggaran)
-            ->get();
+        DB::transaction(function () use ($quarter, $lahanId, $jenisAnggaran, $finalLabel, $yearsSet) {
+            // Scope to cycle years only
+            $yearsSet = array_values(array_unique(array_map('intval', $yearsSet)));
+            sort($yearsSet);
+            $startYear = $yearsSet[0];
+            $endYear   = $yearsSet[count($yearsSet) - 1];
 
-        foreach ($allQuarterRecords as $record) {
-            if ($record->quarter_label !== $finalLabel) {
-                $oldLabel = $record->quarter_label;
-                $record->quarter_label = $finalLabel;
-                $record->save();
+            // Fetch only rows within the cycle's years
+            $allQuarterRecords = AnggaranReklamasi::where('quarter', $quarter)
+                ->where('lahan_id', $lahanId)
+                ->where('jenis_anggaran', $jenisAnggaran)
+                ->whereBetween('tahun', [$startYear, $endYear])
+                ->get();
+
+            if ($allQuarterRecords->isEmpty()) return;
+
+            // Determine the 3 contiguous unique months that actually form the quarter
+            $uniqueIdx = $allQuarterRecords
+                ->map(fn($r) => $r->tahun * 12 + $r->bulan)
+                ->unique()
+                ->sort()
+                ->values();
+
+            // Find all contiguous windows of length 3
+            $windows = [];
+            for ($i = 0; $i <= $uniqueIdx->count() - 3; $i++) {
+                $a = $uniqueIdx[$i]; $b = $uniqueIdx[$i+1]; $c = $uniqueIdx[$i+2];
+                if ($b === $a + 1 && $c === $b + 1) {
+                    $windows[] = [$a, $b, $c];
+                }
             }
+
+            // Prefer a window that spans both start and end years if cross-year
+            $targetIdx = null;
+            if (!empty($windows)) {
+                foreach ($windows as $win) {
+                    $minYear = intdiv(min($win) - 1, 12);
+                    $maxYear = intdiv(max($win) - 1, 12);
+                    if ($startYear !== $endYear) {
+                        if ($minYear === $startYear && $maxYear === $endYear) {
+                            $targetIdx = $win;
+                            break;
+                        }
+                    }
+                }
+                // Fallback: use the last found contiguous window
+                if (!$targetIdx) {
+                    $targetIdx = end($windows);
+                }
+            } else {
+                // If we have less than 3 unique months (still forming), update what we have
+                $targetIdx = $uniqueIdx->all();
+            }
+
+            $idxSet = is_array($targetIdx) ? $targetIdx : (array)$targetIdx;
+
+            foreach ($allQuarterRecords as $record) {
+                $idx = $record->tahun * 12 + $record->bulan;
+
+                // Update only within the chosen window; never override a different cross-year cycle
+                if (in_array($idx, $idxSet, true)
+                    && !$this->isDifferentCycleCrossYear($record->quarter_label, $finalLabel)
+                    && $record->quarter_label !== $finalLabel) {
+                    $oldLabel = $record->quarter_label;
+                    $record->quarter_label = $finalLabel;
+                    $record->save();
+                    \Log::info('Cross-year label propagated (scoped)', [
+                        'id' => $record->anggaran_reklamasi_id,
+                        'from' => $oldLabel,
+                        'to'   => $finalLabel,
+                        'tahun' => $record->tahun,
+                        'bulan' => $record->bulan,
+                    ]);
+                }
+            }
+        });
+    }
+
+    public function regenerateQuarterLabelAfterDeletion(
+        string $quarter,
+        int $lahanId,
+        string $jenisAnggaran,
+        ?string $oldLabel
+    ): void
+    {
+        if (!$oldLabel) {
+            return;
         }
+
+        DB::transaction(function () use ($quarter, $lahanId, $jenisAnggaran, $oldLabel) {
+            $remainingRecords = AnggaranReklamasi::where('quarter', $quarter)
+                ->where('lahan_id', $lahanId)
+                ->where('jenis_anggaran', $jenisAnggaran)
+                ->where('quarter_label', $oldLabel)
+                ->orderBy('tahun')
+                ->orderBy('bulan')
+                ->get();
+
+            if ($remainingRecords->isEmpty()) {
+                \Log::info('No remaining records after deletion', [
+                    'quarter' => $quarter,
+                    'old_label' => $oldLabel
+                ]);
+                return;
+            }
+
+            $years = $remainingRecords->pluck('tahun')->unique()->sort()->values();
+
+            // Simple: If multi-year, try to find matching cycle, else fallback to simple format
+            $cycle = $years->count() > 1 
+                ? ['quarter' => $quarter, 'start' => $years->first(), 'end' => $years->last()]
+                : null;
+
+            // decideLabelWithPolicyA handles all logic
+            $newLabel = $this->decideLabelWithPolicyA($quarter, $years, $cycle ?? [], $remainingRecords);
+
+            if ($newLabel !== $oldLabel) {
+                $remainingRecords->each(function($record) use ($newLabel) {
+                    $record->update(['quarter_label' => $newLabel]);
+                });
+
+                \Log::info('Quarter label recalculated', [
+                    'from' => $oldLabel,
+                    'to' => $newLabel,
+                    'records' => $remainingRecords->count()
+                ]);
+            }
+        });
     }
 
     public function validateQuarterSequence(
@@ -639,9 +777,16 @@ class AnggaranReklamasiService
         
         // Check if there's ANY Q1 in this year from ANY category
         $existingQ1InYear = $allQ1Global->where('tahun', $tahun);
-        if ($existingQ1InYear->isNotEmpty()) {
-            $existingCategory = $existingQ1InYear->first()->kategori_anggaran;
-                   
+        if ($existingQ1InYear->isNotEmpty()) {    
+            // There is at least one Q1 in this year from some category
+            $firstQ1 = $existingQ1InYear->first();     
+            if (!$firstQ1) {
+                return [
+                    'valid' => false,
+                    'message' => 'Data Q1 tidak konsisten. Silakan hubungi administrator.'
+                ];
+            }
+
             // Get all Q1 in this year (from all categories) and treat as one sequence
             $allQ1InYear = $allQ1Global->where('tahun', $tahun);
 
@@ -673,6 +818,44 @@ class AnggaranReklamasiService
             return $this->validateSequenceWithinQuarter($uniqueMonthRecords, $bulan, $tahun, $quarter, $inputLabel, $kategoriAnggaran);
         }
 
+        // Check for incomplete Q1 groups globally
+        $incompleteGroups = $allQ1Global
+            ->groupBy('quarter_label')
+            ->filter(fn($g) => $g->pluck('bulan')->unique()->count() < self::QUARTER_COMPLETE_THRESHOLD);
+
+        if ($incompleteGroups->isNotEmpty()) {
+            foreach ($incompleteGroups as $label => $group) {
+                // Get unique month records in this group
+                $uniqueMonthRecords = $group->pluck('bulan')->unique()->sort()
+                    ->map(fn($m) => $group->firstWhere('bulan', $m))
+                    ->values();
+
+                // Check if input is the next contiguous month after the last month in the group
+                $last = $uniqueMonthRecords->sortBy(fn($r) => $r->tahun * 12 + $r->bulan)->last();
+                if ($last) {
+                    $lastIdx  = $last->tahun * 12 + $last->bulan;
+                    $inputIdx = $tahun * 12 + $bulan;
+                    $isContiguousNext = ($inputIdx === $lastIdx + 1);
+
+                    if ($isContiguousNext) {
+                        // Validate sequence within this incomplete Q1 group
+                        $check = $this->validateSequenceWithinQuarter(
+                            $uniqueMonthRecords,
+                            $bulan,
+                            $tahun,
+                            $quarter,
+                            $inputLabel,
+                            $kategoriAnggaran
+                        );
+                        if ($check['valid']) {
+                            $labelShow = $label ?: '(tanpa label)';
+                            return ['valid' => true, 'message' => "Valid - melengkapi Q1 {$labelShow}"];
+                        }
+                    }
+                }
+            }
+        }
+
         // No Q1 in this year, check if this category can start a new Q1
         $allQ1 = $allQuartersGlobal->where('quarter', 'Q1');
 
@@ -690,7 +873,11 @@ class AnggaranReklamasiService
         // Check for incomplete Q1 blocking
         $q1Groups = $allQ1->groupBy('quarter_label');
         $incompleteBlocking = $q1Groups->filter(function ($g) use ($tahun) {
-            if ($g->count() >= self::QUARTER_COMPLETE_THRESHOLD) return false;
+            $uniqueMonths = $g->pluck('bulan')->unique();
+            
+            if ($uniqueMonths->count() >= self::QUARTER_COMPLETE_THRESHOLD) {
+                return false;
+            }
             $hasCurrentYear = $g->contains(fn($r) => $r->tahun == $tahun);
             if (self::Q1_BLOCK_INCOMPLETE_SAME_YEAR_ONLY) {
                 return $hasCurrentYear;
@@ -700,9 +887,10 @@ class AnggaranReklamasiService
 
         if ($incompleteBlocking->isNotEmpty() && (self::Q1_ALLOW_FORCE_NEW === false)) {
             $blockLabels = $incompleteBlocking->map(function ($g, $label) {
-                $months = $g->sortBy(fn($r) => $r->tahun * 12 + $r->bulan)
-                            ->map(fn($r) => self::MONTH_NAMES[$r->bulan] . ' ' . $r->tahun)
-                            ->join(', ');
+                $months = $g->pluck('bulan')->unique()
+                    ->sort()
+                    ->map(fn($m) => self::MONTH_NAMES[$m] . ' ' . $g->where('bulan', $m)->first()->tahun)
+                    ->join(', ');
                 $labelShow = $label ?? '(tanpa label)';
                 return "{$labelShow} [{$months}]";
             })->values()->join(' | ');
@@ -742,7 +930,7 @@ class AnggaranReklamasiService
         $kategoriAnggaran
     ) {
         // Always use global Q1 context first, not category-specific
-        $globalQ1Context = $this->findGlobalCompleteQ1Context($lahanId, $jenisAnggaran, $tahun);
+        $globalQ1Context = $this->findGlobalCompleteQ1Context($lahanId, $jenisAnggaran, $tahun, $bulan, $quarter);
         
         if ($globalQ1Context) {
             // Use global Q1 as reference
@@ -777,7 +965,7 @@ class AnggaranReklamasiService
         }
 
         // Find relevant Q1 globally, not per category
-        $q1Context = $this->findRelevantQ1ForYear($tahun, $allQuartersGlobal); // Use global data
+        $q1Context = $this->findRelevantQ1ForYear($tahun, $bulan, $quarter, $allQuartersGlobal);
 
         if (in_array($q1Context['status'], ['not_found', 'incomplete'])) {
             if ($q1Context['status'] === 'incomplete') {
@@ -791,7 +979,6 @@ class AnggaranReklamasiService
                 'message' => "Belum ada Q1 yang lengkap sebagai referensi. Silakan buat dan lengkapi Q1 terlebih dahulu."
             ];
         }
-
         return $this->validateBasedOnQ1($quarter, $tahun, $bulan, $q1Context, $allQuartersGlobal, $inputLabel, $kategoriAnggaran);
     }
 
@@ -800,15 +987,38 @@ class AnggaranReklamasiService
         $q1Data = $q1ForThisContext['data'];
         $q1Months = $q1Data->sortBy(fn($item) => $item->tahun * 12 + $item->bulan);
 
+        if ($q1Months->isEmpty()) {
+            return [
+                'valid' => false,
+                'message' => 'Data Q1 tidak valid. Silakan periksa kembali.'
+            ];
+        }
+
         $q1EndMonth = $q1Months->last()->bulan;
         $q1EndYear = $q1Months->last()->tahun;
+
+        if (!isset(self::QUARTER_OFFSETS[$quarter])) {
+            return [
+                'valid' => false,
+                'message' => 'Quarter tidak valid.'
+            ];
+        }
 
         $quarterStartMonth = $q1EndMonth + 1 + self::QUARTER_OFFSETS[$quarter];
         $quarterStartYear = $q1EndYear;
 
-        while ($quarterStartMonth > 12) {
+        $maxIterations = 24; // Max 2 years
+        $iterations = 0;
+        while ($quarterStartMonth > 12 && $iterations < $maxIterations) {
             $quarterStartYear++;
             $quarterStartMonth -= 12;
+            $iterations++;
+        }
+
+        while ($quarterStartMonth < 1 && $iterations < $maxIterations) {
+            $quarterStartYear--;
+            $quarterStartMonth += 12;
+            $iterations++;
         }
 
         $validMonths = [];
@@ -932,8 +1142,11 @@ class AnggaranReklamasiService
             ->map(fn($item) => $item->tahun * 12 + $item->bulan)
             ->toArray();
         $allIdx[] = $inputIdx;
-        $minYear = intval(min($allIdx) / 12);
-        $maxYear = intval(max($allIdx) / 12);
+
+        $minIdx  = min($allIdx);
+        $maxIdx  = max($allIdx);
+        $minYear = intdiv($minIdx - 1, 12);
+        $maxYear = intdiv($maxIdx - 1, 12);
 
         if (($maxYear - $minYear) > 1) {
             return [
@@ -1006,36 +1219,40 @@ class AnggaranReklamasiService
         return null;
     }
 
-    private function prioritizeCycles(array $cycles): array
-    {
-        usort($cycles, function ($a, $b) {
-            $spanA = $a['end'] - $a['start'];
-            $spanB = $b['end'] - $b['start'];
-            if ($spanA === $spanB) return $a['end'] <=> $b['end'];
-            return $spanA <=> $spanB;
-        });
-        return $cycles[0];
-    }
-
     private function decideLabelWithPolicyA(
         string $quarter,
         Collection $yearsSet,
         array $cycle,
         Collection $quarterRecords
     ): string {
+        // Add quarter to cycle if not present
+        if (!isset($cycle['quarter'])) {
+            $cycle['quarter'] = $quarter;
+        }
+
+        // If multiple years, always use cross-year format
         if ($yearsSet->count() > 1) {
             return sprintf('%s-%d/%d', $quarter, $cycle['start'], $cycle['end']);
         }
+        
+        // Single year
         $year = (int)$yearsSet->first();
-        if ($year === (int)$cycle['start']) {
-            return sprintf('%s-%d/%d', $quarter, $cycle['start'], $cycle['end']);
-        }
-        if ($year === (int)$cycle['end']) {
-            if ($quarter === 'Q1') {
-                return $quarter . '-' . $year;
+        
+        // Check if this single year is part of a cross-year cycle
+        if (isset($cycle['start']) && isset($cycle['end']) && $cycle['start'] !== $cycle['end']) {
+            // This is part of a cross-year cycle
+            if ($year === (int)$cycle['start']) {
+                return sprintf('%s-%d/%d', $quarter, $cycle['start'], $cycle['end']);
             }
-            return sprintf('%s-%d/%d', $quarter, $cycle['start'], $cycle['end']);
+            if ($year === (int)$cycle['end']) {
+                if ($quarter === 'Q1') {
+                    // Policy A: Q1 at end year stays single
+                    return $quarter . '-' . $year;
+                }
+                return sprintf('%s-%d/%d', $quarter, $cycle['start'], $cycle['end']);
+            }
         }
+        
         return $quarter . '-' . $year;
     }
 
@@ -1199,7 +1416,7 @@ class AnggaranReklamasiService
         return ['valid' => true, 'message' => 'Valid - Memulai Q1 baru'];
     }
 
-    private function findGlobalCompleteQ1Context(int $lahanId, string $jenisAnggaran, int $targetYear): ?array
+    private function findGlobalCompleteQ1Context(int $lahanId, string $jenisAnggaran, int $targetYear, int $targetMonth, string $targetQuarter): ?array
     {
         // Get ALL Q1s across all categories
         $q1All = AnggaranReklamasi::where('lahan_id', $lahanId)
@@ -1210,116 +1427,205 @@ class AnggaranReklamasiService
 
         if ($q1All->isEmpty()) return null;
 
-        // Group by quarter_label and find complete ones (3 months)
+        // Group by quarter_label and find complete ones (3 UNIQUE months)
         $groups = $q1All->groupBy('quarter_label')
-            ->filter(fn($g) => $g->count() >= self::QUARTER_COMPLETE_THRESHOLD);
+            ->filter(fn($g) => $g->pluck('bulan')->unique()->count() >= self::QUARTER_COMPLETE_THRESHOLD);
 
         if ($groups->isEmpty()) return null;
 
-        // First, try to find Q1 that covers the target year
+        // Check each complete Q1 to see if it can produce the target
         $candidates = [];
+        
         foreach ($groups as $label => $g) {
-            if (preg_match('/^Q1-(\d{4})(?:\/(\d{4}))?$/', $label, $m)) {
-                $start = (int)$m[1];
-                $end = isset($m[2]) ? (int)$m[2] : $start;
-                if ($targetYear >= $start && $targetYear <= $end) {
-                    $candidates[] = [
-                        'label' => $label,
-                        'data' => $g,
-                        'start' => $start,
-                        'end' => $end,
-                        'priority' => 1 // Covers target year
-                    ];
+            if (!preg_match('/^Q1-(\d{4})(?:\/(\d{4}))?$/', $label, $m)) {
+                continue;
+            }
+            
+            // Get Q1's last month/year
+            $sorted = $g->sortBy(fn($r) => $r->tahun * 12 + $r->bulan);
+            $q1LastRecord = $sorted->last();
+            $q1EndMonth = (int)$q1LastRecord->bulan;
+            $q1EndYear = (int)$q1LastRecord->tahun;
+            
+            // Calculate what months this Q1 would produce for the target quarter
+            if (!isset(self::QUARTER_OFFSETS[$targetQuarter])) {
+                continue;
+            }
+            
+            $quarterStartMonth = $q1EndMonth + 1 + self::QUARTER_OFFSETS[$targetQuarter];
+            $quarterStartYear = $q1EndYear;
+            
+            // Normalize month
+            $iterations = 0;
+            $maxIterations = 24;
+            while ($quarterStartMonth > 12 && $iterations < $maxIterations) {
+                $quarterStartYear++;
+                $quarterStartMonth -= 12;
+                $iterations++;
+            }
+            
+            while ($quarterStartMonth < 1 && $iterations < $maxIterations) {
+                $quarterStartYear--;
+                $quarterStartMonth += 12;
+                $iterations++;
+            }
+            
+            // Calculate the 3 valid months for this quarter based on this Q1
+            $validMonths = [];
+            for ($i = 0; $i < 3; $i++) {
+                $month = $quarterStartMonth + $i;
+                $year = $quarterStartYear;
+                if ($month > 12) {
+                    $year++;
+                    $month -= 12;
                 }
+                $validMonths[] = ['month' => $month, 'year' => $year];
+            }
+            
+            // Check if target month/year is in this Q1's valid range
+            $canServe = collect($validMonths)->contains(
+                fn($vm) => $vm['month'] == $targetMonth && $vm['year'] == $targetYear
+            );
+            
+            if ($canServe) {
+                $candidates[] = [
+                    'label' => $label,
+                    'data' => $g,
+                    'q1EndYear' => $q1EndYear,
+                    'priority' => 1 // Can serve this target
+                ];
             }
         }
-
-        // If no Q1 covers target year, use the most recent complete Q1
+        
+        // If no Q1 can serve, return null (will fallback to findRelevantQ1ForYear)
         if (empty($candidates)) {
-            foreach ($groups as $label => $g) {
-                if (preg_match('/^Q1-(\d{4})(?:\/(\d{4}))?$/', $label, $m)) {
-                    $start = (int)$m[1];
-                    $end = isset($m[2]) ? (int)$m[2] : $start;
-                    $candidates[] = [
-                        'label' => $label,
-                        'data' => $g,
-                        'start' => $start,
-                        'end' => $end,
-                        'priority' => 2 // Fallback
-                    ];
-                }
-            }
+            return null;
         }
-
-        if (empty($candidates)) return null;
-
-        // Sort by priority first, then by most recent
-        usort($candidates, function($a, $b) {
-            if ($a['priority'] !== $b['priority']) {
-                return $a['priority'] <=> $b['priority'];
-            }
-            return [$b['end'], $b['start']] <=> [$a['end'], $a['start']];
-        });
-
+        
+        // Sort by most recent Q1
+        usort($candidates, fn($a, $b) => $b['q1EndYear'] <=> $a['q1EndYear']);
+        
         $pick = $candidates[0];
+        
         return [
             'status' => 'complete',
             'data' => $pick['data'],
-            'label' => $pick['data']->unique('bulan')->map(fn($i) => self::MONTH_NAMES[$i->bulan] . ' ' . $i->tahun)->join(', '),
+            'label' => $pick['data']->pluck('bulan')->unique()->sort()
+                        ->map(fn($i) => self::MONTH_NAMES[$i] . ' ' . $pick['data']->firstWhere('bulan', $i)->tahun)->join(', '),
             'quarter_label' => $pick['label']
         ];
     }
 
-    private function findRelevantQ1ForYear($targetYear, $allQuarters)
+    private function findRelevantQ1ForYear($targetYear, $targetMonth, $targetQuarter, $allQuarters)
     {
         if (!($allQuarters instanceof Collection)) {
             $allQuarters = collect($allQuarters);
         }
 
-        // Get ALL Q1 data (should be global now)
         $allQ1Data = $allQuarters->where('quarter', 'Q1');
         if ($allQ1Data->isEmpty()) {
             return ['status' => 'not_found'];
         }
 
-        // Look for Q1 in the target year
-        $q1InTargetYear = $allQ1Data->where('tahun', $targetYear);
-        if ($q1InTargetYear->isNotEmpty()) {
-            $label = $q1InTargetYear->first()->quarter_label;
-            $full = $allQ1Data->where('quarter_label', $label);
-            $status = $full->count() >= self::QUARTER_COMPLETE_THRESHOLD ? 'complete' : 'incomplete';
-            $lbl = $full->unique('bulan')->map(fn($i) => self::MONTH_NAMES[$i->bulan] . " {$i->tahun}")->join(', ');
-            return ['status' => $status, 'data' => $full, 'label' => $lbl, 'quarter_label' => $label];
+        // Get all complete Q1 groups
+        $groups = $allQ1Data->groupBy('quarter_label');
+        $completeGroups = $groups->filter(fn($grp) => $grp->pluck('bulan')->unique()->count() >= self::QUARTER_COMPLETE_THRESHOLD);
+        
+        if ($completeGroups->isEmpty()) {
+            // Check for incomplete Q1 in target year
+            $q1InTargetYear = $allQ1Data->where('tahun', $targetYear);
+            if ($q1InTargetYear->isNotEmpty()) {
+                $label = $q1InTargetYear->first()->quarter_label;
+                $full = $allQ1Data->where('quarter_label', $label);
+                return ['status' => 'incomplete', 'data' => $full, 'label' => '', 'quarter_label' => $label];
+            }
+            return ['status' => 'not_found'];
         }
 
-        // Look for complete Q1 groups
-        $groups = $allQ1Data->groupBy('quarter_label');
-        $completeGroups = $groups->filter(fn($grp) => $grp->count() >= self::QUARTER_COMPLETE_THRESHOLD);
+        // Check each Q1 to see if it can produce the target year/month for this quarter
+        $candidates = [];
         
-        if ($completeGroups->isNotEmpty()) {
-            // Find the most relevant complete Q1 (prefer recent ones)
-            $bestGroup = null;
-            $bestLabel = null;
-            $bestEnd = 0;
-            
-            foreach ($completeGroups as $label => $grp) {
-                if (preg_match('/^Q1-(\d{4})(?:\/(\d{4}))?$/', $label, $m)) {
-                    $end = isset($m[2]) ? (int)$m[2] : (int)$m[1];
-                    if ($end > $bestEnd) {
-                        $bestEnd = $end;
-                        $bestGroup = $grp;
-                        $bestLabel = $label;
-                    }
-                }
+        foreach ($completeGroups as $label => $grp) {
+            if (!preg_match('/^Q1-(\d{4})(?:\/(\d{4}))?$/', $label, $m)) {
+                continue;
             }
             
-            if ($bestGroup) {
-                $lbl = $bestGroup->map(fn($i) => self::MONTH_NAMES[$i->bulan] . " {$i->tahun}")->join(', ');
-                return ['status' => 'complete', 'data' => $bestGroup, 'label' => $lbl, 'quarter_label' => $bestLabel];
+            // Get Q1's last month
+            $sorted = $grp->sortBy(fn($r) => $r->tahun * 12 + $r->bulan);
+            $q1LastRecord = $sorted->last();
+            $q1EndMonth = (int)$q1LastRecord->bulan;
+            $q1EndYear = (int)$q1LastRecord->tahun;
+            
+            // Calculate what months this Q1 would produce for the target quarter
+            if (!isset(self::QUARTER_OFFSETS[$targetQuarter])) {
+                continue;
+            }
+            
+            $quarterStartMonth = $q1EndMonth + 1 + self::QUARTER_OFFSETS[$targetQuarter];
+            $quarterStartYear = $q1EndYear;
+            
+            // Normalize month
+            $iterations = 0;
+            $maxIterations = 24;
+            while ($quarterStartMonth > 12 && $iterations < $maxIterations) {
+                $quarterStartYear++;
+                $quarterStartMonth -= 12;
+                $iterations++;
+            }
+            
+            while ($quarterStartMonth < 1 && $iterations < $maxIterations) {
+                $quarterStartYear--;
+                $quarterStartMonth += 12;
+                $iterations++;
+            }
+            
+            // Check if this Q1 can produce the target year/month
+            $validMonths = [];
+            for ($i = 0; $i < 3; $i++) {
+                $month = $quarterStartMonth + $i;
+                $year = $quarterStartYear;
+                if ($month > 12) {
+                    $year++;
+                    $month -= 12;
+                }
+                $validMonths[] = ['month' => $month, 'year' => $year];
+            }
+            
+            // Check if target month/year is in valid range
+            $canServe = collect($validMonths)->contains(
+                fn($vm) => $vm['month'] == $targetMonth && $vm['year'] == $targetYear
+            );
+            
+            if ($canServe) {
+                $candidates[] = [
+                    'label' => $label,
+                    'data' => $grp,
+                    'q1EndYear' => $q1EndYear
+                ];
             }
         }
         
-        return ['status' => 'not_found'];
+        // If no Q1 can serve this combination, return not found
+        if (empty($candidates)) {
+            return ['status' => 'not_found'];
+        }
+        
+        // Prefer the most recent Q1 if multiple can serve
+        usort($candidates, fn($a, $b) => $b['q1EndYear'] <=> $a['q1EndYear']);
+        
+        $best = $candidates[0];
+        $grp = $best['data'];
+        
+        $lbl = $grp->pluck('bulan')->unique()->sort()
+            ->map(fn($m) => self::MONTH_NAMES[$m] . " " . $grp->firstWhere('bulan', $m)->tahun)
+            ->join(', ');
+        
+        return [
+            'status' => 'complete',
+            'data' => $grp,
+            'label' => $lbl,
+            'quarter_label' => $best['label']
+        ];
     }
 
     private function getExistingQuarterData($quarter, $targetYear, $allQuarters)
@@ -1365,19 +1671,21 @@ class AnggaranReklamasiService
     private function applyLabelToQuarterRecordsByIds(array $ids, string $label): void
     {
         if (empty($ids)) return;
-        $records = AnggaranReklamasi::whereIn('anggaran_reklamasi_id', $ids)->get();
-        foreach ($records as $r) {
-            if ($r->quarter_label !== $label) {
-                $old = $r->quarter_label;
-                $r->quarter_label = $label;
-                $r->save();
-                \Log::info('Quarter label applied (targeted)', [
-                    'id' => $r->anggaran_reklamasi_id,
-                    'from' => $old,
-                    'to' => $label
-                ]);
+        DB::transaction(function () use ($ids, $label) {
+            $records = AnggaranReklamasi::whereIn('anggaran_reklamasi_id', $ids)->get();
+            foreach ($records as $r) {
+                if ($r->quarter_label !== $label) {
+                    $old = $r->quarter_label;
+                    $r->quarter_label = $label;
+                    $r->save();
+                    \Log::info('Quarter label applied (targeted)', [
+                        'id' => $r->anggaran_reklamasi_id,
+                        'from' => $old,
+                        'to' => $label
+                    ]);
+                }
             }
-        }
+        });
     }
 
     protected static array $allowedSorts = [

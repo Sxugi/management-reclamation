@@ -621,7 +621,7 @@ document.addEventListener('alpine:init', () => {
                     { lat: '', lng: '' }
                 ],
         nama_plot: initialData.nama_plot || '',
-        luas_area: initialData.luas_area || 0,
+        luas_area: initialData.luas_area || '',
         polygonId: null,
         
         init() {
@@ -682,7 +682,7 @@ document.addEventListener('alpine:init', () => {
                     { lat: '', lng: '' }
                 ];
                 this.polygonId = null;
-                this.luas_area = 0;
+                this.luas_area = null;
             });
         },
         
@@ -696,7 +696,7 @@ document.addEventListener('alpine:init', () => {
             // Set polygon ID, name, and area
             this.polygonId = this.polygons.plot_id ?? null;
             this.nama_plot = this.polygons.nama_plot ?? '';
-            this.luas_area = this.polygons.luas_area ?? 0;
+            this.luas_area = this.polygons.luas_area ?? '';
 
             // Extract coordinates from the polygons object
             const coordinates = this.polygons?.polygon?.coordinates;

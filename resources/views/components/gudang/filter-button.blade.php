@@ -29,7 +29,7 @@
 
             <div>
                 <x-main.input-label for="jenisBarang" class="block text-sm font-medium text-gray-700 mb-1">Jenis Barang</x-main.input-label>
-                <select id="jenisBarang" name="jenisBarang" placeholder="Jenis Barang" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
+                <select id="jenisBarang" name="jenisBarang" placeholder="Jenis Barang" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
                     <option value="">Pilih Jenis Barang</option>
                     <option value="Pupuk" @selected(request('jenisBarang') === 'Pupuk')>Pupuk</option>
                     <option value="Pestisida" @selected(request('jenisBarang') === 'Pestisida')>Pestisida</option>
@@ -41,7 +41,7 @@
 
             <div>
                 <x-main.input-label for="statusBarang" class="block text-sm font-medium text-gray-700 mb-1">Status Barang</x-main.input-label>
-                <select id="statusBarang" name="statusBarang" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
+                <select id="statusBarang" name="statusBarang" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
                     <option value="">Pilih Status Barang</option>
                     <option value="Tersedia" @selected(request('statusBarang') === 'Tersedia')>Tersedia</option>
                     <option value="Kosong" @selected(request('statusBarang') === 'Kosong')>Kosong</option>

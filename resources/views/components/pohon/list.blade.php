@@ -5,39 +5,41 @@
     'tahunList',
 ])
 
-<div class="grid flex-1 self-stretch auto-cols-fr gap-y-8 rounded-b-2xl border-gainsboro border-solid border-[1px] overflow-hidden">
+<div class="grid flex-1 self-stretch auto-cols-fr gap-y-8 rounded-b-2xl border-gainsboro border-solid border overflow-hidden">
     <div class="flex flex-col overflow-x-auto">
         <table class="min-w-max w-full text-xs text-darkslategray font-outfit border-collapse table-fixed">
-            <thead class="border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[0px] border-l-[0px]">
+            <thead class="border-gainsboro border-solid border-b">
                 <colgroup>
                     <col class="w-32">
                     @foreach($tahunList as $tahun)
                         <col class="w-auto">
                     @endforeach
+                    <col class="w-20">
                 </colgroup>
                 <tr>
-                    <x-main.sortable-header :rowspan="2" column="jenis_pohon" title="Jenis Pohon" class="h-6 py-3 border-b-[1px] text-sm" />
+                    <x-main.sortable-header :rowspan="2" column="jenis_pohon" title="Jenis Pohon" class="h-6 py-3 border-gainsboro border-solid border text-sm" />
                     @if(empty($tahunList))
-                        <th scope="col" class="h-6 py-3 px-3 text-center leading-5 font-bold border-gainsboro border-solid border-[0px] border-b-[1px] border-l-[1px]">Tahun</th>
+                        <th scope="col" class="h-6 py-3 px-3 text-center leading-5 font-bold border-gainsboro border-solid border">Tahun</th>
                     @else
-                        <x-main.sortable-header :colspan="count($tahunList)" column="tahun" title="Tahun" class="text-center border-l-[1px] text-sm p-2" />
+                        <x-main.sortable-header :colspan="count($tahunList)" column="tahun" title="Tahun" class="text-center border-gainsboro border-solid border-l border-r text-sm p-2" />
                     @endif
+                    <x-main.sortable-header :rowspan="2" column="total" title="Total" class="h-6 py-3 border-gainsboro border-solid border text-sm" />
                 </tr>
                 <tr>
                     @foreach($tahunList as $tahun)
-                        <th scope="col" class="px-3 text-center leading-5 font-bold border-gainsboro border-solid border-[1px] border-r-[0px] text-xs p-2">{{ $tahun }}</th>
+                        <th scope="col" class="px-3 text-center leading-5 font-bold border-gainsboro border-solid border text-xs p-2">{{ $tahun }}</th>
                     @endforeach
                 </tr>
             </thead>
             <tbody>
                 @forelse($pohon ?? [] as $data)
                     <tr>
-                        <td class="py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-[0px] whitespace-nowrap">
+                        <td class="py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border border-l-0 whitespace-nowrap">
                             {{ $data->jenis_pohon }}
                         </td>
                         @foreach($tahunList as $tahun)
                             @if(isset($data->dataPohonByTahun[$tahun]))
-                                <td class="py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-l-[1px] border-[0px] whitespace-nowrap cursor-pointer hover:bg-lightgray" 
+                                <td class="py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border whitespace-nowrap cursor-pointer hover:bg-lightgray" 
                                 onclick="window.openPohonModal({
                                     'jenis_pohon': '{{ $data->jenis_pohon }}',
                                     'tahun': '{{ $tahun }}',
@@ -71,20 +73,23 @@
                                     </x-main.modal>
                                 </td>
                             @else
-                                <td class="py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-l-[1px] border-[0px] whitespace-nowrap">
+                                <td class="py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border whitespace-nowrap">
                                     {{ $data->dataPohonByTahun[$tahun]->jumlah ?? '-' }}
                                 </td>
                             @endif
                         @endforeach
+                        <td class="py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border border-r-0 whitespace-nowrap">
+                            {{ $data->SUM ?? '-' }}
+                        </td>
                     </tr>
                 @empty
                     @if($hasFilter)
                         <tr class="border-none">
-                            <td colspan="2"><x-pohon.empty-state :hasFilter="true" /></td>
+                            <td colspan="3"><x-pohon.empty-state :hasFilter="true" /></td>
                         </tr>
                     @else
                         <tr class="border-none">
-                            <td colspan="2" class="py-6 px-3 text-center text-darkslategray">No data pohon available yet</td>
+                            <td colspan="3" class="py-6 px-3 text-center text-darkslategray">No data pohon available yet</td>
                         </tr>
                     @endif
                 @endforelse

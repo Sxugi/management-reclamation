@@ -7,7 +7,9 @@ use App\Models\FieldDefinition;
 use App\Models\Plot;
 use App\Models\IndikatorProgresReklamasi;
 use App\Models\TargetProgresReklamasi;
+use App\Models\ProgresReklamasi;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class StoreProgresReklamasiRequest extends FormRequest
 {
@@ -26,7 +28,11 @@ class StoreProgresReklamasiRequest extends FormRequest
     {
         $coreRules = [
             'jenis_aktivitas_id' => 'required|exists:jenis_aktivitas,jenis_aktivitas_id',
-            'tanggal' => 'required|date',
+            'tanggal' => [
+                'required',
+                'date',
+                'before_or_equal:today'
+            ],
             'catatan' => 'nullable|string|max:500',
             'dokumentasi' => 'nullable|array',
             'dokumentasi.*' => 'nullable|image|max:5120', // 5MB per image
@@ -64,42 +70,263 @@ class StoreProgresReklamasiRequest extends FormRequest
                 return;
             }
 
-            $indikatorId = null;
-
-            $indicatorField = FieldDefinition::where('jenis_aktivitas_id', $activityId)
-                ->whereNotNull('indicator_key')
-                ->first();
-
-            if ($indicatorField) {
-                $indikatorRow = IndikatorProgresReklamasi::where('nama', $indicatorField->indicator_key)->first();
-                $indikatorId = $indikatorRow ? $indikatorRow->indikator_id : null;
-            }
-
-            if (!$indikatorId) {
-                return;
-            }
-
-            $hasTarget = TargetProgresReklamasi::where('plot_id', $plotId)
-                ->where('indikator_id', $indikatorId)
-                ->exists();
-
-            if (!$hasTarget) {
-                $validator->errors()->add('target', 'Tidak dapat input progres karena target untuk indikator ini belum dibuat!');
-            }
+            // Check target exists
+            $this->validateTargetExists($validator, $plotId, $activityId);
+            
+            // Check cumulative limits based on target and field type
+            $this->validateCumulativeLimits($validator, $plotId, $activityId);
         });
     }
 
     /**
-     * Build validation rules for dynamic fields with plot area constraints
+     * Validate that target exists for the indicator
+     */
+    private function validateTargetExists($validator, $plotId, $activityId)
+    {
+        $indikatorId = null;
+
+        $indicatorField = FieldDefinition::where('jenis_aktivitas_id', $activityId)
+            ->whereNotNull('indicator_key')
+            ->first();
+
+        if ($indicatorField) {
+            $indikatorRow = IndikatorProgresReklamasi::where('nama', $indicatorField->indicator_key)->first();
+            $indikatorId = $indikatorRow ? $indikatorRow->indikator_id : null;
+        }
+
+        if (!$indikatorId) {
+            return;
+        }
+
+        $hasTarget = TargetProgresReklamasi::where('plot_id', $plotId)
+            ->where('indikator_id', $indikatorId)
+            ->exists();
+
+        if (!$hasTarget) {
+            $validator->errors()->add('target', "Tidak dapat input progres karena target untuk indikator {$indicatorField->field_label} belum dibuat!");
+        }
+    }
+
+    /**
+     * Validate cumulative limits based on field type and target
+     */
+    private function validateCumulativeLimits($validator, $plotId, $activityId)
+    {
+        $plot = Plot::find($plotId);
+        if (!$plot) {
+            return;
+        }
+
+        $fieldDefinitions = FieldDefinition::where('jenis_aktivitas_id', $activityId)->get();
+
+        foreach ($fieldDefinitions as $fieldDef) {
+            $fieldKey = $fieldDef->field_key;
+            $newValue = $this->input($fieldKey);
+
+            if (!is_numeric($newValue) || $newValue <= 0) {
+                continue;
+            }
+
+            $newValue = (float) $newValue;
+
+            // Determine validation type based on field characteristics
+            $validationType = $this->determineValidationType($fieldDef, $plot);
+            
+            if ($validationType === 'none') {
+                continue;
+            }
+
+            // Get appropriate limit based on validation type
+            $limit = $this->getFieldLimit($fieldDef, $plot, $plotId, $validationType);
+            
+            if (!$limit) {
+                continue;
+            }
+
+            // Get cumulative value for this field
+            $cumulativeValue = $this->getCumulativeFieldValue($plotId, $fieldKey, $activityId);
+            $totalValue = $cumulativeValue + $newValue;
+
+            if ($totalValue > $limit) {
+                $this->addLimitValidationError($validator, $fieldDef, $limit, $cumulativeValue, $totalValue, $validationType);
+            }
+        }
+    }
+
+    /**
+     * Determine what type of validation should be applied to the field
+     */
+    private function determineValidationType(FieldDefinition $fieldDef, Plot $plot): string
+    {
+        $fieldKey = $fieldDef->field_key;
+        $satuan = strtolower($fieldDef->satuan ?? '');
+
+        // Area-related fields (should be limited by plot area)
+        if ($this->isAreaRelatedField($fieldDef)) {
+            return 'area'; // Compare with plot area
+        }
+
+        // Volume fields (m³) - should be limited by target value  
+        if ($satuan === 'm³' || $this->isVolumeField($fieldKey)) {
+            return 'target'; // Compare with target value
+        }
+
+        // Length fields (m) - should be limited by target value
+        if ($satuan === 'm' || $this->isLengthField($fieldKey)) {
+            return 'target'; // Compare with target value
+        }
+
+        // Unit fields (unit, batang, buah) - should be limited by target value
+        if (in_array($satuan, ['unit', 'batang', 'buah']) || $this->isUnitField($fieldKey)) {
+            return 'target'; // Compare with target value
+        }
+
+        return 'none'; // No cumulative validation for other fields
+    }
+
+    /**
+     * Get limit value based on validation type
+     */
+    private function getFieldLimit(FieldDefinition $fieldDef, Plot $plot, $plotId, string $validationType): ?float
+    {
+        switch ($validationType) {
+            case 'area':
+                return $plot->luas_area ? (float) $plot->luas_area : null;
+                
+            case 'target':
+                return $this->getTargetValue($plotId, $fieldDef);
+                
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Get target value for a specific field
+     */
+    private function getTargetValue($plotId, FieldDefinition $fieldDef): ?float
+    {
+        try {
+            // Find indicator for this field
+            $indicatorField = FieldDefinition::where('jenis_aktivitas_id', $fieldDef->jenis_aktivitas_id)
+                ->whereNotNull('indicator_key')
+                ->first();
+
+            if (!$indicatorField) {
+                return null;
+            }
+
+            $indikator = IndikatorProgresReklamasi::where('nama', $indicatorField->indicator_key)->first();
+            
+            if (!$indikator) {
+                return null;
+            }
+
+            // Get target value
+            $target = TargetProgresReklamasi::where('plot_id', $plotId)
+                ->where('indikator_id', $indikator->indikator_id)
+                ->first();
+
+            return $target ? (float) $target->target_value : null;
+
+        } catch (\Exception $e) {
+            Log::error('Error getting target value', [
+                'plot_id' => $plotId,
+                'field_key' => $fieldDef->field_key,
+                'error' => $e->getMessage()
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Get cumulative value for a specific field
+     */
+    private function getCumulativeFieldValue($plotId, $fieldKey, $activityId): float
+    {
+        try {
+            // Use provided activityId or get from input
+            $currentActivityId = $activityId ?? $this->input('jenis_aktivitas_id');
+            
+            $fieldDefinition = FieldDefinition::where('jenis_aktivitas_id', $currentActivityId)
+                ->where('field_key', $fieldKey)
+                ->first();
+
+            if (!$fieldDefinition) {
+                Log::warning('Field definition not found', [
+                    'field_key' => $fieldKey,
+                    'activity_id' => $currentActivityId
+                ]);
+                return 0;
+            }
+
+            $cumulativeValue = DB::table('progres')
+                ->join('progres_field_values', 'progres.progres_id', '=', 'progres_field_values.progres_id')
+                ->where('progres.plot_id', $plotId)
+                ->where('progres.jenis_aktivitas_id', $currentActivityId)
+                ->where('progres_field_values.field_definition_id', $fieldDefinition->field_definition_id)
+                ->sum(DB::raw('CAST(progres_field_values.field_value AS DECIMAL(10,2))'));
+
+            return (float) $cumulativeValue;
+        } catch (\Exception $e) {
+            Log::error('Error calculating cumulative field value', [
+                'plot_id' => $plotId,
+                'field_key' => $fieldKey,
+                'error' => $e->getMessage()
+            ]);
+            return 0;
+        }
+    }
+
+    /**
+     * Add appropriate validation error based on validation type
+     */
+    private function addLimitValidationError($validator, FieldDefinition $fieldDef, $limit, $cumulativeValue, $totalValue, $validationType)
+    {
+        $fieldLabel = $fieldDef->field_label ?? ucfirst($fieldDef->field_key);
+        $fieldKey = $fieldDef->field_key;
+        $remaining = $limit - $cumulativeValue;
+        $satuan = $fieldDef->satuan ?? '';
+
+        if ($remaining <= 0) {
+            if ($validationType === 'area') {
+                $validator->errors()->add($fieldKey, 
+                    "{$fieldLabel} sudah mencapai batas maksimum luas blok ({$limit} ha). " .
+                    "Total area yang sudah diinput: {$cumulativeValue} ha."
+                );
+            } else {
+                $validator->errors()->add($fieldKey, 
+                    "{$fieldLabel} sudah mencapai target maksimum ({$limit} {$satuan}). " .
+                    "Total yang sudah diinput: {$cumulativeValue} {$satuan}."
+                );
+            }
+        } else {
+            if ($validationType === 'area') {
+                $validator->errors()->add($fieldKey, 
+                    "{$fieldLabel} melebihi sisa area yang tersedia. " .
+                    "Maksimal yang bisa diinput: {$remaining} ha " .
+                    "(Total area sudah digunakan: {$cumulativeValue} ha dari {$limit} ha)."
+                );
+            } else {
+                $validator->errors()->add($fieldKey, 
+                    "{$fieldLabel} melebihi sisa target yang tersedia. " .
+                    "Maksimal yang bisa diinput: {$remaining} {$satuan} " .
+                    "(Total sudah diinput: {$cumulativeValue} {$satuan} dari target {$limit} {$satuan})."
+                );
+            }
+        }
+    }
+
+    /**
+     * Build validation rules for dynamic fields
      */
     private function buildDynamicFieldRules(int $activityId): array
     {
         $dynamicRules = [];
         $fieldDefinitions = FieldDefinition::where('jenis_aktivitas_id', $activityId)->get();
-        $plotAreaLimit = $this->getPlotAreaLimit();
         
         foreach ($fieldDefinitions as $fieldDef) {
-            $fieldRules = $this->buildFieldValidationRules($fieldDef, $plotAreaLimit);
+            $fieldRules = $this->buildFieldValidationRules($fieldDef);
             if (!empty($fieldRules)) {
                 $dynamicRules[$fieldDef->field_key] = $fieldRules;
             }
@@ -109,9 +336,9 @@ class StoreProgresReklamasiRequest extends FormRequest
     }
 
     /**
-     * Build validation rules for individual field with area constraints
+     * Build validation rules for individual field
      */
-    private function buildFieldValidationRules(FieldDefinition $fieldDef, ?float $plotAreaLimit = null): array
+    private function buildFieldValidationRules(FieldDefinition $fieldDef): array
     {
         $fieldConfig = $fieldDef->config ?? [];
         $rules = [];
@@ -124,7 +351,7 @@ class StoreProgresReklamasiRequest extends FormRequest
         switch ($fieldDef->field_type) {
             case 'number':
                 $rules[] = 'numeric';
-                $this->addNumericRangeRules($rules, $fieldConfig, $fieldDef, $plotAreaLimit);
+                $this->addNumericRangeRules($rules, $fieldConfig);
                 break;
                 
             case 'select':
@@ -140,6 +367,7 @@ class StoreProgresReklamasiRequest extends FormRequest
                 
             case 'date':
                 $rules[] = 'date';
+                $rules[] = 'before_or_equal:today'; // Tidak boleh tanggal masa depan
                 break;
                 
             case 'textarea':
@@ -167,105 +395,98 @@ class StoreProgresReklamasiRequest extends FormRequest
     }
 
     /**
-     * Add numeric range validation rules with plot area limit consideration
+     * Add numeric range validation rules
      */
-    private function addNumericRangeRules(array &$rules, array $fieldConfig, FieldDefinition $fieldDef, ?float $plotAreaLimit = null): void
+    private function addNumericRangeRules(array &$rules, array $fieldConfig): void
     {
         // Add minimum value validation
         if (isset($fieldConfig['min']) && is_numeric($fieldConfig['min'])) {
             $rules[] = 'min:' . $fieldConfig['min'];
         }
         
-        // For area-related fields, check against plot area limit
-        if ($plotAreaLimit && $this->isAreaRelatedField($fieldDef)) {
-            $configMax = $fieldConfig['max'] ?? null;
-            
-            // Use the smaller value between config max and plot area
-            if ($configMax && is_numeric($configMax)) {
-                $effectiveMax = min((float) $configMax, $plotAreaLimit);
-            } else {
-                $effectiveMax = $plotAreaLimit;
-            }
-            
-            $rules[] = 'max:' . $effectiveMax;
-        } elseif (isset($fieldConfig['max']) && is_numeric($fieldConfig['max'])) {
+        // Add maximum value validation (cumulative validation will be handled separately)
+        if (isset($fieldConfig['max']) && is_numeric($fieldConfig['max'])) {
             $rules[] = 'max:' . $fieldConfig['max'];
         }
     }
 
     /**
-     * Check if field is area-related (should be limited by plot area)
+     * Check if field is area-related (hectare-based)
      */
     private function isAreaRelatedField(FieldDefinition $fieldDef): bool
     {
+        // Define common area-related field keys
         $areaRelatedKeys = [
             'luas_area_dirata',
-            'luas_area_ditimbun',
+            'luas_area_ditimbun', 
             'luas_area_dikupas',
             'luas_area_disebar',
+            'luas_area_ditanam',
             'luas_area_penanaman',
-            'luas_area_ditanam', 
             'luas_area_disiangi',
             'luas_area_dipupuk',
             'luas_area_dilindungi',
             'luas_area_disulam',
-            'luas_area_sampling',
-            'area'
+            'luas_area_sampling'
         ];
 
-        $fieldKey = strtolower($fieldDef->field_key);
-        
-        // Check exact matches
-        if (in_array($fieldKey, $areaRelatedKeys)) {
-            return true;
-        }
-        
-        // Check if field key contains area-related terms
-        foreach ($areaRelatedKeys as $areaKey) {
-            if (strpos($fieldKey, $areaKey) !== false || strpos($fieldKey, 'luas') !== false) {
-                return true;
-            }
-        }
-        
-        // Check if field has area indicator or unit
-        if (isset($fieldDef->satuan) && strtolower($fieldDef->satuan) === 'ha') {
-            return true;
-        }
-        
-        if (isset($fieldDef->indicator_key) && strpos($fieldDef->indicator_key, 'lahan') !== false) {
-            return true;
-        }
+        $fieldKey = $fieldDef->field_key;
+        $satuan = strtolower($fieldDef->satuan ?? '');
 
-        return false;
+        // Check if unit is hectare-based
+        if (in_array($satuan, ['ha', 'hektar', 'hectare'])) {
+            return true;
+        }
+        
+        // Check exact matches for area-related keys from config
+        return in_array($fieldKey, $areaRelatedKeys);
     }
 
     /**
-     * Get plot area limit from route parameter
+     * Check if field is volume-related (cubic meter-based)
      */
-    private function getPlotAreaLimit(): ?float
+    private function isVolumeField(string $fieldKey): bool
     {
-        try {
-            // Get plot from route parameter
-            $plotId = $this->route('plot')?->plot_id ?? $this->route('plot');
-            
-            if (!$plotId) {
-                return null;
-            }
-            
-            $plot = $plotId instanceof Plot ? $plotId : Plot::find($plotId);
-            
-            if (!$plot || !$plot->luas_area) {
-                return null;
-            }
-            
-            return (float) $plot->luas_area;
-            
-        } catch (\Exception $e) {
-            Log::error('Error getting plot area limit', [
-                'error' => $e->getMessage()
-            ]);
-            return null;
-        }
+        // Define common volume-related field keys
+        $volumeKeys = [
+            'volume_material_dipindah',
+            'volume_material_timbunan', 
+            'volume_topsoil_dikupas',
+            'volume_topsoil_disebar'
+        ];
+        
+        return in_array($fieldKey, $volumeKeys);
+    }
+
+    /**
+     * Check if field is length-related (meter-based)
+     */
+    private function isLengthField(string $fieldKey): bool
+    {
+        // Define common length-related field keys
+        $lengthKeys = [
+            'panjang_saluran'
+        ];
+        
+        return in_array($fieldKey, $lengthKeys);
+    }
+
+    /**
+     * Check if field is unit/count-related
+     */
+    private function isUnitField(string $fieldKey): bool
+    {
+        // Define common unit/count-related field keys
+        $unitKeys = [
+            'jumlah_check_dam_dibuat',
+            'jumlah_bibit_ditanam',
+            'jumlah_bibit_sulaman',
+            'jumlah_bibit_hidup',
+            'jumlah_bibit_mati',
+            'jumlah_sampel_diukur'
+        ];
+        
+        return in_array($fieldKey, $unitKeys);
     }
 
     /**
@@ -325,23 +546,20 @@ class StoreProgresReklamasiRequest extends FormRequest
     }
 
     /**
-     * Get custom validation error messages with plot area context
+     * Get custom validation error messages
      */
     public function messages(): array
     {
-        $plotAreaLimit = $this->getPlotAreaLimit();
-        
         return [
             'jenis_aktivitas_id.required' => 'Jenis aktivitas harus dipilih.',
             'jenis_aktivitas_id.exists' => 'Jenis aktivitas tidak valid.',
-            'tanggal.required' => 'Tanggal harus diisi.',
+            'tanggal.required' => 'Data Tanggal harus diisi.',
             'tanggal.date' => 'Format tanggal tidak valid.',
+            'tanggal.before_or_equal' => 'Tanggal tidak boleh mendahului dari hari ini.',
             'catatan.max' => 'Catatan maksimal 500 karakter.',
             'dokumentasi.*.image' => 'File dokumentasi harus berupa gambar.',
             'dokumentasi.*.max' => 'Ukuran gambar maksimal 5MB.',
-            '*.max' => $plotAreaLimit 
-                ? "Nilai tidak boleh lebih dari luas blok lahan ({$plotAreaLimit} ha)." 
-                : 'Nilai melebihi batas maksimum yang diizinkan.',
+            '*.before_or_equal' => 'Tanggal tidak boleh lebih dari hari ini.',
         ];
     }
 
@@ -350,12 +568,10 @@ class StoreProgresReklamasiRequest extends FormRequest
      */
     protected function failedValidation(\Illuminate\Contracts\Validation\Validator $validator)
     {
-        $plotAreaLimit = $this->getPlotAreaLimit();
-        
         Log::error('Progress creation validation failed', [
             'errors' => $validator->errors()->toArray(),
             'activity_id' => $this->input('jenis_aktivitas_id'),
-            'plot_area_limit' => $plotAreaLimit
+            'input_date' => $this->input('tanggal')
         ]);
 
         parent::failedValidation($validator);

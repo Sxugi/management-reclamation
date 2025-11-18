@@ -21,4 +21,5 @@
             <span>Klik pada peta untuk memilih lokasi lahan</span>
         </template>
     </p>
+    <x-main.input-error :messages="$errors->get('longitude')" data-turbo-temporary class="mt-2" />
 </div>

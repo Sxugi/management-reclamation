@@ -8,9 +8,8 @@
             id="nama_lahan"
             name="nama_lahan"
             type="text"
-            class="block w-full"
+            class="block w-full text-sm"
             :value="old('nama_lahan', $lahan?->nama_lahan ?? '')"
-            required
             placeholder="Masukkan nama lahan"
         />
     </div>
@@ -26,9 +25,8 @@
             name="luas_lahan"
             type="number"
             step="0.01"
-            class="block w-full"
+            class="block w-full text-sm"
             :value="old('luas_lahan', $lahan?->luas_lahan ?? '')"
-            required
             placeholder="0.00"
         />
     </div>
@@ -44,8 +42,7 @@
             <select
                 name="tahun_awal"
                 id="tahun_awal"
-                class="border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm block w-full font-outfit"
-                required
+                class="text-sm border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md block w-full font-outfit"
             >
                 <option value="" disabled {{ old('tahun_awal', $lahan?->tahun_awal ?? '') ? '' : 'selected' }}>Tahun Awal</option>
                 @for ($year = date('Y') - 5; $year <= date('Y') + 5; $year++)
@@ -62,8 +59,7 @@
             <select
                 name="tahun_akhir"
                 id="tahun_akhir"
-                class="border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm block w-full font-outfit"
-                required
+                class="text-sm border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md block w-full font-outfit"
             >
                 <option value="" disabled {{ old('tahun_akhir', $lahan?->tahun_akhir ?? '') ? '' : 'selected' }}>Tahun Akhir</option>
                 @for ($year = date('Y') - 1; $year <= date('Y') + 9; $year++)
@@ -78,16 +74,15 @@
 </div>
 
 <!-- PIC Reklamasi -->
-<div class="space-y-1.5">
+<div>
     <x-main.input-label for="pic_reklamasi" :value="__('PIC Reklamasi')" class="text-darkslategray-200" />
     <div>
         <x-main.text-input
             id="pic_reklamasi"
             name="pic_reklamasi"
             type="text"
-            class="block w-full"
+            class="block w-full text-sm"
             :value="old('pic_reklamasi', $lahan?->pic_reklamasi ?? '')"
-            required
             placeholder="Masukkan nama PIC"
         />
     </div>

@@ -1,61 +1,185 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Management Reclamation System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel-based web application for managing land reclamation progress tracking, monitoring environmental restoration activities, and maintaining compliance with regulatory requirements.
 
-## About Laravel
+## Features
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Plot Management**: Track multiple reclamation plots with detailed progress monitoring
+- **Progress Tracking**: Record and monitor various reclamation activities with dynamic field definitions
+- **Target Management**: Set and track progress against specific environmental restoration targets
+- **Documentation System**: Upload and manage photographic evidence and documentation
+- **Progress Analytics**: Calculate overall progress percentages and generate trend analysis
+- **Historical Snapshots**: Maintain timeline accuracy with historical progress data
+- **Activity Categorization**: Organize activities by categories (Revegetasi, Monitoring, etc.)
+- **Indicator-based Tracking**: Support for multiple environmental indicators with configurable aggregation
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Simplified Route Overview
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+**Authentication & User**
+- Login, password reset, email verification, logout
+- Profile view/update/delete
 
-## Learning Laravel
+**Land & Plot Management**
+- Manage lahan (sites) and associated plots (blocks)
+- Set plot-specific targets
+- View plot activity logs
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+**Progress Entries**
+- Create, edit, update, delete reclamation progress records
+- Attach/remove documentation files
+- Dynamic form based on selected activity type
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+**Dashboard & Analytics**
+- Fetch consolidated stats (totals, daily/weekly changes)
+- Retrieve progress per block
+- Map data (plots + progress)
+- Historical progress series (overall & per block)
+- Indicator data (all, specific, enhanced, block breakdowns)
+- Summary metrics
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+**Planning & Budget**
+- Manage reclamation plans and cost plans (with PDF exports)
+- Track reclamation budget
+- Generate recapitulation (progress & cost) reports (PDF)
 
-## Laravel Sponsors
+**Success Criteria**
+- View & update success criteria sections
+- Export criteria report (PDF)
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+**Documentation & Files**
+- General documentation CRUD
+- Plan files list/upload/delete + preview
+- Report files list/upload/delete + preview
 
-### Premium Partners
+**Biological & Inventory**
+- Tree/species records (create, manage yearly data, remove by year)
+- Warehouse/inventory records CRUD
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Requirements
 
-## Contributing
+- PHP 8.3 or higher
+- Composer 2.0+
+- PostgreSQL 17+
+- Node.js 18+ and npm
+- Laravel 12.x
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Installation
 
-## Code of Conduct
+1. **Clone the repository**
+```bash
+git clone <repository-url>
+cd management-reclamation
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+2. **Install PHP dependencies**
+```bash
+composer install
+```
 
-## Security Vulnerabilities
+3. **Install Node.js dependencies**
+```bash
+npm install
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+4. **Environment configuration**
+```bash
+cp .env.example .env
+php artisan key:generate
+```
 
-## License
+5. **Configure database**
+Edit your `.env` file with database credentials:
+```env
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=reclamation_db
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+6. **Run database migrations**
+```bash
+php artisan migrate
+```
+
+7. **Seed the database (optional)**
+```bash
+php artisan db:seed
+```
+
+8. **Build frontend assets**
+```bash
+npm run build
+# or for development
+npm run dev
+```
+
+9. **Create storage symlink**
+```bash
+php artisan storage:link
+```
+
+## Configuration
+
+### Indicators Configuration
+
+Configure your environmental indicators in `config/indicators.php`:
+
+```php
+return [
+    'targets' => [
+        'pohon_ditanam' => [
+            'label' => 'Pohon Ditanam',
+            'satuan' => 'batang',
+            'summary_type' => 'sum'
+        ],
+        'luas_revegetasi' => [
+            'label' => 'Luas Revegetasi',
+            'satuan' => 'ha',
+            'summary_type' => 'sum'
+        ],
+        // Add more indicators as needed
+    ]
+];
+```
+
+## Architecture
+
+- Controllers: HTTP handling (dashboard, progress, planning, files, criteria, etc.)
+- Services: Business logic (ProgresReklamasiService, DashboardService)
+- Models: Plot, ProgresReklamasi, TargetProgresReklamasi, ProgresSnapshot, FieldDefinition, ProgresFieldValue, etc.
+- Storage: Public disk for documentation (with cleanup procedures)
+- Snapshots: Maintain historical integrity & trend analysis
+
+## Usage
+
+### Running the Application
+
+**Development:**
+```bash
+composer run dev
+```
+
+**Production:**
+```bash
+# Set up your web server to point to the public directory
+# Build production assets
+npm run build
+```
+
+### Basic Operations
+
+1. **Managing Plots**: Create and configure reclamation plots with basic information
+2. **Setting Targets**: Define target values for various environmental indicators per plot
+3. **Recording Progress**: Add progress entries with dynamic fields based on activity type
+4. **Uploading Documentation**: Attach photos and documents to progress entries
+5. **Monitoring Progress**: View real-time progress percentages and historical trends
+
+## Security
+
+- All file uploads are validated and stored securely
+- Progress data is validated before database insertion
+- User authentication and authorization implemented
+- CSRF protection enabled for all forms
+- SQL injection prevention through Eloquent ORM

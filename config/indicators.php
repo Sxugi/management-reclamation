@@ -9,13 +9,13 @@ return [
             'description' => 'Total luas area yang telah diratakan, dikompaksi, dan dipersiapkan untuk tahap reklamasi selanjutnya'
         ],
         'pengupasan_topsoil' => [
-            'label' => 'Pengelolaan Tanah Pucuk',
+            'label' => 'Pengupasan Tanah Pucuk',
             'satuan' => 'ha',
             'summary_type' => 'max',
             'description' => 'Luas area yang telah dilakukan pengupasan lapisan tanah atas'
         ],
         'jalur_drainase' => [
-            'label' => 'Pengendalian Erosi & Drainase',
+            'label' => 'Saluran Drainase',
             'satuan' => 'm',
             'summary_type' => 'sum',
             'description' => 'Total panjang saluran drainase'
@@ -88,7 +88,7 @@ return [
             'label' => 'Penataan Lahan',
             'activities' => [
                 'perataan' => [
-                    'label' => 'Perataan',
+                    'label' => 'Perataan Area Lahan',
                     'fields' => [
                         'luas_area_dirata' => [
                             'label' => 'Luas Area yang Diratakan',
@@ -132,7 +132,7 @@ return [
                     ],
                 ],
                 'penimbunan' => [
-                    'label' => 'Penimbunan',
+                    'label' => 'Penimbunan Area Lahan',
                     'fields' => [
                         'luas_area_ditimbun' => [
                             'label' => 'Luas Area yang Ditimbun',

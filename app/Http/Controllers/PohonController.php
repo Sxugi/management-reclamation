@@ -28,6 +28,7 @@ class PohonController extends Controller
         $direction = $request->get('tableSortDirection', 'asc');
 
         $pohon = DataPohonService::getFilteredData($request, $lahan);
+
         $pohonCollection = $pohon->getCollection();
         $pohonCollection = DataPohonService::mapDataPohonByTahun($pohonCollection, $direction);
         $pohon->setCollection($pohonCollection);

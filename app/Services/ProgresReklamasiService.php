@@ -252,6 +252,14 @@ class ProgresReklamasiService
 
         // Recalculate all future snapshots to maintain timeline consistency
         self::recalculateSnapshotsAfterDate($plot, $targetDate);
+        try {
+            $deleted = self::cleanupOrphanedSnapshots($plot);
+        } catch (\Exception $e) {
+            Log::error('Error during cleanup of orphaned snapshots', [
+                'plot_id' => $plot->plot_id,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     /**
@@ -325,16 +333,33 @@ class ProgresReklamasiService
      */
     public static function generateProgresDescription($action, $progres)
     {
-        $indikator = $progres->indikator->label ?? $progres->indikator->nama ?? 'Unknown Indicator';
-        $jenisAktivitas = $progres->jenisAktivitas->label ?? 'Unknown Activity';
+        try {
+            if (!$progres->relationLoaded('indikator')) {
+                $progres->load('indikator');
+            }
+            if (!$progres->relationLoaded('jenisAktivitas')) {
+                $progres->load('jenisAktivitas');
+            }
 
-        $actions = [
-            'created' => "Menambahkan Progres untuk Kategori {$indikator} dengan Aktivitas {$jenisAktivitas}",
-            'updated' => "Mengubah Progres untuk Kategori {$indikator} dengan Aktivitas {$jenisAktivitas}",
-            'deleted' => "Menghapus Progres untuk Kategori {$indikator} dengan Aktivitas {$jenisAktivitas}",
-        ];
+            $indikator = $progres->indikator?->label ?? $progres->indikator?->nama ?? 'Indikator Tidak Diketahui';
+            $jenisAktivitas = $progres->jenisAktivitas?->label ?? $progres->jenisAktivitas?->nama ?? 'Aktivitas Tidak Diketahui';
 
-        return $actions[$action] ?? "Aktivitas Progres tidak diketahui";
+            $actions = [
+                'created' => "Menambahkan Progres untuk Kategori {$indikator} dengan Aktivitas {$jenisAktivitas}",
+                'updated' => "Mengubah Progres untuk Kategori {$indikator} dengan Aktivitas {$jenisAktivitas}",
+                'deleted' => "Menghapus Progres untuk Kategori {$indikator} dengan Aktivitas {$jenisAktivitas}",
+            ];
+
+            return $actions[$action] ?? "Aktivitas Progres tidak diketahui";
+        } catch (\Exception $e) {
+            Log::error('Error generating progres description', [
+                'action' => $action,
+                'progres_id' => $progres->progres_id ?? 'unknown',
+                'error' => $e->getMessage()
+            ]);
+            
+            return "Aktivitas progres {$action}";
+        }
     }
 
     /**
@@ -500,7 +525,7 @@ class ProgresReklamasiService
                 $this->saveDocumentationFiles($progress->progres_id, $requestData);
                 
                 // Create audit trail entry
-                $description = $this->generateProgresDescription('created', $progress);
+                $description = self::generateProgresDescription('created', $progress);
                 ActivityLog::createLog(
                     $plot->plot_id, 
                     'created', 
@@ -562,7 +587,7 @@ class ProgresReklamasiService
                 $this->saveDocumentationFiles($progress->progres_id, $requestData);
 
                 // Create audit trail entry
-                $description = $this->generateProgresDescription('updated', $progress);
+                $description = self::generateProgresDescription('updated', $progress);
                 ActivityLog::createLog(
                     $progress->plot_id,
                     'updated',
@@ -614,7 +639,7 @@ class ProgresReklamasiService
                 $progress->delete();
 
                 // Create audit trail entry
-                $description = $this->generateProgresDescription('deleted', $progress);
+                $description = self::generateProgresDescription('deleted', $progress);
                 ActivityLog::createLog(
                     $progress->plot_id, 
                     'deleted', 

@@ -21,8 +21,7 @@
                         type="date"
                         name="tanggal_masuk" 
                         value="{{ old('tanggal_masuk', $gudang?->tanggal_masuk) }}"
-                        class="flex-1 leading-5 bg-transparent"
-                        required
+                        class="flex-1 leading-5 bg-transparent text-sm"
                     />
                     <x-main.input-error :messages="$errors->get('tanggal_masuk')" data-turbo-temporary class="mt-2" />
                 </div>
@@ -34,7 +33,6 @@
                     <select 
                         name="jenis_barang" 
                         class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent"
-                        required
                     >
                         <option value="">Select Option</option>
                         <option value="Pupuk" {{ old('jenis_barang', $gudang?->jenis_barang) == 'Pupuk' ? 'selected' : '' }}>Pupuk</option>
@@ -56,7 +54,6 @@
                         value="{{ old('nama_barang', $gudang?->nama_barang) }}"
                         placeholder="Masukkan nama barang"
                         class="flex-1 leading-5 bg-transparent text-sm"
-                        required
                     />
                     <x-main.input-error :messages="$errors->get('nama_barang')" data-turbo-temporary class="mt-2" />
                 </div>
@@ -72,7 +69,6 @@
                         placeholder="Masukkan jumlah barang"
                         class="flex-1 leading-5 bg-transparent text-sm"
                         min="1"
-                        required
                     />
                     <x-main.input-error :messages="$errors->get('jumlah_barang')" data-turbo-temporary class="mt-2" />
                 </div>
@@ -87,7 +83,6 @@
                         value="{{ old('lokasi_penyimpanan', $gudang?->lokasi_penyimpanan) }}"
                         placeholder="Masukkan lokasi penyimpanan"
                         class="flex-1 leading-5 bg-transparent text-sm"
-                        required
                     />
                     <x-main.input-error :messages="$errors->get('lokasi_penyimpanan')" data-turbo-temporary class="mt-2" />
                 </div>
@@ -99,7 +94,6 @@
                     <select 
                         name="status_barang" 
                         class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent"
-                        required
                     >
                         <option value="">Select Option</option>
                         <option value="Tersedia" {{ old('status_barang', $gudang?->status_barang) == 'Tersedia' ? 'selected' : '' }}>Tersedia</option>

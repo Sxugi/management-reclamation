@@ -9,9 +9,9 @@
         <table class="min-w-max w-full text-xs text-darkslategray font-outfit border-collapse table-auto">
             <thead class="border-gainsboro border-solid border-b-[1px] border-[0px]">
                 <tr>
-                    <x-main.sortable-header column="tanggal_masuk" title="Tanggal Barang Masuk" class="h-6 py-3 border-r-[1px]"/>
-                    <x-main.sortable-header column="jenis_barang" title="Jenis Barang" class="h-6 py-3 border-r-[1px]"/>
-                    <x-main.sortable-header column="nama_barang" title="Nama Barang" class="h-6 py-3 border-r-[1px]"/>
+                    <x-main.sortable-header column="tanggal_masuk" title="Tanggal Masuk" class="h-6 py-3 border-r-[1px]"/>
+                    <x-main.sortable-header column="jenis_barang" title="Jenis" class="h-6 py-3 border-r-[1px]"/>
+                    <x-main.sortable-header column="nama_barang" title="Nama" class="h-6 py-3 border-r-[1px]"/>
                     <x-main.sortable-header column="jumlah_barang" title="Jumlah" class="h-6 py-3 border-r-[1px]"/>
                     <x-main.sortable-header column="lokasi_penyimpanan" title="Lokasi" class="h-6 py-3 border-r-[1px]"/>
                     <x-main.sortable-header column="status_barang" title="Status" class="h-6 py-3 border-r-[1px]"/>
@@ -27,7 +27,7 @@
                 @forelse($gudang ?? [] as $data)
                     <tr>
                         <td class="py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
-                            {{ \Carbon\Carbon::parse($data->tanggal_masuk)->format('d M, Y') }}
+                            {{ \Carbon\Carbon::parse($data->tanggal_masuk)->format('d F Y') }}
                         </td>
                         <td class="py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
                             {{ $data->jenis_barang }}

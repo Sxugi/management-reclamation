@@ -40,7 +40,7 @@
 
             <div>
                 <x-main.input-label for="category" class="block text-sm font-medium text-gray-700 mb-1">Kategori Aktivitas</x-main.input-label>
-                <select id="category" name="category" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
+                <select id="category" name="category" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
                     <option value="">Pilih Kategori</option>
                     @foreach($kategori as $id => $label)
                         <option value="{{ $label }}" @selected(request('category') == $label)>
@@ -56,13 +56,13 @@
                     name="hasDokumentasi"
                     value="true"
                     @checked(request('hasDokumentasi') === 'true')
-                    class="rounded border-gray-300 text-blue-600 shadow-sm focus:ring-blue-500">
+                    class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
                 <x-main.input-label for="hasDokumentasi" class="text-sm font-medium text-gray-700 mb-0">Hanya yang ada dokumentasi</x-main.input-label>
             </div>
 
             <div class="flex justify-between pt-2">
+                <x-main.primary-button type="button" onclick="clearFilters()" class="px-4 py-2">Clear</x-main.primary-button>
                 <div class="flex gap-2">
-                    <x-main.primary-button type="button" onclick="clearFilters()" class="px-4 py-2">Clear</x-main.primary-button>
                     <x-main.primary-button type="button" onclick="closeFilterPanel()" class="px-4 py-2">Cancel</x-main.primary-button>
                     <x-main.primary-button type="submit" class="px-4 py-2">Apply</x-main.primary-button>
                 </div>

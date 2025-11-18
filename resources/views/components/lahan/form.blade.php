@@ -10,13 +10,24 @@
             @method('PUT')
         @endif
         
-        <div class="p-4 sm:p-6 space-y-4 sm:space-y-6">
+        <div class="p-4 sm:p-6 flex flex-col gap-3 lg:gap-6 justify-between">
             <x-lahan.form-fields :lahan="$lahan ?? null" />
 
-            <!-- Hidden Coordinate Fields -->
-            <input type="hidden" id="longitude" name="longitude" value="{{ old('longitude', $lahan->longitude ?? '') }}" />
-            <input type="hidden" id="latitude" name="latitude" value="{{ old('latitude', $lahan->latitude ?? '') }}" />
-            <x-main.input-error :messages="$errors->get('longitude')" data-turbo-temporary class="mt-2" />
+            <!-- Hidden Coordinate Fields with PostGIS handling -->
+            @php
+                $longitude = old('longitude');
+                $latitude = old('latitude');
+                
+                if (!$longitude && isset($lahan) && $lahan->location) {
+                    // Extract coordinates from PostGIS Point
+                    $coordinates = DB::selectOne("SELECT ST_X(location) as lng, ST_Y(location) as lat FROM lahan WHERE lahan_id = ?", [$lahan->lahan_id]);
+                    $longitude = $coordinates->lng ?? '';
+                    $latitude = $coordinates->lat ?? '';
+                }
+            @endphp
+            
+            <input type="hidden" id="longitude" name="longitude" value="{{ $longitude }}" />
+            <input type="hidden" id="latitude" name="latitude" value="{{ $latitude }}" />
         </div>
         
         <!-- Save Button -->
