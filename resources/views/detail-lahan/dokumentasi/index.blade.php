@@ -30,4 +30,6 @@
     @endif
 
     <x-dokumentasi.card :dokumentasi="$dokumentasi" :lahan="$lahan" :hasFilter="$hasFilter" />
+
+    <x-dokumentasi.detail-modal />
 </x-main-layout>

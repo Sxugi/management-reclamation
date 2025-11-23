@@ -7,7 +7,7 @@
 
 <div class="grid flex-1 self-stretch auto-cols-fr gap-y-8 rounded-b-2xl border-gainsboro border-solid border overflow-hidden">
     <div class="flex flex-col overflow-x-auto">
-        <table class="min-w-max w-full text-xs text-darkslategray font-outfit border-collapse table-fixed">
+        <table class="min-w-max w-full text-xs text-darkslategray font-outfit border-collapse table-auto">
             <thead class="border-gainsboro border-solid border-b">
                 <colgroup>
                     <col class="w-32">

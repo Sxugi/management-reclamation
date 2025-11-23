@@ -129,7 +129,7 @@ class RekapitulasiBiayaController extends Controller
             ->keyBy('tahun');
 
         $tahun_aktif = request('tahun', $rekapitulasi_biaya->tahun);
-        $currency = request('currency', 'IDR');
+        $currency = request('currency', $rekapitulasi_biaya->currency ?? 'IDR');
 
         return view('detail-lahan.rekapitulasi-biaya.edit', [
             'rekapitulasi_biaya' => $rekapitulasi_biaya_collection,

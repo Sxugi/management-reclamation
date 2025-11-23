@@ -7,13 +7,18 @@
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M5.83333 12.6667L10 8.5L5.83333 4.33333" stroke="#667085" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                <div class="relative leading-5 text-darkslategray-200 font-medium">Rencana Biaya Reklamasi</div>
+                <a type="button" href="{{ route('lahan.rencana-biaya.index', $lahan) }}" class="relative leading-5 text-darkslategray no-underline visited:text-darkslategray">Rencana Biaya Reklamasi</a>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5.83333 12.6667L10 8.5L5.83333 4.33333" stroke="#667085" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                <div class="relative leading-5 text-darkslategray-200 font-medium">Menambahkan Rencana Biaya Reklamasi</div>
             </div>
         </div>
     </x-slot>
     
     <div class="self-stretch flex flex-row items-center justify-between text-sm font-outfit">
         <x-rencana-biaya.tab-tahun :lahan="$lahan" :rencana_biaya="$rencana_biaya" :tahun_aktif="$tahun_aktif" />
+        <span id="exchangeRateText" class="font-outfit mx-2 font-medium text-darkslategray"></span>
         <x-rencana-biaya.action-button :lahan="$lahan" :rencana_biaya="$rencana_biaya" :tahun_aktif="$tahun_aktif" :currency="$currency" />
     </div>
 

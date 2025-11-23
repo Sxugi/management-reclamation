@@ -32,6 +32,7 @@ import './components/plot/progres/panel-filter.js';
 import './components/plot/progres/detail-modal.js';
 import './components/dokumentasi/date-filter.js';
 import './components/dokumentasi/file-upload.js';
+import './components/dokumentasi/detail-modal.js';
 import './components/gudang/panel-filter.js';
 import './components/gudang/detail-modal.js';
 import './components/pohon/detail-modal.js';
@@ -40,6 +41,7 @@ import './components/anggaran-reklamasi/detail-modal.js';
 import './components/anggaran-reklamasi/panel-filter.js';
 import './components/biaya-reklamasi/currency-format.js';
 import './components/biaya-reklamasi/currency-conversion.js';
+import './components/biaya-reklamasi/subtotal-calculation.js';
 
 
 // Start Turbo

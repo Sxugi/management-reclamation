@@ -1,7 +1,7 @@
 <x-main-layout>
     <x-slot name="header">
         <div class="flex flex-row items-center justify-between gap-4">
-            <h2 class="text-xl font-bold text-darkslategray font-outfit">Ubah Dokumentasi</h2>
+            <h2 class="text-xl font-bold text-darkslategray font-outfit">Dokumentasi</h2>
             <div class="self-stretch flex flex-row items-center justify-start gap-1.5 text-left text-sm text-slategray font-outfit">
                 <a type="button" href="{{ route('lahan.index') }}" class="relative leading-5 text-darkslategray no-underline visited:text-darkslategray">List Lahan</a>
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -16,8 +16,8 @@
         </div>
     </x-slot>
 
-    <div class="w-full relative flex flex-row items-start justify-center text-left text-base text-gray font-outfit bg-white rounded-lg py-8">
-        <div class="rounded-lg flex flex-col items-center justify-center gap-6">
+    <div class="w-full relative flex flex-row items-start justify-start text-left text-base text-gray font-outfit bg-white rounded-lg py-8 px-8">
+        <div class="w-full rounded-lg flex flex-col items-start justify-start gap-6">
             <x-dokumentasi.form-fields :lahan="$lahan" :dokumentasi="$dokumentasi" />
         </div>
     </div>

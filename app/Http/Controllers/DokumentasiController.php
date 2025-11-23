@@ -76,26 +76,7 @@ class DokumentasiController extends Controller
         $dokumentasi = Dokumentasi::create($validated);
 
         return redirect()->route('lahan.dokumentasi.index', $lahan->lahan_id)
-                        ->with('success', 'Dokumentasi berhasil ditambahkan.');
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Lahan $lahan, Dokumentasi $dokumentasi)
-    {
-        if ($dokumentasi->lahan_id !== $lahan->lahan_id) {
-            abort(404, 'Dokumentasi not found for this lahan.');
-        }
-
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
-        
-        return view('detail-lahan.dokumentasi.show', [
-            'dokumentasi' => $dokumentasi,
-            'lahan' => $lahan,
-        ]);
+                        ->with('success', ' ');
     }
 
     /**

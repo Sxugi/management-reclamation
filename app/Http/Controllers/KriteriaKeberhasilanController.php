@@ -111,7 +111,7 @@ class KriteriaKeberhasilanController extends Controller
             });
 
             return redirect()->route('lahan.kriteria-keberhasilan.show', ['lahan' => $lahan])
-                ->with('success', 'Kriteria Keberhasilan Penatagunaan berhasil diperbarui.');
+                ->with('success', 'Kriteria Keberhasilan Penatagunaan berhasil disimpan.');
         } catch (\Exception $e) {
             \Log::error('Error updating Kriteria Penatagunaan', [
                 'user' => Auth::user()->username,
@@ -157,7 +157,7 @@ class KriteriaKeberhasilanController extends Controller
             });
 
             return redirect()->route('lahan.kriteria-keberhasilan.show', ['lahan' => $lahan])
-                ->with('success', 'Kriteria Keberhasilan Revegetasi berhasil diperbarui.');
+                ->with('success', 'Kriteria Keberhasilan Revegetasi berhasil disimpan.');
         } catch (\Exception $e) {
             \Log::error('Error updating Kriteria Revegetasi', [
                 'user' => Auth::user()->username,
@@ -203,7 +203,7 @@ class KriteriaKeberhasilanController extends Controller
             });
 
             return redirect()->route('lahan.kriteria-keberhasilan.show', ['lahan' => $lahan])
-                ->with('success', 'Kriteria Keberhasilan Penyelesaian berhasil diperbarui.');
+                ->with('success', 'Kriteria Keberhasilan Penyelesaian berhasil disimpan.');
         } catch (\Exception $e) {
             \Log::error('Error updating Kriteria Penyelesaian', [
                 'user' => Auth::user()->username,

@@ -18,7 +18,7 @@
         <div id="datePicker" class="absolute z-50 mt-2 p-4 bg-white border border-gray-300 rounded-lg shadow-lg hidden" style="min-width: 300px;">
             <div class="grid grid-cols-2 gap-4">
                 <div>
-                    <x-main.input-label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Mulai</x-main.input-label>
+                    <x-main.input-label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Awal</x-main.input-label>
                     <x-main.text-input type="date" 
                            name="startDate" 
                            id="startDate" 

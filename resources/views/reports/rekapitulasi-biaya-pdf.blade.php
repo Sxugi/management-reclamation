@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="id" lang="id">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-    <title>Rencana Biaya Reklamasi</title>
+    <title>Rekapitulasi Biaya Reklamasi</title>
     <style>
         @font-face {
             font-family: 'Bookman Old Style';
@@ -333,7 +333,7 @@
                     <p class="s2" style="padding-left: 4pt;text-indent: 0pt;line-height: 12pt;text-align: left;"><strong>SUBTOTAL 1 (Rp/US$)</strong></p>
                 </td>
                 <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
-                    <p class="s2" style="padding-right: 5pt;text-align: center;"><strong>{{ number_format($rencana['subtotal_1'] ?? 0, 0) }}</strong></p>
+                    <p class="s2" style="padding-right: 5pt;text-align: center;"><strong>{{ number_format($rencana['subtotal_1'] ?? 0, 0) }}    </strong></p>
                 </td>
                 <td style="width:104pt;border-top-style:solid;border-top-width:1pt;border-left-style:solid;border-left-width:1pt;border-bottom-style:solid;border-bottom-width:1pt;border-right-style:solid;border-right-width:1pt">
                     <p class="s2" style="padding-right: 5pt;text-align: center;"><strong>{{ number_format($realisasi['subtotal_1'] ?? 0, 0) }}</strong></p>

@@ -4,6 +4,13 @@
             <h2 class="text-xl font-bold text-darkslategray font-outfit">
                 File Laporan Pelaksanaan Reklamasi
             </h2>
+            <div class="self-stretch flex flex-row items-center justify-start gap-1.5 text-left text-sm text-slategray font-outfit">
+                <a type="button" href="{{ route('lahan.index') }}" class="relative leading-5 text-darkslategray no-underline visited:text-darkslategray">List Lahan</a>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5.83333 12.6667L10 8.5L5.83333 4.33333" stroke="#667085" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                <div class="relative leading-5 text-darkslategray-200 font-medium">File Laporan Pelaksanaan Reklamasi</div>
+            </div>
         </div>
     </x-slot>
 
@@ -17,64 +24,224 @@
             {{ session('error') }}
         </div>
     @endif
+    
     <div class="flex flex-col items-center justify-center py-12 px-6 rounded-lg bg-white shadow-sm">
         <div class="w-full max-w-7xl mx-auto">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                <div class="flex flex-col space-y-6">
-                    <div class="rounded-2xl bg-white border-gainsboro border-solid border-[1px] box-border flex flex-col">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+                <!-- Left Column -->
+                <div class="flex flex-col h-full">
+                    <div class="rounded-2xl bg-white border-gainsboro border-solid border-[1px] box-border flex flex-col flex-1">
                         <div class="border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[0px] border-l-[0px] flex flex-row items-center justify-start px-6">
                             <div class="text-base font-medium leading-6 p-3 pl-0">File Input</div>
                         </div>
 
-                        <div class="p-6">
-                            <form action="{{ route('lahan.file-laporan.store', $lahan) }}" method="POST" enctype="multipart/form-data" id="file-upload-form">
+                        <div class="p-6 flex-1 flex flex-col">
+                            <form action="{{ route('lahan.file-laporan.store', $lahan) }}" 
+                                  method="POST" 
+                                  enctype="multipart/form-data" 
+                                  id="file-upload-form"
+                                  class="flex-1 flex flex-col justify-between">
                                 @csrf
-                                <div class="space-y-4">
+                                
+                                <div class="space-y-4 text-sm">
                                     <div>
-                                        <label class="block text-sm font-medium mb-2">Pilih Tahun</label>
-                                        <select name="tahun" id="tahun-select" class="border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md block w-full font-outfit text-sm" onchange="handleYearChange()" required>
+                                        <label class="block text-sm font-medium text-darkslategray-200 mb-2">Pilih Tahun</label>
+                                        <select name="tahun" 
+                                                id="tahun-select" 
+                                                @if(isset($tahun)) value="{{ $tahun }}" @endif
+                                                class="border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md block w-full font-outfit text-sm" 
+                                                required>
                                             <option value="">- Pilih Tahun Laporan -</option>
                                             @for($year = $lahan->tahun_awal; $year <= $lahan->tahun_akhir; $year++)
                                                 <option value="{{ $year }}">{{ $year }}</option>
                                             @endfor
                                         </select>
                                     </div>
+                                    
                                     <div id="file-upload-section" class="hidden">
                                         <label class="block text-sm font-medium text-darkslategray-200 mb-2">Upload file</label>
                                         <div class="rounded-lg bg-white border-gainsboro border-solid border-[1px] overflow-hidden flex">
                                             <label for="file-upload" class="flex-shrink-0 bg-whitesmoke-100 border-gainsboro border-solid border-r-[1px] border-t-[0px] border-b-[0px] border-l-[0px] px-4 py-2.5 cursor-pointer hover:bg-gray-100 transition-colors text-sm">
                                                 Choose File
                                             </label>
-                                            <input type="file" name="file" id="file-upload" accept=".pdf" class="hidden" onchange="updateFileName(this)">
-                                            <div class="flex-1 bg-white px-4 py-2.5 text-sm text-slategray whitespace-nowrap" id="file-name-display">
-                                                @foreach($file as $year => $fileData)
-                                                    @if($fileData->file_name)
-                                                        {{ $fileData->file_name }}
-                                                    @else
-                                                        No file chosen
-                                                    @endif
-                                                @endforeach
+                                            <input type="file" 
+                                                   name="file" 
+                                                   id="file-upload" 
+                                                   accept=".pdf" 
+                                                   class="hidden">
+                                            <div class="flex-1 bg-white px-4 py-2.5 text-sm overflow-hidden text-ellipsis whitespace-nowrap" 
+                                                 id="file-name-display"
+                                                 data-original-file="">
+                                                <span class="text-slategray">No file chosen</span>
                                             </div>
                                         </div>
                                         <x-main.input-error :messages="$errors->get('file')" data-turbo-temporary class="mt-2" />
+                                        <p class="flex flex-row text-xs text-gray-500 mt-2" id="file-info-text" style="display: none;">
+                                            <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            Pilih file baru untuk mengganti file yang ada
+                                        </p>
                                     </div>
+                                </div>
+
+                                <div class="flex justify-center mt-8">
+                                    <x-main.primary-button 
+                                        type="submit" 
+                                        class="py-3 px-4 gap-2 font-medium hidden" 
+                                        id="save-button"
+                                        style="display: none;">
+                                        <span id="button-text">Save</span>
+                                    </x-main.primary-button>
                                 </div>
                             </form>
                         </div>
                     </div>
-                    <div class="flex justify-center mt-8">
-                        <x-main.primary-button 
-                            type="submit" 
-                            form="file-upload-form" 
-                            class="py-3 px-4 gap-2 font-medium hidden" 
-                            id="save-button">
-                            Save
-                        </x-main.primary-button>
-                    </div>
                 </div>
 
-                <div class="flex flex-col justify-between space-y-6">
-                    <div id="laporan-content" class="space-y-4">
+                <!-- Right Column -->
+                <div class="flex flex-col h-full">
+                    <div class="rounded-2xl bg-white border-gainsboro border-solid border-[1px] box-border flex flex-col flex-1">
+                        <div class="border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[0px] border-l-[0px] flex flex-row items-center justify-start px-6">
+                            <div class="text-base font-medium leading-6 p-3 pl-0">File Details</div>
+                        </div>
+
+                        <div class="p-6 flex-1 flex flex-col justify-between">
+                            <div id="laporan-content">
+                                <div class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
+                                    <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-gray-400 mx-auto mb-4">
+                                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" fill="currentColor"/>
+                                    </svg>
+                                    <div class="space-y-2">
+                                        <div class="font-medium text-gray-600">Belum ada file laporan pelaksanaan</div>
+                                        <div class="text-sm text-gray-500">Pilih tahun untuk melihat atau mengunggah file</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            @foreach($file as $year => $f)
+                                <div id="laporan-actions-{{ $f->reklamasi_file_id }}" class="hidden flex flex-row gap-3 justify-center mt-8">
+                                    <a href="{{ route('lahan.file-laporan.preview', [$lahan, 'tahun' => $year]) }}" target="_blank"
+                                       class="rounded-md bg-darkslategray py-3 px-4 gap-2 !text-white text-sm no-underline hover:bg-slategray-200 font-medium">
+                                        View Details
+                                    </a>
+
+                                    <x-main.primary-button 
+                                        x-data="" 
+                                        x-on:click.prevent="$dispatch('open-modal', 'confirm-laporan-deletion-{{ $year }}')"
+                                        class="bg-red-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-red-600 transition-colors">
+                                        <span class="relative text-leading-5 font-medium">Delete</span>
+                                    </x-main.primary-button>
+
+                                    <x-main.modal name="confirm-laporan-deletion-{{ $year }}" focusable>
+                                        <form method="POST" action="{{ route('lahan.file-laporan.destroy', [$lahan, $year]) }}" class="p-6">
+                                            @csrf
+                                            @method('DELETE')
+
+                                            <h2 class="text-lg font-medium text-gray-900">
+                                                {{ __('Are you sure you want to delete this file reclamation report?') }}
+                                            </h2>
+
+                                            <p class="mt-1 text-sm text-gray-600">
+                                                {{ __('After this file is deleted, all related data will be permanently lost. This action cannot be undone.') }}
+                                            </p>
+
+                                            <div class="mt-6 flex justify-end font-outfit">
+                                                <x-main.secondary-button @click="$dispatch('close')">
+                                                    {{ __('Cancel') }}
+                                                </x-main.secondary-button>
+                                                <x-main.danger-button type="submit" class="ml-3">
+                                                    {{ __('Delete') }}
+                                                </x-main.danger-button>
+                                            </div>
+                                        </form>
+                                    </x-main.modal>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        window.laporanData = @json($file);
+
+        // Function to set file name display
+        function setFileNameDisplay(name, isSelected = false) {
+            const fileNameDisplay = document.getElementById('file-name-display');
+            if (!fileNameDisplay) return;
+            
+            fileNameDisplay.innerHTML = isSelected 
+                ? `<span class="text-darkslategray-300">${name}</span>`
+                : `<span class="text-slategray">${name || 'No file chosen'}</span>`;
+        }
+
+        // Function to hide/show save button
+        function toggleSaveButton(show) {
+            const saveButton = document.getElementById('save-button');
+            if (!saveButton) return;
+            
+            if (show) {
+                saveButton.classList.remove('hidden');
+                saveButton.style.display = '';
+            } else {
+                saveButton.classList.add('hidden');
+                saveButton.style.display = 'none';
+            }
+        }
+
+        // Function to reset file input
+        function resetFileInput() {
+            const fileInput = document.getElementById('file-upload');
+            const fileNameDisplay = document.getElementById('file-name-display');
+            const fileInfoText = document.getElementById('file-info-text');
+            
+            if (fileInput) {
+                fileInput.value = '';
+            }
+            
+            const originalFile = fileNameDisplay?.dataset.originalFile || '';
+            
+            if (originalFile) {
+                setFileNameDisplay(originalFile, true);
+                if (fileInfoText) fileInfoText.style.display = '';
+            } else {
+                setFileNameDisplay('No file chosen', false);
+                if (fileInfoText) fileInfoText.style.display = 'none';
+            }
+            
+            toggleSaveButton(false);
+        }
+
+        // Function to format file size
+        function formatFileSize(bytes) {
+            const units = ['B', 'KB', 'MB', 'GB'];
+            let i = 0;
+            while (bytes > 1024 && i < units.length - 1) {
+                bytes /= 1024;
+                i++;
+            }
+            return bytes.toFixed(2) + ' ' + units[i];
+        }
+
+        // Handle year change
+        function handleYearChange() {
+            const yearSelect = document.getElementById('tahun-select');
+            const selectedYear = yearSelect?.value;
+            const laporanContent = document.getElementById('laporan-content');
+            const uploadSection = document.getElementById('file-upload-section');
+            const fileNameDisplay = document.getElementById('file-name-display');
+            const fileInfoText = document.getElementById('file-info-text');
+
+            if (!selectedYear) {
+                uploadSection?.classList.add('hidden');
+                toggleSaveButton(false);
+                resetFileInput();
+                
+                if (laporanContent) {
+                    laporanContent.innerHTML = `
                         <div class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
                             <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-gray-400 mx-auto mb-4">
                                 <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" fill="currentColor"/>
@@ -84,127 +251,59 @@
                                 <div class="text-sm text-gray-500">Pilih tahun untuk melihat atau mengunggah file</div>
                             </div>
                         </div>
-                    </div>
-                    @foreach($file as $year => $f)
-                        <div id="laporan-actions-{{ $f->reklamasi_file_id }}" class="hidden flex flex-row gap-3 justify-center">
-                            <a href="{{ route('lahan.file-laporan.preview', [$lahan, 'tahun' => $year]) }}" target="_blank"
-                                class="w-fit rounded-md bg-darkslategray py-3 px-4 gap-2 !text-white text-sm no-underline hover:bg-slategray-200 font-medium">
-                                    View Details
-                            </a>
-
-                            <x-main.primary-button 
-                                x-data="" 
-                                x-on:click.prevent="$dispatch('open-modal', 'confirm-laporan-deletion-{{ $year }}'); open = false"
-                                class="bg-red-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-red-600 transition-colors">
-                                <span class="relative text-leading-5 font-medium">Delete</span>
-                            </x-main.primary-button>
-
-                            <x-main.modal name="confirm-laporan-deletion-{{ $year }}" focusable>
-                                <form method="POST" action="{{ route('lahan.file-laporan.destroy', [$lahan, $year]) }}" class="p-6">
-                                    @csrf
-                                    @method('DELETE')
-
-                                    <h2 class="text-lg font-medium text-gray-900">
-                                        {{ __('Apakah Anda yakin ingin menghapus dokumen ini?') }}
-                                    </h2>
-
-                                    <p class="mt-1 text-sm text-gray-600">
-                                        {{ __('Setelah dokumen ini dihapus, semua data terkait akan hilang secara permanen. Tindakan ini tidak dapat dibatalkan.') }}
-                                    </p>
-
-                                    <div class="mt-6 flex justify-end font-outfit">
-                                        <x-main.secondary-button @click="$dispatch('close')">
-                                            {{ __('Batal') }}
-                                        </x-main.secondary-button>
-                                        <x-main.primary-button class="ml-3">
-                                            {{ __('Hapus') }}
-                                        </x-main.primary-button>
-                                    </div>
-                                </form>
-                            </x-main.modal>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        window.laporanData = @json($file);
-
-        function setFileNameDisplay(name, isSelected = false) {
-            const fileNameDisplay = document.getElementById('file-name-display');
-            fileNameDisplay.textContent = name || 'No file chosen';
-            fileNameDisplay.classList.remove('text-darkslategray-300', 'text-slategray');
-            fileNameDisplay.classList.add(isSelected ? 'text-darkslategray-300' : 'text-slategray');
-        }
-
-        function handleYearChange() {
-            const yearSelect = document.getElementById('tahun-select');
-            const selectedYear = yearSelect.value;
-            const laporanContent = document.getElementById('laporan-content');
-            const uploadSection = document.getElementById('file-upload-section');
-            const saveButton = document.getElementById('save-button');
-
-            if (!selectedYear) {
-                setFileNameDisplay('No file chosen', false);
-                uploadSection.classList.add('hidden');
-                saveButton.classList.add('hidden');
-                laporanContent.innerHTML = `
-                    <div class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
-                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-gray-400 mx-auto mb-4">
-                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" fill="currentColor"/>
-                        </svg>
-                        <div class="space-y-2">
-                            <div class="font-medium text-gray-600">Belum ada file laporan pelaksanaan</div>
-                            <div class="text-sm text-gray-500">Pilih tahun laporan untuk melihat detail file.</div>
-                        </div>
-                    </div>
-                `;
+                    `;
+                }
+                
+                // Hide all action buttons
+                document.querySelectorAll('[id^="laporan-actions-"]').forEach(el => {
+                    el.classList.add('hidden');
+                });
+                
                 return;
             }
 
             const laporan = laporanData[selectedYear];
 
-            function formatFileSize(bytes) {
-                const units = ['B', 'KB', 'MB', 'GB'];
-                let i = 0;
-                while (bytes > 1024 && i < units.length - 1) {
-                    bytes /= 1024;
-                    i++;
-                }
-                return bytes.toFixed(2) + ' ' + units[i];
-            }
-
+            // Hide all action buttons first
             document.querySelectorAll('[id^="laporan-actions-"]').forEach(el => {
-                if (!laporan || el.id !== `laporan-actions-${laporan.reklamasi_file_id}`) {
-                    el.classList.add('hidden');
-                }
+                el.classList.add('hidden');
             });
 
+            // Show upload section
+            uploadSection?.classList.remove('hidden');
+
             if (!laporan) {
-                setFileNameDisplay('No file chosen', false);
-                uploadSection.classList.remove('hidden');
-                saveButton.classList.add('hidden');
-                laporanContent.innerHTML = `
-                    <div class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
-                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-gray-400 mx-auto mb-4">
-                            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" fill="currentColor"/>
-                        </svg>
-                        <div class="space-y-2">
-                            <div class="font-medium text-gray-600">Belum ada file laporan untuk tahun ${selectedYear}</div>
-                            <div class="text-sm text-gray-500">Silakan unggah file laporan untuk tahun ini.</div>
+                // There is no file for this year
+                if (fileNameDisplay) {
+                    fileNameDisplay.dataset.originalFile = '';
+                }
+                resetFileInput();
+                if (fileInfoText) fileInfoText.style.display = 'none';
+                
+                if (laporanContent) {
+                    laporanContent.innerHTML = `
+                        <div class="bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 p-12 text-center">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-gray-400 mx-auto mb-4">
+                                <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z" fill="currentColor"/>
+                            </svg>
+                            <div class="space-y-2">
+                                <div class="font-medium text-gray-600">Belum ada file laporan untuk tahun ${selectedYear}</div>
+                                <div class="text-sm text-gray-500">Silakan unggah file laporan untuk tahun ini.</div>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
             } else {
-                setFileNameDisplay(laporan.file_name, true);
-                uploadSection.classList.remove('hidden');
-                saveButton.classList.add('hidden');
-                laporanContent.innerHTML = `
-                    <div class="space-y-4">
-                        <div class="text-lg font-bold text-darkslategray-200">File Laporan Pelaksanaan Tahun ${selectedYear}</div>
-                        <div class="bg-white rounded-lg border border-gray-200 p-6">
+                // There is a file for this year
+                if (fileNameDisplay) {
+                    fileNameDisplay.dataset.originalFile = laporan.file_name;
+                }
+                resetFileInput();
+                if (fileInfoText) fileInfoText.style.display = '';
+                
+                if (laporanContent) {
+                    laporanContent.innerHTML = `
+                        <div class="bg-white rounded-lg border border-gainsboro p-6">
                             <div class="flex items-start space-x-4">
                                 <div class="flex-shrink-0">
                                     <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="text-red-500">
@@ -214,42 +313,85 @@
                                 </div>
 
                                 <div class="flex-1 min-w-0">
-                                    <div class="font-medium text-darkslategray-300 truncate">${laporan.file_name }</div>
-                                    <div class="text-sm text-gray-500 mt-1">
+                                    <div class="font-medium text-darkslategray-300 truncate">${laporan.file_name}</div>
+                                    <div class="text-sm text-gray-500 mt-1 space-y-1">
                                         <div>Ukuran: ${formatFileSize(laporan.file_size)}</div>
-                                        <div>Diupload: ${new Date(laporan.created_at).toLocaleString()}</div>
+                                        <div>Diupload: ${new Date(laporan.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
                                         <div>Tipe: ${laporan.mime_type.toUpperCase()}</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
+                
                 const actions = document.getElementById(`laporan-actions-${laporan.reklamasi_file_id}`);
                 if (actions) actions.classList.remove('hidden');
             }
         }
 
+        // Handle file input change
         function updateFileName(input) {
-            const selectedYear = document.getElementById('tahun-select').value;
-            const saveButton = document.getElementById('save-button');
+            const selectedYear = document.getElementById('tahun-select')?.value;
+            const buttonText = document.getElementById('button-text');
 
             if (input.files && input.files[0] && selectedYear) {
                 setFileNameDisplay(input.files[0].name, true);
-                saveButton.classList.remove('hidden');
+                
+                const fileNameDisplay = document.getElementById('file-name-display');
+                const hasExistingFile = fileNameDisplay?.dataset.originalFile !== '';
+                
+                if (buttonText) {
+                    buttonText.textContent = hasExistingFile ? 'Update' : 'Save';
+                }
+                
+                toggleSaveButton(true);
             } else {
-                setFileNameDisplay('No file chosen', false);
-                saveButton.classList.add('hidden');
+                resetFileInput();
             }
         }
 
-        document.addEventListener('turbo:load', () => {
+        // Setup file input listeners
+        function setupFileInput() {
+            const fileInput = document.getElementById('file-upload');
             const yearSelect = document.getElementById('tahun-select');
-            if (yearSelect) {
-                yearSelect.value = '';
-                handleYearChange();
+            
+            if (fileInput) {
+                fileInput.removeEventListener('change', handleFileInputChange);
+                fileInput.addEventListener('change', handleFileInputChange);
             }
-            const fileUploadSection = document.getElementById('file-upload-section');
+            
+            if (yearSelect) {
+                yearSelect.removeEventListener('change', handleYearChange);
+                yearSelect.addEventListener('change', handleYearChange);
+                yearSelect.value = '';
+            }
+            
+            handleYearChange();
+        }
+
+        function handleFileInputChange(event) {
+            updateFileName(event.target);
+        }
+
+        // Initialize on page load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', setupFileInput);
+        } else {
+            setupFileInput();
+        }
+
+        // Handle Turbo events
+        document.addEventListener('turbo:load', setupFileInput);
+        document.addEventListener('turbo:before-cache', function() {
+            resetFileInput();
+            const yearSelect = document.getElementById('tahun-select');
+            if (yearSelect) yearSelect.value = '';
+        });
+
+        // Handle page show 
+        window.addEventListener('pageshow', function(event) {
+            setupFileInput();
         });
     </script>
 </x-main-layout>

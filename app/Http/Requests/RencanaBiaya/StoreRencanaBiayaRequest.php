@@ -46,7 +46,7 @@ class StoreRencanaBiayaRequest extends FormRequest
             'detail.pengadaan_bibit.biaya' => 'required|numeric|min:0',
             'detail.penanaman.biaya' => 'required|numeric|min:0',
             'detail.pemeliharaan_tanaman.biaya' => 'required|numeric|min:0',
-            'detail.pencegahan_air_asam.biaya' => 'required|numeric|min:0',
+            'detail.pencegahan_air_asam.biaya' => 'nullable|numeric|min:0',
             'detail.pekerjaan_sipil.biaya' => 'required|numeric|min:0',
             'detail.stabilisasi_lereng.biaya' => 'required|numeric|min:0',
             'detail.pengamanan_lubang.biaya' => 'required|numeric|min:0',

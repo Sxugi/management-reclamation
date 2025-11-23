@@ -7,7 +7,11 @@
                     <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M5.83333 12.6667L10 8.5L5.83333 4.33333" stroke="#667085" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                <div class="relative leading-5 text-darkslategray-200 font-medium">Kriteria Keberhasilan Reklamasi</div>
+                <a type="button" href="{{ route('lahan.kriteria-keberhasilan.show', [$lahan->lahan_id, 'tab' => $tab_aktif]) }}" class="relative leading-5 text-darkslategray no-underline visited:text-darkslategray">Kriteria Keberhasilan Reklamasi</a>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M5.83333 12.6667L10 8.5L5.83333 4.33333" stroke="#667085" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                <div class="relative leading-5 text-darkslategray-200 font-medium">Form Kriteria Keberhasilan Reklamasi</div>
             </div>
         </div>
     </x-slot>

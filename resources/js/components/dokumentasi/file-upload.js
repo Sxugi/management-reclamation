@@ -136,20 +136,28 @@ class FileUploadHandler {
         }
     }
 
+    showImageError(title, message) {
+        window.dispatchEvent(new CustomEvent('show-image-error', {
+            detail: { title: title, message: message }
+        }));
+
+        window.dispatchEvent(new CustomEvent('open-modal', { detail: 'image-error' }));
+    }
+
     handleFiles(files) {
         if (files.length > 0) {
             const file = files[0];
 
             // Validation for file type
             if (!file.type.startsWith('image/')) {
-                alert('Please select an image file (PNG, JPG, WebP, SVG)');
+                this.showImageError('Tipe File Tidak Valid', 'Silakan pilih file gambar (PNG, JPG, WebP, SVG).');
                 this.removeImage();
                 return;
             }
 
             // Validation for file size (5MB)
             if (file.size > 5 * 1024 * 1024) {
-                alert('File size must be less than 5MB');
+                this.showImageError('Ukuran File Terlalu Besar', 'Ukuran file harus kurang dari 5MB.');
                 this.removeImage();
                 return;
             }

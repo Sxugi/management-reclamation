@@ -65,6 +65,32 @@ $sections = [
             'hasil_evaluasi' => 'Hasil Evaluasi',
         ],
     ],
+    'Material Pembangkit Air Asam Tambang' => [
+        'pengelolaan_material' => [
+            'label' => 'Pengelolaan Material',
+            'satuan' => null,
+            'rencana' => 'Rencana',
+            'realisasi' => 'Realisasi/Hasil Penilaian',
+            'standar_keberhasilan' => 'Sesuai dengan Rencana',
+            'hasil_evaluasi' => 'Hasil Evaluasi',
+        ],
+        'bangunan_erosi' => [
+            'label' => 'Bangunan Pengendali Erosi',
+            'satuan' => null,
+            'rencana' => 'Rencana',
+            'realisasi' => 'Realisasi/Hasil Penilaian',
+            'standar_keberhasilan' => 'Tidak Terjadi Alur - Alur Erosi',
+            'hasil_evaluasi' => 'Hasil Evaluasi',
+        ],
+        'kolam_sedimen' => [
+            'label' => 'Kolam Pengendap Sedimen',
+            'satuan' => null,
+            'rencana' => 'Rencana',
+            'realisasi' => 'Realisasi/Hasil Penilaian',
+            'standar_keberhasilan' => 'Kualitas Air Keluaran Memenuhi Baku Mutu Lingkungan',
+            'hasil_evaluasi' => 'Hasil Evaluasi',
+        ],
+    ],
 ];
 @endphp
 

@@ -129,7 +129,7 @@ class RencanaBiayaController extends Controller
             ->keyBy('tahun');
 
         $tahun_aktif = request('tahun', $rencana_biaya->tahun);
-        $currency = request('currency', 'IDR');
+        $currency = request('currency', $rencana_biaya->currency ?? 'IDR');
 
         return view('detail-lahan.rencana-biaya.edit', [
             'rencana_biaya' => $rencana_biaya_collection,

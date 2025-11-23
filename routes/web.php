@@ -155,7 +155,8 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Dokumentasi and File routes
-    Route::resource('lahan.dokumentasi', DokumentasiController::class);
+    Route::resource('lahan.dokumentasi', DokumentasiController::class)
+        ->except('show');
     Route::resource('lahan.file-rencana', FileRencanaController::class)
         ->only(['index', 'store', 'destroy']);
     Route::get('lahan/{lahan}/file-rencana/preview', [FileRencanaController::class, 'preview'])

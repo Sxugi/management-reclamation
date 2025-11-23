@@ -38,34 +38,33 @@
                 x-on:click.prevent="$dispatch('open-modal', 'confirm-lahan-deletion-{{ $lahan->lahan_id }}'); open = false"
                 class="no-underline text-left block px-3 py-2 text-sm text-white hover:bg-gray-200 font-outfit border-none bg-slategray-200 rounded-lg"
             >
-                Hapus
+                Delete
             </button>
         </div>
     </div>
-    
-    <!-- Deletion Confirmation Modal -->
-    <x-main.modal name="confirm-lahan-deletion-{{ $lahan->lahan_id }}" focusable>
-        <form method="POST" action="{{ route('lahan.destroy', $lahan->lahan_id) }}" class="p-6">
-            @csrf
-            @method('DELETE')
-
-            <h2 class="text-lg font-medium text-gray-900">
-                {{ __('Apakah Anda yakin ingin menghapus lahan ini?') }}
-            </h2>
-
-            <p class="mt-1 text-sm text-gray-600">
-                {{ __('Setelah lahan ini dihapus, semua data terkait akan hilang secara permanen. Tindakan ini tidak dapat dibatalkan.') }}
-            </p>
-
-            <div class="mt-6 flex justify-end font-outfit">
-                <x-main.secondary-button x-on:click="$dispatch('close')">
-                    {{ __('Batal') }}
-                </x-main.secondary-button>
-
-                <x-main.danger-button class="ml-3">
-                    {{ __('Hapus Lahan') }}
-                </x-main.danger-button>
-            </div>
-        </form>
-    </x-main.modal>
 </div>
+
+<!-- Deletion Confirmation Modal -->
+<x-main.modal name="confirm-lahan-deletion-{{ $lahan->lahan_id }}" focusable>
+    <form method="POST" action="{{ route('lahan.destroy', $lahan->lahan_id) }}" class="p-6">
+        @csrf
+        @method('DELETE')
+
+        <h2 class="text-lg font-medium text-gray-900">
+            {{ __('Are you sure you want to delete this lahan?') }}
+        </h2>
+
+        <p class="mt-1 text-sm text-gray-600">
+            {{ __('Once deleted, all data related to this lahan will be permanently lost. This action cannot be undone.') }}
+        </p>
+
+        <div class="mt-6 flex justify-end font-outfit">
+            <x-main.secondary-button x-on:click="$dispatch('close')">
+                {{ __('Cancel') }}
+            </x-main.secondary-button>
+            <x-main.danger-button type="submit" class="ml-3">
+                {{ __('Delete') }}
+            </x-main.danger-button>
+        </div>
+    </form>
+</x-main.modal>

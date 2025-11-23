@@ -21,7 +21,7 @@ class KriteriaKeberhasilanService
             ->first();
 
         if (!$kriteria) {
-            $errors[] = 'Belum ada data kriteria keberhasilan.';
+            $errors[] = 'Tidak ada data kriteria keberhasilan.';
             return $errors;
         }
 
@@ -57,7 +57,7 @@ class KriteriaKeberhasilanService
         }
 
         if (count($kategoriBelumLengkap) === count($kategoriList)) {
-            $errors[] = 'Belum ada data kriteria keberhasilan.';
+            $errors[] = 'Tidak ada data kriteria keberhasilan.';
         } elseif (!empty($kategoriBelumLengkap)) {
             $errors[] = 'Data kategori berikut belum lengkap: ' . implode(', ', $kategoriBelumLengkap) . '.';
         }
