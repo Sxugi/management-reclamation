@@ -49,7 +49,7 @@ class StorePlotRequest extends FormRequest
                 });
 
                 if (count($validCoords) !== count($coords)) {
-                    return $fail('Semua koordinat harus berisi coordinat valid latitude (-90 sampai 90) dan longitude (-180 sampai 180).');
+                    return $fail('Semua koordinat harus berisi coordinat valid. Latitude (-90 sampai 90) dan Longitude (-180 sampai 180).');
                 }
 
                 if (count($validCoords) < 3) {

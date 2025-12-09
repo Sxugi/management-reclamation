@@ -86,13 +86,19 @@
     <div class="w-full rounded-2xl bg-white border-gainsboro border-solid border-[1px] box-border flex flex-col items-center justify-start text-sm">
         <div class="w-full flex flex-col items-start justify-start p-6">
             <div class="w-full flex flex-col items-start justify-start gap-1.5">
-                <x-main.input-label class="relative leading-5 font-medium">Nama Dokumentasi</x-main.input-label>
+                <x-main.input-label class="relative leading-5 font-medium">Nama Dokumentasi
+                    <span class="text-tomato">*</span>
+                </x-main.input-label>
                 <x-main.text-input type="text"
                     name="nama" 
                     value="{{ old('nama', $doc->nama ?? '') }}"
                     placeholder="Masukkan judul dokumentasi..." 
-                    class="w-full leading-5 bg-transparent text-sm"/>
-                <x-main.input-error :messages="$errors->get('nama')" data-turbo-temporary class="mt-2" />
+                    class="w-full leading-5 bg-transparent text-sm"
+                    required
+                    oninvalid="this.setCustomValidity('Nama dokumentasi harus diisi')"
+                    oninput="this.setCustomValidity('')"
+                    />
+                <x-main.input-error :messages="$errors->get('nama')" data-turbo-temporary  />
             </div>
         </div>
     </div>
@@ -105,7 +111,7 @@
                     rows="5" 
                     placeholder="Masukkan deskripsi..." 
                     class="w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-0 rounded-md px-3 py-2 resize-none leading-5 bg-transparent font-outfit text-sm min-h-[120px] resize-y">{{ old('deskripsi', $doc->deskripsi ?? '') }}</textarea>
-                <x-main.input-error :messages="$errors->get('deskripsi')" data-turbo-temporary class="mt-2" />
+                <x-main.input-error :messages="$errors->get('deskripsi')" data-turbo-temporary  />
             </div>
         </div>
     </div>

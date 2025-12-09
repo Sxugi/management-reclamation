@@ -55,6 +55,8 @@
                             class="flex-1 leading-5 bg-transparent text-sm" 
                             x-bind:required="field.required"
                             x-bind:value="data[key] || ''"
+                            x-on:invalid="$el.setCustomValidity(field.label + ' harus diisi')"
+                            x-on:input="$el.setCustomValidity('')"
                         />
                         <div x-show="getErrorMessage(key)" class="text-tomato text-xs mt-1">
                             <p x-text="getErrorMessage(key)"></p>
@@ -126,6 +128,8 @@
                                 class="flex-1 leading-5 bg-transparent text-sm"
                                 x-bind:required="field.required"
                                 x-bind:value="data[key] || ''"
+                                x-on:invalid="$el.setCustomValidity(field.label + ' harus diisi')"
+                                x-on:input="$el.setCustomValidity('')"
                             />
                         </template>
                         

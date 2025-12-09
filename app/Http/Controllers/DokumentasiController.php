@@ -76,7 +76,7 @@ class DokumentasiController extends Controller
         $dokumentasi = Dokumentasi::create($validated);
 
         return redirect()->route('lahan.dokumentasi.index', $lahan->lahan_id)
-                        ->with('success', ' ');
+                        ->with('success', 'Dokumentasi berhasil ditambahkan.');
     }
 
     /**

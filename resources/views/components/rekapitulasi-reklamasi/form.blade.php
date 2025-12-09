@@ -120,7 +120,9 @@
                         </div>
                         @foreach($fields as $label => $items)
                             <div class="self-stretch flex flex-col items-start justify-start gap-1.5 text-darkslategray-200">
-                                <div class="relative leading-5 font-medium">{!! $label !!}</div>
+                                <div class="relative leading-5 font-medium">{!! $label !!}
+                                    <span class="text-red-500">*</span>
+                                </div>
                                 <input
                                     type="number"
                                     step="0.01"
@@ -129,11 +131,14 @@
                                     class="block w-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                                     @if($readonly ?? false) readonly disabled @endif
                                     min="0"
+                                    required
+                                    oninvalid="this.setCustomValidity('{!! strip_tags($label) !!}' + ' harus diisi')"
+                                    oninput="this.setCustomValidity('')"
                                 >
                                 <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kegiatan]" value="{{ $items['kegiatan'] }}">
                                 <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kategori]" value="{{ $items['kategori'] }}">
                                 <input type="hidden" name="detail[{{ $items['kegiatan'] }}][satuan]" value="{{ $items['satuan'] }}">
-                                <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary class="mt-2" />
+                                <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary  />
                             </div>
                         @endforeach
                     </div>
@@ -150,7 +155,9 @@
             <div class="self-stretch flex flex-col items-start justify-start p-6 gap-6 text-sm text-darkslategray-200">
                 @foreach($penambanganFields as $label => $items)
                     <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                        <div class="relative leading-5 font-medium">{!! $label !!}</div>
+                        <div class="relative leading-5 font-medium">{!! $label !!}
+                            <span class="text-red-500">*</span>
+                        </div>
                         <input
                             type="number"
                             step="0.01"
@@ -159,11 +166,14 @@
                             class="block w-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                             @if($readonly ?? false) readonly disabled @endif
                             min="0"
+                            required
+                            oninvalid="this.setCustomValidity('{!! strip_tags($label) !!}' + ' harus diisi')"
+                            oninput="this.setCustomValidity('')"
                         >
                         <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kegiatan]" value="{{ $items['kegiatan'] }}">
                         <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kategori]" value="{{ $items['kategori'] }}">
                         <input type="hidden" name="detail[{{ $items['kegiatan'] }}][satuan]" value="{{ $items['satuan'] }}">
-                        <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary class="mt-2" />
+                        <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary  />
                     </div>
                 @endforeach
             </div>
@@ -178,7 +188,9 @@
             <div class="self-stretch flex flex-col items-start justify-start p-6 gap-6 text-sm text-darkslategray-200">
                 @foreach($penimbunanFields as $label => $items)
                     <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                        <div class="relative leading-5 font-medium">{!! $label !!}</div>
+                        <div class="relative leading-5 font-medium">{!! $label !!}
+                            <span class="text-red-500">*</span>
+                        </div>
                         <input
                             type="number"
                             step="0.01"
@@ -187,11 +199,14 @@
                             class="block w-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                             @if($readonly ?? false) readonly disabled @endif
                             min="0"
+                            required
+                            oninvalid="this.setCustomValidity('{!! strip_tags($label) !!}' + ' harus diisi')"
+                            oninput="this.setCustomValidity('')"
                         >
                         <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kegiatan]" value="{{ $items['kegiatan'] }}">
                         <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kategori]" value="{{ $items['kategori'] }}">
                         <input type="hidden" name="detail[{{ $items['kegiatan'] }}][satuan]" value="{{ $items['satuan'] }}">
-                        <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary class="mt-2" />
+                        <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary  />
                     </div>
                 @endforeach
             </div>
@@ -216,7 +231,11 @@
                         </div>
                         @foreach($fields as $label => $items)
                             <div class="self-stretch flex flex-col items-start justify-start gap-1.5 text-darkslategray-200">
-                                <div class="relative leading-5 font-medium">{!! $label !!}</div>
+                                <div class="relative leading-5 font-medium">{!! $label !!}
+                                    @if($label !== 'Analisis Kualitas Tanah')
+                                        <span class="text-red-500">*</span>
+                                    @endif
+                                </div>
                                 <input
                                     type="number"
                                     step="0.01"
@@ -225,11 +244,16 @@
                                     class="block w-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                                     @if($readonly ?? false) readonly disabled @endif
                                     min="0"
+                                    @if($label !== 'Analisis Kualitas Tanah')
+                                        required
+                                        oninvalid="this.setCustomValidity('{!! strip_tags($label) !!}' + ' harus diisi')"
+                                        oninput="this.setCustomValidity('')"
+                                    @endif
                                 >
                                 <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kegiatan]" value="{{ $items['kegiatan'] }}">
                                 <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kategori]" value="{{ $items['kategori'] }}">
                                 <input type="hidden" name="detail[{{ $items['kegiatan'] }}][satuan]" value="{{ $items['satuan'] }}">
-                                <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary class="mt-2" />
+                                <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary  />
                             </div>
                         @endforeach
                     </div>
@@ -241,7 +265,9 @@
             <div class="self-stretch flex flex-col items-start justify-start p-6 gap-6 text-sm text-darkslategray-200">
                 @foreach($pencegahanAirAsamFields as $label => $items)
                     <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                        <div class="relative leading-5 font-bold">{!! $label !!}</div>
+                        <div class="relative leading-5 font-bold">
+                            {!! $label !!}
+                        </div>
                         <input
                             type="number"
                             step="0.01"
@@ -253,13 +279,15 @@
                         <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kegiatan]" value="{{ $items['kegiatan'] }}">
                         <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kategori]" value="{{ $items['kategori'] }}">
                         <input type="hidden" name="detail[{{ $items['kegiatan'] }}][satuan]" value="{{ $items['satuan'] }}">
-                        <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary class="mt-2" />
+                        <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary  />
                     </div>
                 @endforeach
                 
                 @foreach($pekerjaanSipilFields as $label => $items)
                     <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                        <div class="relative leading-5 font-bold">{!! $label !!}</div>
+                        <div class="relative leading-5 font-bold">{!! $label !!}
+                            <span class="text-red-500">*</span>
+                        </div>
                         <input
                             type="number"
                             step="0.01"
@@ -268,11 +296,14 @@
                             class="block w-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                             @if($readonly ?? false) readonly disabled @endif
                             min="0"
+                            required
+                            oninvalid="this.setCustomValidity('{!! strip_tags($label) !!}' + ' harus diisi')"
+                            oninput="this.setCustomValidity('')"
                         >
                         <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kegiatan]" value="{{ $items['kegiatan'] }}">
                         <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kategori]" value="{{ $items['kategori'] }}">
                         <input type="hidden" name="detail[{{ $items['kegiatan'] }}][satuan]" value="{{ $items['satuan'] }}">
-                        <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary class="mt-2" />
+                        <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary  />
                     </div>
                 @endforeach
             </div>
@@ -287,7 +318,9 @@
             <div class="self-stretch flex flex-col items-start justify-start p-6 gap-6 text-sm text-darkslategray-200">
                 @foreach($pemanfaatanLubangFields as $label => $items)
                     <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                        <div class="relative leading-5 font-medium">{!! $label !!}</div>
+                        <div class="relative leading-5 font-medium">{!! $label !!}
+                            <span class="text-red-500">*</span>
+                        </div>
                         <input
                             type="number"
                             step="0.01"
@@ -296,11 +329,14 @@
                             class="block w-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit"
                             @if($readonly ?? false) readonly disabled @endif
                             min="0"
+                            required
+                            oninvalid="this.setCustomValidity('{!! strip_tags($label) !!}' + ' harus diisi')"
+                            oninput="this.setCustomValidity('')"
                         >
                         <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kegiatan]" value="{{ $items['kegiatan'] }}">
                         <input type="hidden" name="detail[{{ $items['kegiatan'] }}][kategori]" value="{{ $items['kategori'] }}">
                         <input type="hidden" name="detail[{{ $items['kegiatan'] }}][satuan]" value="{{ $items['satuan'] }}">
-                        <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary class="mt-2" />
+                        <x-main.input-error :messages="$errors->get('detail.' . $items['kegiatan'] . '.volume')" data-turbo-temporary  />
                     </div>
                 @endforeach
             </div>

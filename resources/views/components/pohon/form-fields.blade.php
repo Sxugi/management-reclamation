@@ -16,11 +16,15 @@
         <div class="self-stretch flex flex-col items-start justify-start p-6 gap-6 text-sm text-darkslategray-200">
 
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                <x-main.input-label class="relative leading-5 font-medium">Jenis Pohon</x-main.input-label>
+                <x-main.input-label class="relative leading-5 font-medium">Jenis Pohon
+                    <span class="text-red-500">*</span>
+                </x-main.input-label>
                 <div class="flex gap-3 w-full">
                     <select 
                         id="jenis_pohon_select"
                         name="jenis_pohon"
+                        required oninvalid="this.setCustomValidity('Jenis pohon harus diisi')" 
+                        oninput="this.setCustomValidity('')"
                         class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent"
                     >
                         <option value="">Pilih Jenis Pohon</option>
@@ -49,7 +53,9 @@
             </div>
 
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                <x-main.input-label class="relative leading-5 font-medium">Tahun</x-main.input-label>
+                <x-main.input-label class="relative leading-5 font-medium">Tahun
+                    <span class="text-red-500">*</span>
+                </x-main.input-label>
                 <x-main.text-input 
                     type="number" 
                     name="tahun"
@@ -57,12 +63,17 @@
                     min="1900" max="2100"
                     placeholder="Masukkan tahun"
                     class="flex-1 leading-5 bg-transparent text-sm"
+                    required
+                    oninvalid="this.setCustomValidity('Tahun harus diisi')"
+                    oninput="this.setCustomValidity('')"
                 />
                 <x-main.input-error :messages="$errors->get('tahun')" data-turbo-temporary />
             </div>
 
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                <x-main.input-label class="relative leading-5 font-medium">Jumlah</x-main.input-label>
+                <x-main.input-label class="relative leading-5 font-medium">Jumlah
+                    <span class="text-red-500">*</span>
+                </x-main.input-label>
                 <x-main.text-input 
                     type="number" 
                     name="jumlah"
@@ -70,6 +81,9 @@
                     min="1"
                     placeholder="Masukkan jumlah pohon"
                     class="flex-1 leading-5 bg-transparent text-sm"
+                    required
+                    oninvalid="this.setCustomValidity('Jumlah harus diisi')"
+                    oninput="this.setCustomValidity('')"
                 />
                 <x-main.input-error :messages="$errors->get('jumlah')" data-turbo-temporary />
             </div>
@@ -88,22 +102,22 @@
 </form>
 
 <script>
-function showInputJenisBaru() {
-    document.getElementById('input-jenis-baru-wrapper').classList.remove('hidden');
-}
-function hideInputJenisBaru() {
-    document.getElementById('input-jenis-baru-wrapper').classList.add('hidden');
-    document.getElementById('input-jenis-baru').value = '';
-}
-function addJenisBaru() {
-    let val = document.getElementById('input-jenis-baru').value.trim();
-    if (!val) return;
-    let select = document.getElementById('jenis_pohon_select');
-    let option = document.createElement('option');
-    option.value = val;
-    option.text = val;
-    option.selected = true;
-    select.add(option);
-    hideInputJenisBaru();
-}
+    function showInputJenisBaru() {
+        document.getElementById('input-jenis-baru-wrapper').classList.remove('hidden');
+    }
+    function hideInputJenisBaru() {
+        document.getElementById('input-jenis-baru-wrapper').classList.add('hidden');
+        document.getElementById('input-jenis-baru').value = '';
+    }
+    function addJenisBaru() {
+        let val = document.getElementById('input-jenis-baru').value.trim();
+        if (!val) return;
+        let select = document.getElementById('jenis_pohon_select');
+        let option = document.createElement('option');
+        option.value = val;
+        option.text = val;
+        option.selected = true;
+        select.add(option);
+        hideInputJenisBaru();
+    }
 </script>

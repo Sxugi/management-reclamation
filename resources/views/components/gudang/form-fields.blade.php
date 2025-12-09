@@ -16,12 +16,17 @@
         <div class="self-stretch flex flex-col items-start justify-start p-6 gap-6 text-sm text-darkslategray-200">
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
                 <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                    <x-main.input-label class="relative leading-5 font-medium">Tanggal Masuk</x-main.input-label>
+                    <x-main.input-label class="relative leading-5 font-medium">Tanggal Masuk
+                        <span class="text-red-500">*</span>
+                    </x-main.input-label>
                     <x-main.text-input 
                         type="date"
                         name="tanggal_masuk" 
                         value="{{ old('tanggal_masuk', $gudang?->tanggal_masuk) }}"
                         class="flex-1 leading-5 bg-transparent text-sm"
+                        required
+                        oninvalid="this.setCustomValidity('Tanggal masuk harus diisi')"
+                        oninput="this.setCustomValidity('')"
                     />
                     <x-main.input-error :messages="$errors->get('tanggal_masuk')" data-turbo-temporary class="mt-2" />
                 </div>
@@ -29,9 +34,14 @@
 
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
                 <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                    <x-main.input-label class="relative leading-5 font-medium">Jenis Barang</x-main.input-label>
+                    <x-main.input-label class="relative leading-5 font-medium">Jenis Barang
+                        <span class="text-red-500">*</span>
+                    </x-main.input-label>
                     <select 
                         name="jenis_barang" 
+                        required
+                        oninvalid="this.setCustomValidity('Jenis barang harus diisi')"
+                        oninput="this.setCustomValidity('')"
                         class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent"
                     >
                         <option value="">Select Option</option>
@@ -47,13 +57,18 @@
 
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
                 <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                    <x-main.input-label class="relative leading-5 font-medium">Nama Barang</x-main.input-label>
+                    <x-main.input-label class="relative leading-5 font-medium">Nama Barang
+                        <span class="text-red-500">*</span>
+                    </x-main.input-label>
                     <x-main.text-input 
                         type="text" 
                         name="nama_barang" 
                         value="{{ old('nama_barang', $gudang?->nama_barang) }}"
                         placeholder="Masukkan nama barang"
                         class="flex-1 leading-5 bg-transparent text-sm"
+                        required
+                        oninvalid="this.setCustomValidity('Nama barang harus diisi')"
+                        oninput="this.setCustomValidity('')"
                     />
                     <x-main.input-error :messages="$errors->get('nama_barang')" data-turbo-temporary class="mt-2" />
                 </div>
@@ -61,7 +76,9 @@
 
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
                 <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                    <x-main.input-label class="relative leading-5 font-medium">Jumlah Barang</x-main.input-label>
+                    <x-main.input-label class="relative leading-5 font-medium">Jumlah Barang
+                        <span class="text-red-500">*</span>
+                    </x-main.input-label>
                     <x-main.text-input 
                         type="number" 
                         name="jumlah_barang" 
@@ -69,6 +86,9 @@
                         placeholder="Masukkan jumlah barang"
                         class="flex-1 leading-5 bg-transparent text-sm"
                         min="1"
+                        required
+                        oninvalid="this.setCustomValidity('Jumlah barang harus diisi')"
+                        oninput="this.setCustomValidity('')"
                     />
                     <x-main.input-error :messages="$errors->get('jumlah_barang')" data-turbo-temporary class="mt-2" />
                 </div>
@@ -76,13 +96,18 @@
 
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
                 <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                    <x-main.input-label class="relative leading-5 font-medium">Lokasi Penyimpanan</x-main.input-label>
+                    <x-main.input-label class="relative leading-5 font-medium">Lokasi Penyimpanan
+                        <span class="text-red-500">*</span>
+                    </x-main.input-label>
                     <x-main.text-input 
                         type="text" 
                         name="lokasi_penyimpanan" 
                         value="{{ old('lokasi_penyimpanan', $gudang?->lokasi_penyimpanan) }}"
                         placeholder="Masukkan lokasi penyimpanan"
                         class="flex-1 leading-5 bg-transparent text-sm"
+                        required
+                        oninvalid="this.setCustomValidity('Lokasi penyimpanan harus diisi')"
+                        oninput="this.setCustomValidity('')"
                     />
                     <x-main.input-error :messages="$errors->get('lokasi_penyimpanan')" data-turbo-temporary class="mt-2" />
                 </div>
@@ -90,9 +115,14 @@
 
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
                 <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                    <x-main.input-label class="relative leading-5 font-medium">Status Barang</x-main.input-label>
+                    <x-main.input-label class="relative leading-5 font-medium">Status Barang
+                        <span class="text-red-500">*</span>
+                    </x-main.input-label>
                     <select 
                         name="status_barang" 
+                        required
+                        oninvalid="this.setCustomValidity('Status barang harus diisi')"
+                        oninput="this.setCustomValidity('')"
                         class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent"
                     >
                         <option value="">Select Option</option>

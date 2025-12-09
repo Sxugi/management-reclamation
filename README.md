@@ -59,63 +59,88 @@ A Laravel-based web application for managing land reclamation progress tracking,
 
 - PHP 8.3 or higher
 - Composer 2.0+
-- PostgreSQL 17+
+- PostgreSQL 17+ & PostGIS
+  - **Note:** PostGIS must be installed as an extension for PostgreSQL before running this web application
 - Node.js 18+ and npm
 - Laravel 12.x
 
-## Installation
+## Setup Instructions
 
-1. **Clone the repository**
+1. **Install PostgreSQL with PostGIS**
+
+Before proceeding with application setup, ensure PostgreSQL 17+ is installed with the PostGIS extension enabled:
+
 ```bash
-git clone <repository-url>
+# macOS (using Homebrew)
+brew install postgresql postgis
+
+# Ubuntu/Debian
+sudo apt-get install postgresql postgresql-contrib postgis
+
+# Windows
+# Download from https://www.postgresql.org/download/windows/
+# Select PostGIS during installation
+```
+ 
+2. **Enable PostGIS Extension**
+
+Connect to your PostgreSQL database and run:
+
+```sql
+CREATE EXTENSION postgis;
+```
+
+3. **Clone the repository**
+```bash
+git clone https://github.com/Sxugi/management-reclamation.git
 cd management-reclamation
 ```
 
-2. **Install PHP dependencies**
+4. **Install PHP dependencies**
 ```bash
 composer install
 ```
 
-3. **Install Node.js dependencies**
+5. **Install Node.js dependencies**
 ```bash
 npm install
 ```
 
-4. **Environment configuration**
+6. **Environment configuration**
 ```bash
 cp .env.example .env
 php artisan key:generate
 ```
 
-5. **Configure database**
+7. **Configure database**
 Edit your `.env` file with database credentials:
 ```env
 DB_CONNECTION=pgsql
 DB_HOST=127.0.0.1
-DB_PORT=3306
+DB_PORT=5432
 DB_DATABASE=reclamation_db
 DB_USERNAME=your_username
 DB_PASSWORD=your_password
 ```
 
-6. **Run database migrations**
+8. **Run database migrations**
 ```bash
 php artisan migrate
 ```
 
-7. **Seed the database (optional)**
+9. **Seed the database (optional)**
 ```bash
 php artisan db:seed
 ```
 
-8. **Build frontend assets**
+10. **Build frontend assets**
 ```bash
 npm run build
 # or for development
 npm run dev
 ```
 
-9. **Create storage symlink**
+11. **Create storage symlink**
 ```bash
 php artisan storage:link
 ```

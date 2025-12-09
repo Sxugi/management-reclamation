@@ -36,6 +36,9 @@
                 <div class="flex items-center gap-3">
                     <x-main.text-input
                         type="number"
+                        required
+                        oninvalid="this.setCustomValidity('Nilai indikator {{ $field['label'] }} harus diisi')"
+                        oninput="this.setCustomValidity('')"
                         step="0.01"
                         name="value[{{ $key }}]"
                         value="{{ $val }}"

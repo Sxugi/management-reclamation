@@ -27,6 +27,9 @@
                                 x-model="point.lat" 
                                 class="w-full h-full text-darkslategray focus:outline-none"
                                 placeholder="Latitude"
+                                required
+                                oninvalid="this.setCustomValidity('Latitude harus diisi (-90 sampai 90)')"
+                                oninput="this.setCustomValidity('')"
                                 @input="if(point.lat && point.lng && !isNaN(point.lat) && !isNaN(point.lng)) updateMapFromInputs()" />
                         </div>
 
@@ -36,6 +39,9 @@
                                 x-model="point.lng" 
                                 class="w-full h-full text-darkslategray focus:outline-none"
                                 placeholder="Longitude"
+                                required
+                                oninvalid="this.setCustomValidity('Longitude harus diisi (-180 sampai 180')"
+                                oninput="this.setCustomValidity('')"
                                 @input="if(point.lat && point.lng && !isNaN(point.lat) && !isNaN(point.lng)) updateMapFromInputs()" />
                         </div>
                         

@@ -72,6 +72,9 @@ $sections = [
                                                 ? 'Standar Keberhasilan'
                                                 : ($field[$col] ?? ucfirst($col)) 
                                             }}
+                                            @if($col !== 'standar_keberhasilan')
+                                                <span class="text-tomato">*</span>
+                                            @endif
                                         </div>
                                     </div>
                                     
@@ -97,12 +100,15 @@ $sections = [
                                                 class="w-full h-full text-sm border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 font-outfit"
                                                 placeholder="{{ $field['satuan'] && in_array($col, ['rencana','realisasi']) ? $field['satuan'] : '' }}"
                                                 @if($readonly ?? false) readonly disabled @endif
+                                                required
+                                                oninvalid="this.setCustomValidity('{{ ucfirst($col) }} {{ $field['label'] }} {{ in_array($col, ['rencana','realisasi']) ? '(' . $field['satuan'] . ')' : '' }} harus diisi')"
+                                                oninput="this.setCustomValidity('')"
                                             />
                                         @endif
                                     </div>
                                     
                                     @if($col !== 'standar_keberhasilan')
-                                        <x-main.input-error :messages="$errors->get('indikator.' . $indikator . '.' . $col)" data-turbo-temporary class="mt-2" />
+                                        <x-main.input-error :messages="$errors->get('indikator.' . $indikator . '.' . $col)" data-turbo-temporary  />
                                     @endif
                                 </div>
                             @endforeach

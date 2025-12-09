@@ -8,7 +8,7 @@
 <div class="grid flex-1 self-stretch auto-cols-fr gap-y-8 rounded-b-2xl border-gainsboro border-solid border overflow-hidden">
     <div class="flex flex-col overflow-x-auto">
         <table class="min-w-max w-full text-xs text-darkslategray font-outfit border-collapse table-auto">
-            <thead class="border-gainsboro border-solid border-b">
+            <thead class="border-gainsboro border-solid border">
                 <colgroup>
                     <col class="w-32">
                     @foreach($tahunList as $tahun)
@@ -19,7 +19,7 @@
                 <tr>
                     <x-main.sortable-header :rowspan="2" column="jenis_pohon" title="Jenis Pohon" class="h-6 py-3 border-gainsboro border-solid border text-sm" />
                     @if(empty($tahunList))
-                        <th scope="col" class="h-6 py-3 px-3 text-center leading-5 font-bold border-gainsboro border-solid border">Tahun</th>
+                        <th scope="col" class="h-6 py-3 px-3 text-center leading-5 font-bold border-gainsboro border-solid text-sm">Tahun</th>
                     @else
                         <x-main.sortable-header :colspan="count($tahunList)" column="tahun" title="Tahun" class="text-center border-gainsboro border-solid border-l border-r text-sm p-2" />
                     @endif
@@ -88,7 +88,7 @@
                             <td colspan="3"><x-pohon.empty-state :hasFilter="true" /></td>
                         </tr>
                     @else
-                        <tr class="border-none">
+                        <tr class="border-t border-solid border-gainsboro">
                             <td colspan="3" class="py-6 px-3 text-center text-darkslategray">No data pohon available yet</td>
                         </tr>
                     @endif

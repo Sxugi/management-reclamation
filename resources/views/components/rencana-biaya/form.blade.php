@@ -106,7 +106,11 @@
                     @if ($section === 'lain')
                         @foreach($fields as $key => $label)
                             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                                <div class="relative leading-5 font-medium">{!! $label !!}</div>
+                                <div class="relative leading-5 font-medium">{!! $label !!}
+                                    @if($key !== 'pencegahan_air_asam')
+                                        <span class="text-red-500">*</span>
+                                    @endif
+                                </div>
                                 <input
                                     type="text"
                                     id="biaya-display-{{ $key }}"
@@ -114,6 +118,11 @@
                                     placeholder="{{ $currencyLabel }}"
                                     autocomplete="off"
                                     inputmode="numeric"
+                                    @if($key !== 'pencegahan_air_asam')
+                                        required
+                                        oninvalid="this.setCustomValidity('{!! strip_tags($label) !!}' + ' harus diisi')"
+                                        oninput="this.setCustomValidity('')"
+                                    @endif
                                     @if($readonly ?? false) readonly disabled @endif
                                 >
                                 <input
@@ -125,14 +134,16 @@
                                 >
                                 <input type="hidden" name="detail[{{ $key }}][kegiatan]" value="{{ $key }}">
                                 <input type="hidden" name="detail[{{ $key }}][kategori]" value="biaya_langsung">
-                                <x-main.input-error :messages="$errors->get('detail.' . $key . '.biaya')" data-turbo-temporary class="mt-2" />
+                                <x-main.input-error :messages="$errors->get('detail.' . $key . '.biaya')" data-turbo-temporary  />
                             </div>
                         @endforeach
                     @elseif ($section === 'sub_total')
                         <div class="self-stretch flex flex-col items-start justify-start gap-1.5 text-gray">
                             <div class="self-stretch border-gainsboro border-solid border-b-[1px] border-t-[0px] border-l-[0px] border-r-[0px] flex flex-row items-start justify-center py-0 px-6">
                                 <div class="flex flex-col items-start justify-start">
-                                    <b class="relative leading-6">SUBTOTAL 1 (Rp/US$)</b>
+                                    <b class="relative leading-6">SUBTOTAL 1 (Rp/US$)
+                                        <span class="text-red-500">*</span>
+                                    </b>
                                 </div>
                             </div>
                             @foreach($fields as $key => $label)
@@ -143,6 +154,9 @@
                                     placeholder="{{ $currencyLabel }}"
                                     autocomplete="off"
                                     inputmode="numeric"
+                                    required
+                                    oninvalid="this.setCustomValidity('{!! strip_tags($label) !!}' + ' harus diisi')"
+                                    oninput="this.setCustomValidity('')"
                                     @if($readonly ?? false) readonly disabled @endif
                                 >
                                 <input
@@ -152,7 +166,7 @@
                                     value="{{ old('subtotal_1', $biaya->subtotal_1 ?? '') }}"
                                     required
                                 >
-                                <x-main.input-error :messages="$errors->get('subtotal_1')" data-turbo-temporary class="mt-2" />
+                                <x-main.input-error :messages="$errors->get('subtotal_1')" data-turbo-temporary  />
                             @endforeach
                         </div>
                     @else
@@ -164,7 +178,9 @@
                             </div>
                             @foreach($fields as $key => $label)
                                 <div class="self-stretch flex flex-col items-start justify-start gap-1.5 text-darkslategray-200">
-                                    <div class="relative leading-5 font-medium">{!! $label !!}</div>
+                                    <div class="relative leading-5 font-medium">{!! $label !!}
+                                        <span class="text-red-500">*</span>
+                                    </div>
                                     <input
                                         type="text"
                                         id="biaya-display-{{ $key }}"
@@ -172,6 +188,9 @@
                                         placeholder="{{ $currencyLabel }}"
                                         autocomplete="off"
                                         inputmode="numeric"
+                                        required
+                                        oninvalid="this.setCustomValidity('{!! strip_tags($label) !!}' + ' harus diisi')"
+                                        oninput="this.setCustomValidity('')"
                                         @if($readonly ?? false) readonly disabled @endif
                                     >
                                     <input
@@ -183,7 +202,7 @@
                                     >
                                     <input type="hidden" name="detail[{{ $key }}][kegiatan]" value="{{ $key }}">
                                     <input type="hidden" name="detail[{{ $key }}][kategori]" value="biaya_langsung">
-                                    <x-main.input-error :messages="$errors->get('detail.' . $key . '.biaya')" data-turbo-temporary class="mt-2" />
+                                    <x-main.input-error :messages="$errors->get('detail.' . $key . '.biaya')" data-turbo-temporary  />
                                 </div>
                             @endforeach
                         </div>
@@ -207,7 +226,9 @@
                         <div class="self-stretch flex flex-col items-start justify-start gap-1.5 text-gray">
                             <div class="self-stretch border-gainsboro border-solid border-b-[1px] border-t-[0px] border-l-[0px] border-r-[0px] flex flex-row items-start justify-center py-0 px-6">
                                 <div class="flex flex-col items-start justify-start">
-                                    <b class="relative leading-6">SUBTOTAL 2 (Rp/US$)</b>
+                                    <b class="relative leading-6">SUBTOTAL 2 (Rp/US$)
+                                        <span class="text-red-500">*</span>
+                                    </b>
                                 </div>
                             </div>
                             <input
@@ -217,6 +238,9 @@
                                 placeholder="{{ $currencyLabel }}"
                                 autocomplete="off"
                                 inputmode="numeric"
+                                required
+                                oninvalid="this.setCustomValidity('{!! strip_tags($label) !!}' + ' harus diisi')"
+                                oninput="this.setCustomValidity('')"
                                 @if($readonly ?? false) readonly disabled @endif
                             >
                             <input
@@ -226,11 +250,13 @@
                                 value="{{ old('subtotal_2', $biaya->subtotal_2 ?? '') }}"
                                 required
                             >
-                            <x-main.input-error :messages="$errors->get('subtotal_2')" data-turbo-temporary class="mt-2" />
+                            <x-main.input-error :messages="$errors->get('subtotal_2')" data-turbo-temporary  />
                         </div>
                     @else
                         <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                            <div class="relative leading-5 font-medium">{!! $field['label'] !!}</div>
+                            <div class="relative leading-5 font-medium">{!! $field['label'] !!}
+                                <span class="text-red-500">*</span>
+                            </div>
                             <input
                                 type="text"
                                 id="biaya-tidaklang-display-{{ $key }}"
@@ -238,6 +264,9 @@
                                 placeholder="{{ $currencyLabel }}"
                                 autocomplete="off"
                                 inputmode="numeric"
+                                required
+                                oninvalid="this.setCustomValidity('{!! strip_tags($label) !!}' + ' harus diisi')"
+                                oninput="this.setCustomValidity('')"
                                 @if($readonly ?? false) readonly disabled @endif
                             >
                             <input
@@ -252,7 +281,7 @@
                             @if (!empty($field['hint']))
                                 <span class="self-stretch relative text-xs leading-[18px] text-darkslategray-100">{{ $field['hint'] }}</span>
                             @endif
-                            <x-main.input-error :messages="$errors->get('detail.' . $key . '.biaya')" data-turbo-temporary class="mt-2" />
+                            <x-main.input-error :messages="$errors->get('detail.' . $key . '.biaya')" data-turbo-temporary  />
                         </div>
                     @endif
                 @endforeach

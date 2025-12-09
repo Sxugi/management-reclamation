@@ -24,7 +24,10 @@
                                         name="email" 
                                         type="text" 
                                         placeholder="Enter your email or username" 
-                                        required autofocus 
+                                        required autofocus
+                                        required
+                                        oninvalid="this.setCustomValidity('Username or Email is required')" 
+                                        oninput="this.setCustomValidity('')"
                                         autocomplete="username" 
                                         class="flex-1 relative leading-5 focus:ring-0 py-3 text-gray-200 w-full"
                                     />
@@ -45,6 +48,8 @@
                                         type="password" 
                                         placeholder="Enter your password" 
                                         required 
+                                        oninvalid="this.setCustomValidity('Password is required')" 
+                                        oninput="this.setCustomValidity('')"
                                         autocomplete="current-password" 
                                         class="flex-1 relative leading-5 focus:ring-0 py-3 text-gray-200 w-full"
                                     />
@@ -56,7 +61,7 @@
                     <!-- Remember Me and Forgot Password -->
                     <div class="w-full flex flex-row flex-wrap items-center justify-between gap-2 text-slategray-100 mt-4 font-outfit">
                         <div class="flex flex-row items-center justify-start gap-3">
-                            <input id="remember_me" type="checkbox" name="remember" class="rounded border-lightgray border-solid border-[1.3px] w-5 h-5 shrink-0 focus:ring-0">
+                            <input id="remember_me" type="checkbox" name="remember" class="rounded border-lightgray border-solid border-[1.3px] w-5 h-5 shrink-0 focus:ring-0 cursor-pointer" />
                             <label for="remember_me" class="relative leading-5">Keep me logged in</label>
                         </div>
                         <a href="{{ route('password.request') }}" class="relative leading-5 text-mediumslateblue no-underline">Forgot password?</a>
@@ -64,9 +69,9 @@
 
                     <!-- Submit Button -->
                     <div class="w-full flex flex-col items-start justify-start mt-6">
-                        <button type="submit" class="login-button w-full shadow-[0px_1px_2px_rgba(16,_24,_40,_0.05)] rounded-lg bg-slategray-200 border-slategray-200 border-solid border-[1px] overflow-hidden flex flex-row items-center justify-center py-3 px-4 font-outfit text-white hover:bg-opacity-90 transition-colors">
+                        <x-main.primary-button type="submit" class="w-full items-center justify-center py-3 bg-slategray-200 hover:!bg-gainsboro hover:text-darkslategray border-none cursor-pointer">
                             <span class="relative leading-5 font-medium">Log In</span>
-                        </button>
+                        </x-main.primary-button>
                     </div>
                 </form>
             </div>

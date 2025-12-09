@@ -18,6 +18,9 @@
                         x-model="nama_plot" 
                         class="w-full text-darkslategray rounded-lg border-lightgray border-solid border-[1px] p-2.5 text-sm"
                         placeholder="Masukkan nama plot"
+                        required
+                        oninvalid="this.setCustomValidity('Nama plot harus diisi')"
+                        oninput="this.setCustomValidity('')"
                     />
                     <x-main.input-error :messages="$errors->get('nama_plot')" data-turbo-temporary />
                 </div>
@@ -30,6 +33,9 @@
                         x-model="luas_area" 
                         class="w-full text-darkslategray rounded-lg border-lightgray border-solid border-[1px] p-2.5 text-sm" 
                         placeholder="Masukkan luas area dalam hektar"
+                        required
+                        oninvalid="this.setCustomValidity('Luas area harus diisi')"
+                        oninput="this.setCustomValidity('')"
                     />
                     <x-main.input-error :messages="$errors->get('luas_area')" data-turbo-temporary />
                 </div>
