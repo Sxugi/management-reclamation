@@ -7,12 +7,15 @@ use App\Http\Requests\ProgresReklamasi\UpdateProgresReklamasiRequest;
 use App\Models\Plot;
 use App\Models\ProgresReklamasi;
 use App\Models\JenisAktivitas;
-use App\Models\KategoriAktivitas;
 use App\Services\ProgresReklamasiService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class ProgresReklamasiController extends Controller
 {
+    use AuthorizesRequests;
+
     protected ProgresReklamasiService $service;
 
     public function __construct(ProgresReklamasiService $service)
@@ -31,10 +34,14 @@ class ProgresReklamasiController extends Controller
             abort(404, 'Lahan not found for this plot');
         }
 
+        // Check authorization
+        $this->authorize('create', [ProgresReklamasi::class, $plot]);
+
         // Get kategori & aktivitas from query params if available
         $kategori = $request->query('kategori');
         $aktivitas = $request->query('aktivitas');
         $jenisAktivitas = null;
+
         if ($kategori && $aktivitas) {
             $jenisAktivitas = JenisAktivitas::whereHas('kategoriAktivitas', function($q) use ($kategori) {
                 $q->where('field', $kategori);
@@ -57,13 +64,31 @@ class ProgresReklamasiController extends Controller
      */
     public function store(StoreProgresReklamasiRequest $request, Plot $plot)
     {
+        // Load lahan relation
+        $plot->load('lahan');
+        
+        // Check authorization
+        $this->authorize('create', [ProgresReklamasi::class, $plot]);
+
+        DB::beginTransaction();
         try {
-            $this->service->create($plot, $request->validated());
+            $progres = $this->service->create($plot, $request->validated());
+
+            DB::commit();
             
             return redirect()->route('plot.show', $plot)
                             ->with('success', 'Progres berhasil ditambahkan.');
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Gagal menyimpan progres: ' . $e->getMessage()]);
+            DB::rollBack();
+            \Log::error('Failed to create progres reklamasi', [
+                'plot_id' => $plot->plot_id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal menyimpan progres:  ' . $e->getMessage());
         }
     }
 
@@ -72,6 +97,17 @@ class ProgresReklamasiController extends Controller
      */
     public function edit(Plot $plot, ProgresReklamasi $progres)
     {
+        // Validate progres belongs to plot
+        if ($progres->plot_id !== $plot->plot_id) {
+            abort(404, 'Progres tidak ditemukan untuk plot ini.');
+        }
+
+        // Check authorization
+        $this->authorize('update', $progres);
+
+        // Load relations
+        $progres->load(['jenisAktivitas.kategoriAktivitas', 'fieldValues.fieldDefinition', 'dokumentasi', 'plot.lahan']);
+
         // Load relations
         $jenisAktivitas = $progres->jenisAktivitas;
         $kategori = $jenisAktivitas?->kategoriAktivitas?->field;
@@ -112,10 +148,35 @@ class ProgresReklamasiController extends Controller
      */
     public function update(UpdateProgresReklamasiRequest $request, Plot $plot, ProgresReklamasi $progres)
     {
-        $this->service->update($progres, $request->validated());
+        // Validate progres belongs to plot
+        if ($progres->plot_id !== $plot->plot_id) {
+            abort(404, 'Progres tidak ditemukan untuk plot ini.');
+        }
 
-        return redirect()->route('plot.show', $progres->plot)
-                         ->with('success', 'Progres berhasil diperbarui.');
+        // Check authorization
+        $this->authorize('update', $progres);
+
+        DB::beginTransaction();
+        try {
+            $this->service->update($progres, $request->validated());
+
+            DB::commit();
+
+            return redirect()->route('plot.show', $progres->plot)
+                            ->with('success', 'Progres berhasil diperbarui.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Failed to update progres reklamasi', [
+                'progres_id' => $progres->progres_reklamasi_id,
+                'plot_id' => $plot->plot_id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal memperbarui progres: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -123,13 +184,58 @@ class ProgresReklamasiController extends Controller
      */
     public function destroy(Plot $plot, ProgresReklamasi $progres)
     {
+        // Validate progres belongs to plot
+        if ($progres->plot_id !== $plot->plot_id) {
+            abort(404, 'Progres tidak ditemukan untuk plot ini.');
+        }
+
+        // Check authorization
+        $this->authorize('delete', $progres);
+
+        DB::beginTransaction();
         try {
+            // Store info for success message
+            $tanggal = $progres->tanggal?->format('d/m/Y');
+            $aktivitas = $progres->jenisAktivitas?->field ??  'Unknown';
+
             $this->service->delete($progres);
+
+            DB::commit();
 
             return redirect()->route('plot.show', $plot)
                              ->with('success', 'Progres berhasil dihapus.');
         } catch (\Exception $e) {
-            return back()->withErrors(['error' => 'Gagal menghapus progres: ' . $e->getMessage()]);
+            DB::rollBack();
+            \Log::error('Failed to delete progres reklamasi', [
+                'progres_id' => $progres->progres_reklamasi_id,
+                'plot_id' => $plot->plot_id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()
+                ->route('plot.show', $plot)
+                ->with('error', 'Gagal menghapus progres: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export progres to Excel
+     */
+    public function export(Plot $plot)
+    {
+        // Check authorization
+        $this->authorize('view', $plot); 
+
+        try {
+            return $this->service->exportExcel($plot);
+        } catch (\Exception $e) {
+            \Log::error('Failed to export progres', [
+                'plot_id' => $plot->plot_id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return back()->with('error', 'Gagal mengexport data: ' . $e->getMessage());
         }
     }
 }

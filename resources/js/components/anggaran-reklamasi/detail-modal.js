@@ -80,27 +80,38 @@ document.addEventListener("turbo:load", () => {
             </div>
             <div class="bg-white border border-gainsboro rounded-xl p-6 pt-3 shadow-lg space-y-4">
                 <h3 class="text-sm font-semibold text-darkslategray mt-2 mb-2">Rincian Anggaran</h3>
-                ${items.map(item => `
+                ${items.map(item => {
+                    const editDisabledAttr = !item.can_update ? 'disabled' : '';
+                    const editAction = item.can_update 
+                        ? `window.location.href='${item.edit_url}'`
+                        : `return false;`;
+
+                    const deleteDisabledAttr = !item.can_delete ? 'disabled' : '';
+                    const deleteDataAttr = item.can_delete 
+                        ? `data-id="${item.anggaran_reklamasi_id}"` 
+                        : '';
+
+                    return `
                     <li class="flex flex-row items-center justify-between bg-gray-50 border border-gainsboro rounded-lg px-3 py-2">
                         <div>
                             <div class="font-medium text-darkslategray">${item.kategori_anggaran}</div>
                             <div class="text-xs text-slategray">Rp.${Number(item.nominal).toLocaleString('id-ID')}</div>
                         </div>
                         <div class="flex flex-row items-center justify-center gap-2">
-                            <a href="${item.edit_url}">
+                            <button onclick="${editAction}" ${editDisabledAttr} class="edit-anggaran-btn cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
                                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M5.83301 5.83334H4.99967C4.55765 5.83334 4.13372 6.00894 3.82116 6.3215C3.5086 6.63406 3.33301 7.05798 3.33301 7.50001V15C3.33301 15.442 3.5086 15.866 3.82116 16.1785C4.13372 16.4911 4.55765 16.6667 4.99967 16.6667H12.4997C12.9417 16.6667 13.3656 16.4911 13.6782 16.1785C13.9907 15.866 14.1663 15.442 14.1663 15V14.1667" stroke="#27374D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                     <path d="M13.3333 4.16666L15.8333 6.66666M16.9875 5.4875C17.3157 5.15929 17.5001 4.71415 17.5001 4.25C17.5001 3.78585 17.3157 3.3407 16.9875 3.0125C16.6593 2.68429 16.2142 2.49991 15.75 2.49991C15.2858 2.49991 14.8407 2.68429 14.5125 3.0125L7.5 10V12.5H10L16.9875 5.4875Z" stroke="#27374D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                 </svg>
-                            </a>
-                            <a class="delete-anggaran-btn cursor-pointer" data-id="${item.anggaran_reklamasi_id}">
+                            </button>
+                            <button ${deleteDataAttr} ${deleteDisabledAttr} class="delete-anggaran-btn cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed">
                                 <svg width="13" height="16" viewBox="0 0 13 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M3.92321 1.01855L3.71429 1.4375H0.928571C0.414955 1.4375 0 1.85645 0 2.375C0 2.89355 0.414955 3.3125 0.928571 3.3125H12.0714C12.585 3.3125 13 2.89355 13 2.375C13 1.85645 12.585 1.4375 12.0714 1.4375H9.28571L9.07679 1.01855C8.92009 0.699219 8.59799 0.5 8.24688 0.5H4.75312C4.40201 0.5 4.07991 0.699219 3.92321 1.01855ZM12.0714 4.25H0.928571L1.54375 14.1816C1.59018 14.9229 2.19955 15.5 2.93371 15.5H10.0663C10.8004 15.5 11.4098 14.9229 11.4562 14.1816L12.0714 4.25Z" fill="#F24822"/>
                                 </svg>
-                            </a>
+                            </button>
                         </div>
                     </li>
-                `).join('')}
+                `}).join('')}
             </div>
             <div class="mt-6 text-sm text-slategray space-y-2">
                 <div class="bg-white border border-gainsboro rounded-xl p-6 shadow-lg space-y-4">
@@ -137,7 +148,9 @@ document.addEventListener("turbo:load", () => {
         // Setup Delete button
         content.querySelectorAll('.delete-anggaran-btn').forEach(btn => {
             const id = btn.getAttribute('data-id');
+
             if (id) {
+                btn.disabled = false;
                 btn.onclick = function(e) {
                     e.preventDefault();
                     window.closeAnggaranModal();
@@ -145,10 +158,13 @@ document.addEventListener("turbo:load", () => {
                         new CustomEvent('open-modal', { detail: `confirm-anggaran-deletion-${id}` })
                     );
                 };
-                btn.classList.remove('hidden');
             } else {
-                btn.classList.add('hidden');
-                btn.onclick = null;
+                btn.disabled = true;
+                btn.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                };
             }
         });
 

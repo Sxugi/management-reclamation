@@ -108,3 +108,31 @@
 .dot.active:hover {
     background-color: #1d4ed8;
 }
+
+/* Map Scale Control Customization */
+.maplibregl-ctrl-scale {
+    /* Background */
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    backdrop-filter: blur(4px);
+    
+    /* Border & Shape */
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important; 
+    
+    /* Typography */
+    color: #1e293b !important;
+    font-family: sans-serif;
+    font-size: 11px !important;
+    font-weight: 600 !important;
+    
+    /* Layout */
+    padding: 2px 8px !important;
+    margin-bottom: 10px !important;
+    margin-left: 10px !important;
+    
+    /* Size */
+    border-width: 1px !important; 
+    height: auto !important;
+    line-height: 1.5 !important;
+}

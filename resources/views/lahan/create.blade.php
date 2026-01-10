@@ -7,7 +7,7 @@
                 </svg>
                 <span class="text-white">Back</span>
             </a>
-            <h2 class="text-xl sm:text-2xl font-bold text-darkslategray-200 font-outfit">Input Data Lahan</h2>
+            <h2 class="text-xl font-bold text-darkslategray-200 font-outfit">Input Data Lahan</h2>
         </div>
     </x-slot>
 

@@ -5,21 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\DataGudang;
 use App\Models\Lahan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\Gudang\StoreDataGudangRequest;
 use App\Http\Requests\Gudang\UpdateDataGudangRequest;
 use App\Services\DataGudangService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class DataGudangController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request, Lahan $lahan)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('viewAny', [DataGudang::class, $lahan]);
 
         $gudang = DataGudangService::getFilteredData($request, $lahan);
 
@@ -40,9 +41,7 @@ class DataGudangController extends Controller
      */
     public function create(Lahan $lahan)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('create', [DataGudang::class, $lahan]);
 
         return view('detail-lahan.gudang.create', [
             'lahan' => $lahan,
@@ -54,12 +53,29 @@ class DataGudangController extends Controller
      */
     public function store(StoreDataGudangRequest $request, Lahan $lahan)
     {
-        $validated = $request->validated();
-        $validated['lahan_id'] = $lahan->lahan_id;
-        $gudang = DataGudang::create($validated);
+        $this->authorize('create', [DataGudang::class, $lahan]);
 
-        return redirect()->route('lahan.gudang.index', $lahan)
-                        ->with('success', 'Data Gudang berhasil ditambahkan');
+        DB::beginTransaction();
+        try {
+            $validated = $request->validated();
+            $validated['lahan_id'] = $lahan->lahan_id;
+            
+            DataGudang::create($validated);
+            DB::commit();
+
+            return redirect()->route('lahan.gudang.index', $lahan)
+                            ->with('success', 'Data Gudang berhasil ditambahkan');
+        } catch (\Exception $e) {
+            DB::rollBack(); 
+            \Log::error('Failed to create gudang', [
+                'lahan_id' => $lahan->lahan_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal menambahkan data gudang: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -67,15 +83,12 @@ class DataGudangController extends Controller
      */
     public function edit(Lahan $lahan, DataGudang $gudang) // Sesuaikan dengan route parameter
     {
-        // Check if user owns the lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
-
         // Check if gudang belongs to this lahan
         if ($gudang->lahan_id !== $lahan->lahan_id) {
             abort(404, 'Data not found.');
         }
+
+        $this->authorize('update', $gudang);
 
         return view('detail-lahan.gudang.edit', [
             'gudang' => $gudang, 
@@ -88,12 +101,32 @@ class DataGudangController extends Controller
      */
     public function update(UpdateDataGudangRequest $request, Lahan $lahan, DataGudang $gudang)
     {
-        $validated = $request->validated();
-        $validated['lahan_id'] = $lahan->lahan_id;
-        $gudang->update($validated);
+        if ($gudang->lahan_id !== $lahan->lahan_id) {
+            abort(404, 'Data not found.');
+        }
 
-        return redirect()->route('lahan.gudang.index', $lahan)
+        $this->authorize('update', $gudang);
+
+        DB::beginTransaction();
+        try {
+            $validated = $request->validated();
+            $gudang->update($validated);
+
+            DB::commit();
+
+            return redirect()->route('lahan.gudang.index', $lahan)
                         ->with('success', 'Data Gudang berhasil diperbarui');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Failed to update gudang', [
+                'gudang_id' => $gudang->data_gudang_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal memperbarui data gudang: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -101,19 +134,49 @@ class DataGudangController extends Controller
      */
     public function destroy(Lahan $lahan, DataGudang $gudang)
     {
-        // Check if user owns the lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
-
         // Check if gudang belongs to this lahan
         if ($gudang->lahan_id !== $lahan->lahan_id) {
             abort(404, 'Data not found.');
         }
 
-        $gudang->delete();
+        $this->authorize('delete', $gudang);
 
-        return redirect()->route('lahan.gudang.index', $lahan)
-                        ->with('success', 'Data Gudang berhasil dihapus');
+        DB::beginTransaction();
+        try {
+            $gudang->delete();
+
+            DB::commit();
+
+            return redirect()->route('lahan.gudang.index', $lahan)
+                            ->with('success', 'Data Gudang berhasil dihapus');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Failed to delete gudang', [
+                'gudang_id' => $gudang->data_gudang_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->route('lahan.gudang.index', $lahan)
+                            ->with('error', 'Gagal menghapus data gudang: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export Excel Data Gudang
+     */
+    public function export(Lahan $lahan)
+    {
+        $this->authorize('viewAny', [DataGudang::class, $lahan]);
+
+        try {
+            return DataGudangService::exportExcel($lahan);
+        } catch (\Exception $e) {
+            \Log::error('Failed to export data gudang', [
+                'lahan_id' => $lahan->lahan_id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return back()->with('error', 'Gagal mengexport data: ' . $e->getMessage());
+        }
     }
 }

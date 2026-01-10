@@ -4,6 +4,7 @@ document.addEventListener("turbo:load", () => {
         const modal = document.getElementById('infoModal');
         const content = document.getElementById('infoModalContent');
         const editButton = document.getElementById('editButton');
+        const deleteButton = document.getElementById('deleteButton');
 
         if (!modal || !content) {
             console.error('Modal elements not found');
@@ -191,13 +192,37 @@ document.addEventListener("turbo:load", () => {
             </div>
         `;
 
-        // Set edit button URL if available
-        if (editButton && data.edit_url) {
-            editButton.onclick = () => {
-                window.location.href = data.edit_url;
-            };
-        } else if (editButton) {
-            editButton.style.display = 'none';
+        if (editButton) {            
+            if (data.can_update && data.edit_url) {
+                editButton.disabled = false
+                editButton.onclick = () => {
+                    window.location.href = data.edit_url;
+                };
+            } else {
+                editButton.disabled = true;
+                editButton.onclick = null;
+            }
+        }
+
+        if (deleteButton) {
+            if (data.can_delete && data.id) {
+                if (data.id) {
+                    deleteButton.disabled = false
+                    deleteButton.onclick = () => {
+                        window.closeInfoModal();
+                        window.dispatchEvent(
+                            new CustomEvent('open-modal', { detail: `confirm-gudang-deletion-${data.id}` })
+                        );
+                    };
+                    deleteButton.classList.remove('hidden');
+                } else {
+                    deleteButton.classList.add('hidden');
+                    deleteButton.onclick = null;
+                }
+            } else {
+                deleteButton.disabled = true;
+                deleteButton.onclick = null;
+            }
         }
 
         modal.classList.remove('hidden');

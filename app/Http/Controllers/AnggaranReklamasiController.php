@@ -5,21 +5,22 @@ namespace App\Http\Controllers;
 use App\Models\AnggaranReklamasi;
 use App\Models\Lahan;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Http\Requests\AnggaranReklamasi\StoreAnggaranReklamasiRequest;
 use App\Http\Requests\AnggaranReklamasi\UpdateAnggaranReklamasiRequest;
 use App\Services\AnggaranReklamasiService;
 
 class AnggaranReklamasiController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      */
     public function index(AnggaranReklamasiService $service, Request $request, Lahan $lahan)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403);
-        }
+        $this->authorize('viewAny', [AnggaranReklamasi::class, $lahan]);
 
         $tabAktif = request()->query('tab', 'actual');
         $jenisArr = ['actual', 'projection', 'forecast'];
@@ -70,9 +71,7 @@ class AnggaranReklamasiController extends Controller
      */
     public function create(AnggaranReklamasiService $service, Lahan $lahan)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('create', [AnggaranReklamasi::class, $lahan]);
 
         $kategoriAnggaranList = $service->getKategoriAnggaranList($lahan->lahan_id);
 
@@ -87,25 +86,38 @@ class AnggaranReklamasiController extends Controller
      */
     public function store(AnggaranReklamasiService $service, StoreAnggaranReklamasiRequest $request, Lahan $lahan)
     {
-        $validated = $request->validated();
-        $validated['lahan_id'] = $lahan->lahan_id;
-        $validated['quarter_label'] = $service->generateQuarterLabel(
-            $validated['quarter'],
-            $validated['tahun'],
-            $validated['bulan'],
-            $lahan->lahan_id,
-            $validated['jenis_anggaran'],
-            $validated['kategori_anggaran']
-        );
+        $this->authorize('create', [AnggaranReklamasi::class, $lahan]);
 
+        DB::beginTransaction();
         try {
-            $anggaran_reklamasi = AnggaranReklamasi::create($validated);
-        } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['general' => $e->getMessage()])->withInput();
-        }
+            $validated = $request->validated();
+            $validated['lahan_id'] = $lahan->lahan_id;
+            $validated['quarter_label'] = $service->generateQuarterLabel(
+                $validated['quarter'],
+                $validated['tahun'],
+                $validated['bulan'],
+                $lahan->lahan_id,
+                $validated['jenis_anggaran'],
+                $validated['kategori_anggaran_id']
+            );
 
-        return redirect()->route('lahan.anggaran.index', $lahan)
-            ->with('success', 'Anggaran Reklamasi berhasil ditambahkan.');
+            $anggaran = AnggaranReklamasi::create($validated);
+
+            DB::commit();
+
+            return redirect()->route('lahan.anggaran.index', $lahan)
+                ->with('success', 'Anggaran Reklamasi berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Failed to create anggaran reklamasi', [
+                'lahan_id' => $lahan->lahan_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal menambahkan anggaran:  ' . $e->getMessage());
+        }
     }
     
 
@@ -114,13 +126,12 @@ class AnggaranReklamasiController extends Controller
      */
     public function edit(Lahan $lahan, AnggaranReklamasi $anggaran, AnggaranReklamasiService $service)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
+        // Validate anggaran belongs to lahan
+        if ($anggaran->lahan_id !== $lahan->lahan_id) {
+            abort(404, 'Anggaran tidak ditemukan untuk lahan ini.');
         }
 
-        if ($anggaran->lahan_id !== $lahan->lahan_id) {
-            abort(404, 'Data not found.');
-        }
+        $this->authorize('update', $anggaran);
 
         $kategoriAnggaranList = $service->getKategoriAnggaranList($lahan->lahan_id);
 
@@ -136,27 +147,43 @@ class AnggaranReklamasiController extends Controller
      */
     public function update(AnggaranReklamasiService $service, UpdateAnggaranReklamasiRequest $request, Lahan $lahan, AnggaranReklamasi $anggaran)
     {
-        $validated = $request->validated();
-
-        $validated['lahan_id'] = $lahan->lahan_id;
-        $validated['quarter_label'] = $service->generateQuarterLabel(
-            $validated['quarter'],
-            $validated['tahun'],
-            $validated['bulan'],
-            $lahan->lahan_id,
-            $validated['jenis_anggaran'],
-            $validated['kategori_anggaran'],
-            $anggaran->anggaran_reklamasi_id
-        );
-
-        try {
-            $anggaran->update($validated);
-        } catch (\Exception $e) {
-            return redirect()->back()->withErrors(['general' => $e->getMessage()])->withInput();
+        // Validate anggaran belongs to lahan
+        if ($anggaran->lahan_id !== $lahan->lahan_id) {
+            abort(404, 'Anggaran tidak ditemukan untuk lahan ini.');
         }
 
-        return redirect()->route('lahan.anggaran.index', $lahan)
-            ->with('success', 'Anggaran Reklamasi berhasil diperbarui.');
+        $this->authorize('update', $anggaran);
+
+        DB::beginTransaction();
+        try {
+            $validated = $request->validated();
+            $validated['quarter_label'] = $service->generateQuarterLabel(
+                $validated['quarter'],
+                $validated['tahun'],
+                $validated['bulan'],
+                $lahan->lahan_id,
+                $validated['jenis_anggaran'],
+                $validated['kategori_anggaran_id'],
+                $anggaran->anggaran_reklamasi_id
+            );
+
+            $anggaran->update($validated);
+
+            DB::commit();
+
+            return redirect()->route('lahan.anggaran.index', $lahan)
+                ->with('success', 'Anggaran Reklamasi berhasil diperbarui.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Failed to update anggaran reklamasi', [
+                'anggaran_reklamasi_id' => $anggaran->anggaran_reklamasi_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal memperbarui anggaran: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -164,40 +191,71 @@ class AnggaranReklamasiController extends Controller
      */
     public function destroy(AnggaranReklamasiService $service, Lahan $lahan, AnggaranReklamasi $anggaran)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
-
+        // Validate anggaran belongs to lahan
         if ($anggaran->lahan_id !== $lahan->lahan_id) {
-            abort(404, 'Data not found.');
+            abort(404, 'Anggaran tidak ditemukan untuk lahan ini.');
         }
 
+        $this->authorize('delete', $anggaran);
+
+        DB::beginTransaction();
         try {
-            $kategori = $anggaran->kategori_anggaran;
+            $kategoriNama = $anggaran->kategori->nama_kategori ?? 'Unknown';
             $quarter = $anggaran->quarter;
             $tahun = $anggaran->tahun;
             $bulan = $anggaran->bulan;
-            $lahanId = $lahan->lahan_id;
             $jenisAnggaran = $anggaran->jenis_anggaran;
             $oldLabel = $anggaran->quarter_label;
 
             $anggaran->delete();
 
+            // Regenerate quarter labels for remaining items
             $service->regenerateQuarterLabelAfterDeletion(
                 $quarter,
-                $lahanId,
+                $lahan->lahan_id,
                 $jenisAnggaran,
                 $oldLabel
             );
+
+            DB::commit();
             
             return redirect()->route('lahan.anggaran.index', $lahan)
-                ->with('success', "Anggaran dengan kategori $kategori untuk $quarter $tahun-$bulan berhasil dihapus.");
+                ->with('success', "Anggaran dengan kategori $kategoriNama untuk $quarter $tahun-$bulan berhasil dihapus.");
         } catch (\Exception $e) {
-            \Log::error('Anggaran deletion failed: ' . $e->getMessage());
+            DB::rollBack();
+            \Log::error('Failed to delete anggaran reklamasi', [
+                'anggaran_id' => $anggaran->anggaran_reklamasi_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()
+                ->route('lahan.anggaran. index', $lahan)
+                ->with('error', 'Gagal menghapus anggaran: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Export Anggaran ke Excel
+     */
+    public function export(AnggaranReklamasiService $service, Lahan $lahan)
+    {
+        // Authorize user
+        $this->authorize('viewAny', [AnggaranReklamasi::class, $lahan]);
+
+        try {
+            // Call service to export
+            return $service->exportExcel($lahan);
             
-            return redirect()->back()
-                ->withErrors(['general' => 'Terjadi kesalahan saat menghapus data anggaran.'])
-                ->withInput();
+        } catch (\Exception $e) {
+            // Log the error
+            \Log::error('Gagal export anggaran reklamasi', [
+                'lahan_id' => $lahan->lahan_id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            // Return back with error message
+            return back()->with('error', 'Terjadi kesalahan saat mengexport data: ' . $e->getMessage());
         }
     }
 }

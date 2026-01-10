@@ -10,18 +10,19 @@ use App\Http\Requests\RencanaBiaya\StoreRencanaBiayaRequest;
 use App\Http\Requests\RencanaBiaya\UpdateRencanaBiayaRequest;
 use App\Services\RencanaBiayaService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class RencanaBiayaController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      */
     public function index(Lahan $lahan)
     {
         // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('viewAny', [BiayaReklamasi::class, $lahan]);
 
         $rencana_biaya = BiayaReklamasi::with('detailBiayaReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
@@ -42,9 +43,7 @@ class RencanaBiayaController extends Controller
     public function create(Lahan $lahan)
     {
         // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('create', [BiayaReklamasi::class, $lahan]);
 
         $rencana_biaya = BiayaReklamasi::with('detailBiayaReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
@@ -64,36 +63,36 @@ class RencanaBiayaController extends Controller
     public function store(StoreRencanaBiayaRequest $request, Lahan $lahan)
     {
         // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('create', [BiayaReklamasi::class, $lahan]);
 
         // Validate the request
         $validated = $request->validated();
 
+        DB::beginTransaction();
         try {
-            DB::transaction(function () use ($validated, $lahan) {
-                $rencanaBiaya = BiayaReklamasi::create([
-                    'lahan_id'    => $lahan->lahan_id,
-                    'tahun'       => $validated['tahun'],
-                    'tipe'        => 'rencana',
-                    'currency'    => $validated['currency'],
-                    'subtotal_1'  => $validated['subtotal_1'],
-                    'subtotal_2'  => $validated['subtotal_2'],
-                ]);
+            $rencanaBiaya = BiayaReklamasi::create([
+                'lahan_id'    => $lahan->lahan_id,
+                'tahun'       => $validated['tahun'],
+                'tipe'        => 'rencana',
+                'currency'    => $validated['currency'],
+                'subtotal_1'  => $validated['subtotal_1'],
+                'subtotal_2'  => $validated['subtotal_2'],
+            ]);
 
-                foreach ($validated['detail'] as $data) {
-                    $rencanaBiaya->detailBiayaReklamasi()->create([
-                        'kegiatan' => $data['kegiatan'],
-                        'kategori' => $data['kategori'],
-                        'biaya'    => $data['biaya'],
-                    ]);
-                }
-            });
+            foreach ($validated['detail'] as $data) {
+                $rencanaBiaya->detailBiayaReklamasi()->create([
+                    'kegiatan' => $data['kegiatan'],
+                    'kategori' => $data['kategori'],
+                    'biaya'    => $data['biaya'],
+                ]);
+            }
+
+            DB::commit();
 
             return redirect()->route('lahan.rencana-biaya.index', $lahan->lahan_id)
                 ->with('success', 'Rencana Biaya tahun ' . $validated['tahun'] . ' berhasil ditambahkan.');
         } catch (\Exception $e) {
+            DB::rollBack();
             \Log::error('Error creating rencana biaya', [
                 'user' => Auth::user()->username,
                 'lahan_id' => $lahan->lahan_id,
@@ -117,9 +116,7 @@ class RencanaBiayaController extends Controller
         }
 
         // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('update', $rencana_biaya);
 
         $rencana_biaya_collection = BiayaReklamasi::with('detailBiayaReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
@@ -151,37 +148,36 @@ class RencanaBiayaController extends Controller
         }
 
         // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('update', $rencana_biaya);
 
         // Validate the request
         $validated = $request->validated();
         
+        DB::beginTransaction();
         try {
-            DB::transaction(function () use ($validated, $rencana_biaya) {
-                $rencana_biaya->update([
-                    'tahun'      => $validated['tahun'],
-                    'currency'    => $validated['currency'],
-                    'subtotal_1' => $validated['subtotal_1'],
-                    'subtotal_2' => $validated['subtotal_2'],
+            $rencana_biaya->update([
+                'tahun'      => $validated['tahun'],
+                'currency'    => $validated['currency'],
+                'subtotal_1' => $validated['subtotal_1'],
+                'subtotal_2' => $validated['subtotal_2'],
+            ]);
+
+            $rencana_biaya->detailBiayaReklamasi()->delete();
+
+            foreach ($validated['detail'] as $data) {
+                $rencana_biaya->detailBiayaReklamasi()->create([
+                    'kegiatan' => $data['kegiatan'],
+                    'kategori' => $data['kategori'],
+                    'biaya'    => $data['biaya'],
                 ]);
+            }
 
-                $rencana_biaya->detailBiayaReklamasi()->delete();
-
-                foreach ($validated['detail'] as $data) {
-                    $rencana_biaya->detailBiayaReklamasi()->create([
-                        'kegiatan' => $data['kegiatan'],
-                        'kategori' => $data['kategori'],
-                        'biaya'    => $data['biaya'],
-                    ]);
-                }
-            });
+            DB::commit();
 
             return redirect()->route('lahan.rencana-biaya.index', $lahan->lahan_id)
                 ->with('success', 'Rencana Biaya tahun ' . $validated['tahun'] . ' berhasil diperbarui.');
-
         } catch (\Exception $e) {
+            DB::rollBack();
             \Log::error('Error updating rencana biaya', [
                 'user' => Auth::user()->username,
                 'lahan_id' => $lahan->lahan_id,
@@ -196,6 +192,8 @@ class RencanaBiayaController extends Controller
 
     public function generatePDF(Lahan $lahan, RencanaBiayaService $pdfService)
     {
+        $this->authorize('generatePDF', [BiayaReklamasi::class, $lahan]);
+        
         $data = BiayaReklamasi::with('detailBiayaReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
             ->where('tipe', 'rencana')

@@ -148,6 +148,7 @@ document.addEventListener("turbo:load", () => {
                                     </div>
                                 </th>
                                 <th class="py-3 px-4 text-center font-bold border-gainsboro border-r whitespace-nowrap text-sm">Waktu</th>
+                                <th class="py-3 px-4 text-center font-bold border-gainsboro border-r whitespace-nowrap text-sm">User</th>
                                 <th class="py-3 px-4 text-center font-bold border-gainsboro border-r whitespace-nowrap text-sm">Table</th>
                                 <th class="py-3 px-4 text-center font-bold border-gainsboro border-r whitespace-nowrap text-sm">Action</th>
                                 <th class="py-3 px-4 text-center font-bold border-gainsboro whitespace-nowrap text-sm">Deskripsi</th>
@@ -158,16 +159,18 @@ document.addEventListener("turbo:load", () => {
                             ${logs.map(log => `
                                 <tr class="hover:bg-gray-50 border-gainsboro border-b">
                                     <!-- Date Cell -->
-                                    <td class="py-3 px-4 text-sm text-center text-gray-700 border-gainsboro border-r whitespace-nowrap align-top">${formatDateTime(log.created_at)}</td>
+                                    <td class="py-3 px-4 text-sm text-center text-gray-700 border-gainsboro border-r whitespace-nowrap align-center">${formatDateTime(log.created_at)}</td>
                                     <!-- Time Cell -->
-                                    <td class="py-3 px-4 text-sm text-center text-gray-700 border-gainsboro border-r whitespace-nowrap align-top">${formatTime(log.created_at)}</td>
+                                    <td class="py-3 px-4 text-sm text-center text-gray-700 border-gainsboro border-r whitespace-nowrap align-center">${formatTime(log.created_at)}</td>
+                                    <!-- User Cell -->
+                                    <td class="py-3 px-4 text-sm text-center text-gray-700 border-gainsboro border-r whitespace-nowrap capitalize align-center">${log.user_name || '-'}</td>
                                     <!-- Table Name Cell -->
-                                    <td class="py-3 px-4 text-sm text-center text-gray-700 border-gainsboro border-r whitespace-nowrap capitalize align-top">${log.table_name || '-'}</td>
+                                    <td class="py-3 px-4 text-sm text-center text-gray-700 border-gainsboro border-r whitespace-nowrap capitalize align-center">${log.table_name || '-'}</td>
                                     <!-- Action Cell -->
-                                    <td class="py-3 px-4 text-sm text-center text-gray-700 border-gainsboro border-r whitespace-nowrap capitalize align-top">${log.action || '-'}</td>
+                                    <td class="py-3 px-4 text-sm text-center text-gray-700 border-gainsboro border-r whitespace-nowrap capitalize align-center">${log.action || '-'}</td>
                                     <!-- Description Cell -->
                                     <td class="px-4 text-sm text-left text-gray-700 border-gainsboro align-center">
-                                        <div class="max-w-md truncate-2-lines">${log.description || `${log.table_name || 'Unknown Table'} #${log.record_id || 'N/A'}`}</div>
+                                        <div class="max-w-xs truncate-4-lines">${log.description || `${log.table_name || 'Unknown Table'} #${log.record_id || 'N/A'}`}</div>
                                     </td>
                                 </tr>
                             `).join('')}
@@ -236,6 +239,7 @@ document.addEventListener("turbo:load", () => {
                                     </svg>
                                 </th>
                                 <th class="py-3 px-4 text-center font-bold border-gainsboro border-r whitespace-nowrap text-sm">Waktu</th>
+                                <th class="py-3 px-4 text-center font-bold border-gainsboro border-r whitespace-nowrap text-sm">User</th>
                                 <th class="py-3 px-4 text-center font-bold border-gainsboro border-r whitespace-nowrap text-sm">Table</th>
                                 <th class="py-3 px-4 text-center font-bold border-gainsboro border-r whitespace-nowrap text-sm">Action</th>
                                 <th class="py-3 px-4 text-center font-bold border-gainsboro whitespace-nowrap text-sm">Deskripsi</th>

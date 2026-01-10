@@ -19,6 +19,12 @@
                 </div>
             @endif
 
+            @if(session('error'))
+                <div data-turbo-temporary class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                    {{ session('error') }}
+                </div>
+            @endif
+
             <div class="space-y-4">
                 @forelse($lahan as $item)
                     <x-lahan.card :lahan="$item" :index="$loop->iteration"/>

@@ -12,6 +12,19 @@
 		</div>
   	</x-slot>
 
+    {{-- Success/Error Messages --}}
+    @if(session('success'))
+        <div data-turbo-temporary class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div data-turbo-temporary class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {{ session('error') }}
+        </div>
+    @endif
+
 	<div class="py-6">
 		<div class="self-stretch mx-auto">
 			<div class="bg-almostgray overflow-hidden shadow-md rounded-lg sm:rounded-lg">
@@ -25,6 +38,36 @@
 					<div class="rounded-2xl overflow-hidden flex flex-col items-center">
 						<div class="w-full overflow-hidden shrink-0 flex flex-col items-start justify-between relative" style="height: 400px;">
 							<div id="maplibre-map" class="w-full h-full rounded-lg"></div>
+							<div class="absolute bottom-10 right-2 bg-white/90 backdrop-blur-md p-1.5 rounded-lg shadow-lg border border-gray-200 z-10 text-sm max-w-3xs font-outfit">
+								<h4 class="font-bold text-gray-700 mb-2 border-b pb-1 text-[10px] uppercase tracking-wider text-center">Status Progres</h4>
+								
+								<div class="flex items-center mb-1.5">
+									<div class="w-4 h-4 mr-2 bg-[#ef4444]/50 border-2 border-[#ef4444] rounded-[3px]"></div>
+									<span class="text-gray-600 text-xs">0% - 49%</span>
+								</div>
+
+								<div class="flex items-center mb-1.5">
+									<div class="w-4 h-4 mr-2 bg-[#f59e0b]/50 border-2 border-[#f59e0b] rounded-[3px]"></div>
+									<span class="text-gray-600 text-xs">50% - 74%</span>
+								</div>
+
+								<div class="flex items-center mb-1.5">
+									<div class="w-4 h-4 mr-2 bg-[#3b82f6]/50 border-2 border-[#3b82f6] rounded-[3px]"></div>
+									<span class="text-gray-600 text-xs">75% - 99%</span>
+								</div>
+
+								<div class="flex items-center mb-2">
+									<div class="w-4 h-4 mr-2 bg-[#22c55e]/50 border-2 border-[#22c55e] rounded-[3px]"></div>
+									<span class="text-gray-600 text-xs font-medium">Selesai (100%)</span>
+								</div>
+
+								<div class="border-t my-1.5"></div>
+
+								<div class="flex items-center">
+									<div class="w-4 h-4 mr-2 bg-[#d946ef] border-2 border-[#d946ef] shadow-sm rounded-[3px]"></div>
+									<span class="text-gray-800 text-xs font-bold">Plot Terpilih</span>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>

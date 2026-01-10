@@ -161,9 +161,9 @@ class StoreProgresReklamasiRequest extends FormRequest
         $fieldKey = $fieldDef->field_key;
         $satuan = strtolower($fieldDef->satuan ?? '');
 
-        // Area-related fields (should be limited by plot area)
+        // Area-related fields
         if ($this->isAreaRelatedField($fieldDef)) {
-            return 'area'; // Compare with plot area
+            return 'target'; // Compare with plot area
         }
 
         // Volume fields (m³) - should be limited by target value  

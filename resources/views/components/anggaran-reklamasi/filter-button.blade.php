@@ -115,9 +115,10 @@
                 <x-main.input-label for="kategori_anggaran" class="block text-sm font-medium text-gray-700 mb-1">Kategori Anggaran</x-main.input-label>
                 <select id="kategori_anggaran" name="kategori_anggaran" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
                     <option value="">Pilih Kategori</option>
-                    @foreach($kategoriAnggaranList as $kategori)
-                        <option value="{{ $kategori }}" @selected(request('kategori_anggaran') === $kategori)>
-                            {{ $kategori }}
+                    @foreach($kategoriAnggaranList as $item)
+                        <option value="{{ $item->kategori_anggaran_id }}" 
+                            {{ request('kategori_anggaran') == $item->kategori_anggaran_id ? 'selected' : '' }}>
+                            {{ $item->nama_kategori }}
                         </option>
                     @endforeach
                 </select>

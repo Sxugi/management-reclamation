@@ -5,13 +5,13 @@ return [
         'penataan_lahan' => [
             'label' => 'Penataan Lahan',
             'satuan' => 'ha',
-            'summary_type' => 'max',
+            'summary_type' => 'sum',
             'description' => 'Total luas area yang telah diratakan, dikompaksi, dan dipersiapkan untuk tahap reklamasi selanjutnya'
         ],
         'pengupasan_topsoil' => [
             'label' => 'Pengupasan Tanah Pucuk',
             'satuan' => 'ha',
-            'summary_type' => 'max',
+            'summary_type' => 'sum',
             'description' => 'Luas area yang telah dilakukan pengupasan lapisan tanah atas'
         ],
         'jalur_drainase' => [
@@ -29,37 +29,37 @@ return [
         'tanah_pucuk' => [
             'label' => 'Tanah Pucuk Tersebar',
             'satuan' => 'm³',
-            'summary_type' => 'max',
+            'summary_type' => 'sum',
             'description' => 'Volume tanah pucuk yang telah disebarkan'
         ],
         'cover_crops' => [
             'label' => 'Revegetasi Cover Crops',
             'satuan' => 'ha',
-            'summary_type' => 'max',
+            'summary_type' => 'sum',
             'description' => 'Luas area yang ditanami tanaman penutup'
         ],
         'pohon_pionir' => [
             'label' => 'Penanaman Pohon Pionir',
             'satuan' => 'ha',
-            'summary_type' => 'max',
+            'summary_type' => 'sum',
             'description' => 'Luas area yang ditanami pohon pionir'
         ],
         'pohon_lokal' => [
             'label' => 'Penanaman Pohon Lokal',
             'satuan' => 'ha',
-            'summary_type' => 'max', 
+            'summary_type' => 'sum', 
             'description' => 'Luas area yang ditanami pohon lokal'
         ],
         'pemeliharaan_tanaman' => [
             'label' => 'Pemeliharaan Tanaman',
             'satuan' => 'ha',
-            'summary_type' => 'max', 
+            'summary_type' => 'sum', 
             'description' => 'Luas area tanaman yang telah mendapat perawatan'
         ],
         'monitoring_tanaman' => [
             'label' => 'Monitoring & Evaluasi',
             'satuan' => 'ha',
-            'summary_type' => 'max', 
+            'summary_type' => 'sum', 
             'description' => 'Luas area yang telah dilakukan monitoring'
         ],
     ],

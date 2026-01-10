@@ -52,6 +52,8 @@ class PlotService
                 // URLs
                 'edit_url' => route('plot.progres.edit', [$plot, $progres]),
                 'delete_url' => route('plot.progres.destroy', [$plot, $progres]),
+                'can_update' => auth()->user()->can('update', $progres),
+                'can_delete' => auth()->user()->can('delete', $progres),
             ];
             
             return $progres;

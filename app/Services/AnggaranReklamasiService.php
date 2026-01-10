@@ -3,11 +3,19 @@
 namespace App\Services;
 
 use App\Models\AnggaranReklamasi;
+use App\Models\KategoriAnggaran;
 use Illuminate\Support\Collection;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use App\Models\Lahan; 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 use Exception;
 
 class AnggaranReklamasiService
@@ -36,24 +44,26 @@ class AnggaranReklamasiService
         try {
             $query = AnggaranReklamasi::where('lahan_id', $lahanId)
                 ->where('jenis_anggaran', $jenis)
+                ->join('kategori_anggaran', 'anggaran_reklamasi.kategori_anggaran_id', '=', 'kategori_anggaran.kategori_anggaran_id')
                 ->selectRaw("
                     tahun, 
                     bulan, 
                     quarter, 
                     quarter_label,
                     SUM(nominal) as nominal,
-                    STRING_AGG(kategori_anggaran, ', ') as kategori_anggaran,
+                    STRING_AGG(kategori_anggaran.nama_kategori, ', ') as list_kategori,
                     COUNT(*) as jumlah_kategori,
                     json_agg(
                         json_build_object(
                             'id', anggaran_reklamasi_id,
-                            'kategori', kategori_anggaran,
+                            'kategori_id', anggaran_reklamasi.kategori_anggaran_id,
+                            'kategori', kategori_anggaran.nama_kategori,
                             'nominal', nominal,
                             'tahun', tahun,
                             'bulan', bulan,
                             'quarter', quarter,
-                            'created_at', created_at,
-                            'updated_at', updated_at
+                            'created_at', anggaran_reklamasi.created_at, 
+                            'updated_at', anggaran_reklamasi.updated_at
                         )
                     ) as items_json
                 ")
@@ -159,7 +169,7 @@ class AnggaranReklamasiService
             $query->where('bulan', '<=', $request->endMonth);
         }
         if ($request->filled('kategori_anggaran')) {
-            $query->where('kategori_anggaran', $request->kategori_anggaran);
+            $query->where('kategori_anggaran_id', $request->kategori_anggaran);
         }
         if ($request->filled('quarter')) {
             $query->where('quarter', $request->quarter);
@@ -190,17 +200,18 @@ class AnggaranReklamasiService
             ->get();
     }
 
-    public function isDuplicate($quarter, $tahun, $bulan, $lahanId, $jenisAnggaran, $kategoriAnggaran, $excludeId = null)
+    public function isDuplicate($quarter, $tahun, $bulan, $lahanId, $jenisAnggaran, $kategoriAnggaranId, $excludeId = null)
     {
-        $query = AnggaranReklamasi::where('quarter', $quarter)
-            ->where('tahun', $tahun)
-            ->where('bulan', $bulan)
-            ->where('lahan_id', $lahanId)
-            ->where('jenis_anggaran', $jenisAnggaran)
-            ->where('kategori_anggaran', $kategoriAnggaran);
+        $query = AnggaranReklamasi::query()
+            ->where('anggaran_reklamasi.lahan_id', $lahanId)
+            ->where('anggaran_reklamasi.quarter', $quarter)
+            ->where('anggaran_reklamasi.tahun', $tahun)
+            ->where('anggaran_reklamasi.bulan', $bulan) 
+            ->where('anggaran_reklamasi.jenis_anggaran', $jenisAnggaran)
+            ->where('anggaran_reklamasi.kategori_anggaran_id', $kategoriAnggaranId);
 
         if ($excludeId) {
-            $query->where('anggaran_reklamasi_id', '!=', $excludeId);
+            $query->where('anggaran_reklamasi.anggaran_reklamasi_id', '!=', $excludeId);
         }
 
         return $query->exists();
@@ -212,12 +223,12 @@ class AnggaranReklamasiService
         $bulan,
         $lahanId,
         $jenisAnggaran,
-        $kategoriAnggaran,
+        $kategoriId,
         $excludeId = null
     ) {
         try {
             $context = $this->prepareGenerationContext(
-                $quarter, $tahun, $bulan, $lahanId, $jenisAnggaran, $kategoriAnggaran, $excludeId
+                $quarter, $tahun, $bulan, $lahanId, $jenisAnggaran, $kategoriId, $excludeId
             );
 
             $cycles = $this->determineCycles($context);
@@ -236,13 +247,13 @@ class AnggaranReklamasiService
         }
     }
 
-    private function prepareGenerationContext($quarter, $tahun, $bulan, $lahanId, $jenisAnggaran, $kategoriAnggaran, $excludeId)
+    private function prepareGenerationContext($quarter, $tahun, $bulan, $lahanId, $jenisAnggaran, $kategoriId, $excludeId)
     {
         // Get quarter records for SAME category (for direct sequence)
         $quarterRecordsCategory = AnggaranReklamasi::where('quarter', $quarter)
             ->where('lahan_id', $lahanId)
             ->where('jenis_anggaran', $jenisAnggaran)
-            ->where('kategori_anggaran', $kategoriAnggaran)
+            ->where('kategori_anggaran_id', $kategoriId) // Pastikan kolom ini benar (biasanya _id)
             ->when($excludeId, fn($q) => $q->where('anggaran_reklamasi_id', '!=', $excludeId))
             ->orderBy('tahun')->orderBy('bulan')->get();
 
@@ -265,7 +276,7 @@ class AnggaranReklamasiService
             'bulan' => (int)$bulan,
             'quarter' => $quarter,
             'quarter_label' => null,
-            'kategori_anggaran' => $kategoriAnggaran,
+            'kategori_anggaran_id' => $kategoriId,
             'anggaran_reklamasi_id' => null 
         ]);
 
@@ -291,7 +302,7 @@ class AnggaranReklamasiService
             'bulan' => (int)$bulan,
             'lahanId' => $lahanId,
             'jenisAnggaran' => $jenisAnggaran,
-            'kategoriAnggaran' => $kategoriAnggaran,
+            'kategoriAnggaran' => $kategoriId, // [FIX] Gunakan $kategoriId, bukan $kategoriAnggaran
             'quarterRecords' => $relevantSequence,
             'quarterRecordsAll' => $quarterRecordsAll,
             'yearsSet' => $allYears,
@@ -388,7 +399,7 @@ class AnggaranReklamasiService
         $existingSameQuarterCategory = AnggaranReklamasi::where('quarter', $quarter)
             ->where('lahan_id', $context['lahanId'])
             ->where('jenis_anggaran', $context['jenisAnggaran'])
-            ->where('kategori_anggaran', $context['kategoriAnggaran'])
+            ->where('kategori_anggaran_id', $context['kategoriAnggaran'])
             ->get();
             
         if ($existingSameQuarterCategory->isEmpty()) {
@@ -705,7 +716,7 @@ class AnggaranReklamasiService
 
             // Get quarters for this specific kategori
             $allQuartersLocal = $allQuartersGlobal
-                ->where('kategori_anggaran', $kategoriAnggaran)
+                ->where('kategori_anggaran_id', $kategoriAnggaran)
                 ->values();
 
             // Check for duplicates
@@ -1077,7 +1088,7 @@ class AnggaranReklamasiService
         }
 
         $alreadyExists = $existingInQuarter->first(function($item) use ($tahun, $bulan, $kategoriAnggaran) {
-            return $item->tahun == $tahun && $item->bulan == $bulan && $item->kategori_anggaran == $kategoriAnggaran;
+            return $item->tahun == $tahun && $item->bulan == $bulan && $item->kategori_anggaran_id == $kategoriAnggaran;
         });
 
         if ($alreadyExists) {
@@ -1165,7 +1176,7 @@ class AnggaranReklamasiService
             ->whereNotNull('quarter_label');
 
         if ($kategoriAnggaran !== null) {
-            $query->where('kategori_anggaran', $kategoriAnggaran);
+            $query->where('kategori_anggaran_id', $kategoriAnggaran);
         }
 
         $labels = $query->pluck('quarter_label')->unique();        
@@ -1263,7 +1274,7 @@ class AnggaranReklamasiService
 
         $all = AnggaranReklamasi::where('lahan_id', $lahanId)
             ->where('jenis_anggaran', $jenisAnggaran)
-            ->where('kategori_anggaran', $kategoriAnggaran)
+            ->where('kategori_anggaran_id', $kategoriAnggaran)
             ->whereBetween('tahun', [$start, $end])
             ->get();
 
@@ -1313,7 +1324,7 @@ class AnggaranReklamasiService
         $targets = AnggaranReklamasi::where('quarter', 'Q1')
             ->where('lahan_id', $lahanId)
             ->where('jenis_anggaran', $jenisAnggaran)
-            ->where('kategori_anggaran', $kategoriAnggaran)
+            ->where('kategori_anggaran_id', $kategoriAnggaran)
             ->where('tahun', $startYear)
             ->where('quarter_label', $labelBefore)
             ->get();
@@ -1359,7 +1370,7 @@ class AnggaranReklamasiService
         $existingQ1 = AnggaranReklamasi::where('quarter', 'Q1')
             ->where('lahan_id', $lahanId)
             ->where('jenis_anggaran', $jenisAnggaran)
-            ->where('kategori_anggaran', $kategoriAnggaran)
+            ->where('kategori_anggaran_id', $kategoriAnggaran)
             ->orderBy('tahun')
             ->orderBy('bulan')
             ->get();
@@ -1700,7 +1711,7 @@ class AnggaranReklamasiService
         'created_at'
     ];
 
-    public static function getFilteredData(Request $request, Lahan $lahan, string $jenis = null)
+    public static function getFilteredData(Request $request, Lahan $lahan, ?string $jenis = null)
     {
         $query = AnggaranReklamasi::query()->where('lahan_id', $lahan->lahan_id);
 
@@ -1748,7 +1759,7 @@ class AnggaranReklamasiService
 
         // Selected category filter
         if ($request->filled('kategori_anggaran')) {
-            $query->where('kategori_anggaran', $request->kategori_anggaran);
+            $query->where('anggaran_reklamasi.kategori_anggaran_id', $request->kategori_anggaran);
         }
 
         // Quarter range filter
@@ -1794,24 +1805,25 @@ class AnggaranReklamasiService
         }
 
         $groupedSub = $query->clone()
+            ->join('kategori_anggaran', 'anggaran_reklamasi.kategori_anggaran_id', '=', 'kategori_anggaran.kategori_anggaran_id')
             ->selectRaw("
                 tahun,
                 bulan,
                 quarter,
                 quarter_label,
                 SUM(nominal) AS nominal,
-                STRING_AGG(kategori_anggaran, ', ') AS kategori_anggaran,
+                STRING_AGG(kategori_anggaran.nama_kategori, ', ') AS kategori_anggaran_nama,
                 COUNT(*) AS jumlah_kategori,
                 json_agg(
                     json_build_object(
                         'id', anggaran_reklamasi_id,
-                        'kategori', kategori_anggaran,
+                        'kategori', kategori_anggaran.nama_kategori,
                         'nominal', nominal,
                         'tahun', tahun,
                         'bulan', bulan,
                         'quarter', quarter,
-                        'created_at', created_at,
-                        'updated_at', updated_at
+                        'created_at', anggaran_reklamasi.created_at,
+                        'updated_at', anggaran_reklamasi.updated_at
                     )
                 ) AS items_json,
                 SUM(SUM(nominal)) OVER (PARTITION BY quarter_label) AS quarter_total
@@ -1875,9 +1887,174 @@ class AnggaranReklamasiService
 
     public function getKategoriAnggaranList($lahan_id)
     {
-        return AnggaranReklamasi::where('lahan_id', $lahan_id)
-            ->distinct()
-            ->pluck('kategori_anggaran')
-            ->toArray();
+        return KategoriAnggaran::orderBy('nama_kategori')->get();
+    }
+
+    /**
+     * Export Anggaran to Excel 
+     */
+    public function exportExcel(Lahan $lahan)
+    {
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->getDefaultStyle()->getFont()->setName('Calibri');
+        $spreadsheet->getDefaultStyle()->getFont()->setSize(11);
+
+        $spreadsheet->removeSheetByIndex(0);
+
+        $types = ['actual', 'projection', 'forecast'];
+        
+        $quarterColors = [
+            'Q1' => 'E2EFDA', 'Q2' => 'DDEBF7', 'Q3' => 'FFF2CC', 'Q4' => 'FCE4D6', 'DEFAULT' => 'FFFFFF'
+        ];
+        $totalColors = [
+            'Q1' => 'C6E0B4', 'Q2' => 'BDD7EE', 'Q3' => 'FFE699', 'Q4' => 'F8CBAD', 'DEFAULT' => 'EAEAEA'
+        ];
+        
+        foreach ($types as $index => $type) {
+            $sheet = new Worksheet($spreadsheet, ucfirst($type));
+            $spreadsheet->addSheet($sheet, $index);
+
+            // TITLE
+            $lahanName = strtoupper($lahan->nama_lahan);
+            $typeName = strtoupper($type);
+            $sheet->setCellValue('A1', "DATA ANGGARAN REKLAMASI - {$lahanName} ({$typeName})");
+            $sheet->mergeCells('A1:F1');
+            $sheet->getStyle('A1')->applyFromArray([
+                'font' => ['bold' => true, 'size' => 14],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+            ]);
+            $sheet->getRowDimension('1')->setRowHeight(30);
+
+            // HEADER
+            $headers = ['Tahun', 'Quarter', 'Bulan', 'Rincian Penggunaan (Kategori)', 'Total Nominal (Bulan)', 'Total Quarter'];
+            $sheet->fromArray($headers, null, 'A2');
+            
+            $headerStyle = [
+                'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '44546A']],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+            ];
+            $sheet->getStyle('A2:F2')->applyFromArray($headerStyle);
+            $sheet->getRowDimension('2')->setRowHeight(25);
+
+            // DATA FETCHING
+            $rawData = AnggaranReklamasi::where('lahan_id', $lahan->lahan_id)
+                ->where('jenis_anggaran', $type)
+                ->join('kategori_anggaran', 'anggaran_reklamasi.kategori_anggaran_id', '=', 'kategori_anggaran.kategori_anggaran_id')
+                ->selectRaw("
+                    tahun, bulan, quarter, quarter_label,
+                    SUM(nominal) as total_nominal_bulan,
+                    json_agg(json_build_object('kategori', kategori_anggaran.nama_kategori, 'nominal', nominal)) as items_json
+                ")
+                ->groupBy('tahun', 'bulan', 'quarter', 'quarter_label')
+                ->orderBy('tahun', 'asc')
+                ->orderBy('bulan', 'asc')
+                ->get();
+
+            if ($rawData->isEmpty()) {
+                $sheet->mergeCells('A3:F5'); 
+                $sheet->setCellValue('A3', "BELUM ADA DATA ANGGARAN " . strtoupper($type));
+                $sheet->getStyle('A3')->applyFromArray([
+                    'font' => ['italic' => true, 'color' => ['rgb' => '777777'], 'size' => 12],
+                    'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F2F2F2']],
+                    'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'CCCCCC']]]
+                ]);
+                foreach (range('A', 'F') as $col) $sheet->getColumnDimension($col)->setWidth(15);
+                $sheet->getColumnDimension('D')->setWidth(40);
+                continue; 
+            }
+
+            $groupedData = $rawData->groupBy('tahun')->map(fn($y) => $y->groupBy('quarter_label'));
+            $row = 3; 
+
+            foreach ($groupedData as $tahun => $quarters) {
+                $yearStartRow = $row; 
+
+                foreach ($quarters as $qLabel => $months) {
+                    $quarterStartRow = $row;
+                    $quarterTotalSum = 0;
+                    
+                    $qPrefix = substr($qLabel, 0, 2); 
+                    $bgColor = $quarterColors[$qPrefix] ?? $quarterColors['DEFAULT'];
+                    $totalColor = $totalColors[$qPrefix] ?? $totalColors['DEFAULT'];
+
+                    foreach ($months as $data) {
+                        $items = json_decode($data->items_json);
+                        $detailLines = [];
+                        foreach ($items as $item) {
+                            $nom = number_format($item->nominal, 0, ',', '.');
+                            $detailLines[] = "- {$item->kategori}: Rp {$nom}";
+                        }
+                        $detailString = implode("\n", $detailLines);
+                        if (!empty($detailString)) $detailString .= "\n"; 
+
+                        $sheet->setCellValue('A' . $row, $tahun);
+                        $sheet->setCellValue('B' . $row, $qLabel); 
+                        $sheet->setCellValue('C' . $row, self::MONTH_NAMES[$data->bulan]);
+                        $sheet->setCellValue('D' . $row, $detailString);
+                        $sheet->setCellValue('E' . $row, $data->total_nominal_bulan);
+
+                        // STYLING
+                        $sheet->getStyle('C' . $row)->applyFromArray(['alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER], 'font' => ['bold' => true]]);
+                        $sheet->getStyle('D' . $row)->applyFromArray(['alignment' => ['vertical' => Alignment::VERTICAL_TOP, 'wrapText' => true, 'indent' => 1]]);
+                        
+                        // FORMAT NOMINAL
+                        $sheet->getStyle('E' . $row)->applyFromArray([
+                            'numberFormat' => ['formatCode' => '"Rp " #,##0; "Rp " (#,##0); "Rp " -; @'],
+                            'alignment' => ['vertical' => Alignment::VERTICAL_CENTER, 'horizontal' => Alignment::HORIZONTAL_CENTER],
+                        ]);
+
+                        $quarterTotalSum += $data->total_nominal_bulan;
+                        $row++;
+                    }
+
+                    $quarterEndRow = $row - 1;
+
+                    // COLORS
+                    $sheet->getStyle("A{$quarterStartRow}:B{$quarterEndRow}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB($bgColor);
+                    $sheet->getStyle("F{$quarterStartRow}:F{$quarterEndRow}")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB($totalColor);
+                        
+                    // MERGE
+                    if ($quarterEndRow > $quarterStartRow) $sheet->mergeCells("B{$quarterStartRow}:B{$quarterEndRow}");
+                    
+                    $sheet->setCellValue("F{$quarterStartRow}", $quarterTotalSum);
+                    if ($quarterEndRow > $quarterStartRow) $sheet->mergeCells("F{$quarterStartRow}:F{$quarterEndRow}");
+
+                    // STYLE TOTAL
+                    $sheet->getStyle("F{$quarterStartRow}")->applyFromArray([
+                        'numberFormat' => ['formatCode' => '"Rp " #,##0; "Rp " (#,##0); "Rp " -; @'],
+                        'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+                        'font' => ['bold' => true]
+                    ]);
+                }
+
+                $yearEndRow = $row - 1;
+                if ($yearEndRow > $yearStartRow) $sheet->mergeCells("A{$yearStartRow}:A{$yearEndRow}");
+                
+                $sheet->getStyle("A{$yearStartRow}:B{$yearEndRow}")->applyFromArray(['alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER], 'font' => ['bold' => true]]);
+            }
+
+            $lastRow = $row - 1;
+            if ($lastRow >= 3) $sheet->getStyle("A3:F{$lastRow}")->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+
+            $sheet->getColumnDimension('A')->setWidth(10);
+            $sheet->getColumnDimension('B')->setWidth(12);
+            $sheet->getColumnDimension('C')->setWidth(15);
+            $sheet->getColumnDimension('D')->setWidth(60);
+            $sheet->getColumnDimension('E')->setWidth(25);
+            $sheet->getColumnDimension('F')->setWidth(25);
+        }
+
+        $spreadsheet->setActiveSheetIndex(0);
+        $fileName = 'Anggaran_Reklamasi_' . str_replace(' ', '_', $lahan->nama_lahan) . '_' . date('Ymd_His') . '.xlsx';
+        $writer = new Xlsx($spreadsheet);
+        
+        return new StreamedResponse(function () use ($writer) { $writer->save('php://output'); }, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment;filename="' . $fileName . '"',
+            'Cache-Control' => 'max-age=0',
+        ]);
     }
 }

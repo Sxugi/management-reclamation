@@ -10,33 +10,35 @@ use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use App\Http\Requests\Dokumentasi\StoreDokumentasiRequest;
 use App\Http\Requests\Dokumentasi\UpdateDokumentasiRequest;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class DokumentasiController extends Controller
 {
+    use AuthorizesRequests;
+    
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request, Lahan $lahan)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('viewAny', [Dokumentasi::class, $lahan]);
 
-        $dokumentasi = Dokumentasi::where('lahan_id', $lahan->lahan_id);
+        $query = Dokumentasi::where('lahan_id', $lahan->lahan_id);
 
         if ($request->filled('startDate')) {
             $startDate = Carbon::parse($request->startDate)->startOfDay();
-            $dokumentasi->where('created_at', '>=', $startDate);
+            $query->where('created_at', '>=', $startDate);
         }
 
         if ($request->filled('endDate')) {
             $endDate = Carbon::parse($request->endDate)->endOfDay();
-            $dokumentasi->where('created_at', '<=', $endDate);
+            $query->where('created_at', '<=', $endDate);
         }
 
         $hasFilter = $request->has(['startDate', 'endDate']);
 
-        $dokumentasi = $dokumentasi->latest()->paginate(8);
+        $dokumentasi = $query->latest()->paginate(8);
         
         return view('detail-lahan.dokumentasi.index', [
             'dokumentasi' => $dokumentasi,
@@ -51,9 +53,7 @@ class DokumentasiController extends Controller
     public function create(Lahan $lahan)
     {
         // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('create', [Dokumentasi::class, $lahan]);
 
         return view('detail-lahan.dokumentasi.create', [
             'lahan' => $lahan,
@@ -65,18 +65,35 @@ class DokumentasiController extends Controller
      */
     public function store(Lahan $lahan, StoreDokumentasiRequest $request)
     {
-        $validated = $request->validated();
+        $this->authorize('create', [Dokumentasi::class, $lahan]);
 
+        $validated = $request->validated();
         $validated['lahan_id'] = $lahan->lahan_id;
 
-        if ($request->hasFile('image')) {
-            $validated['image_path'] = $request->file('image')->store('dokumentasi', 'public');
+        DB::beginTransaction();
+        try {
+            if ($request->hasFile('image')) {
+                $validated['image_path'] = $request->file('image')->store('dokumentasi', 'public');
+            }
+
+            Dokumentasi::create($validated);
+
+            DB::commit();
+
+            return redirect()->route('lahan.dokumentasi.index', $lahan->lahan_id)
+                            ->with('success', 'Dokumentasi berhasil ditambahkan.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error creating dokumentasi', [
+                'user' => Auth::user()->username,
+                'lahan_id' => $lahan->lahan_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan saat menyimpan data. Silakan coba lagi.');
         }
-
-        $dokumentasi = Dokumentasi::create($validated);
-
-        return redirect()->route('lahan.dokumentasi.index', $lahan->lahan_id)
-                        ->with('success', 'Dokumentasi berhasil ditambahkan.');
     }
 
     /**
@@ -89,9 +106,7 @@ class DokumentasiController extends Controller
         }
 
         // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('update', $dokumentasi);
 
         return view('detail-lahan.dokumentasi.edit', [
             'dokumentasi' => $dokumentasi,
@@ -104,21 +119,38 @@ class DokumentasiController extends Controller
      */
     public function update(Lahan $lahan, Dokumentasi $dokumentasi, UpdateDokumentasiRequest $request)
     {
-        $validated = $request->validated();
+        $this->authorize('update', $dokumentasi);
 
+        $validated = $request->validated();
         $validated['lahan_id'] = $lahan->lahan_id;
 
-        if ($request->hasFile('image')) {
-            if ($dokumentasi->image_path) {
-                Storage::disk('public')->delete($dokumentasi->image_path);
+        DB::beginTransaction();
+        try {
+            if ($request->hasFile('image')) {
+                if ($dokumentasi->image_path) {
+                    Storage::disk('public')->delete($dokumentasi->image_path);
+                }
+                $validated['image_path'] = $request->file('image')->store('dokumentasi', 'public');
             }
-            $validated['image_path'] = $request->file('image')->store('dokumentasi', 'public');
+
+            $dokumentasi->update($validated);
+
+            DB::commit();
+
+            return redirect()->route('lahan.dokumentasi.index', $lahan->lahan_id)
+                            ->with('success', 'Dokumentasi berhasil diperbarui.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error updating dokumentasi', [
+                'user' => Auth::user()->username,
+                'lahan_id' => $lahan->lahan_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Terjadi kesalahan saat memperbarui data. Silakan coba lagi.');
         }
-
-        $dokumentasi->update($validated);
-
-        return redirect()->route('lahan.dokumentasi.index', $lahan->lahan_id)
-                        ->with('success', 'Dokumentasi berhasil diperbarui.');
     }
 
     /**
@@ -126,16 +158,34 @@ class DokumentasiController extends Controller
      */
     public function destroy(Lahan $lahan, Dokumentasi $dokumentasi)
     {
-        // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
+        if ($dokumentasi->lahan_id !== $lahan->lahan_id) {
+            abort(404, 'Dokumentasi not found for this lahan.');
         }
-        
-        if ($dokumentasi->image_path) {
-            Storage::disk('public')->delete($dokumentasi->image_path);
-        }
-        $dokumentasi->delete();
 
-        return redirect()->route('lahan.dokumentasi.index', $lahan->lahan_id)->with('success', 'Dokumentasi berhasil dihapus.');
+        // Check if user owns this lahan
+        $this->authorize('delete', $dokumentasi);
+        
+        DB::beginTransaction();
+        try {
+            if ($dokumentasi->image_path) {
+                Storage::disk('public')->delete($dokumentasi->image_path);
+            }
+            $dokumentasi->delete();
+
+            DB::commit();
+
+            return redirect()->route('lahan.dokumentasi.index', $lahan->lahan_id)
+                        ->with('success', 'Dokumentasi berhasil dihapus.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error deleting dokumentasi', [
+                'user' => Auth::user()->username,
+                'lahan_id' => $lahan->lahan_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Terjadi kesalahan saat menghapus data. Silakan coba lagi.');
+        }
     }
 }

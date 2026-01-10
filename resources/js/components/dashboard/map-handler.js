@@ -12,6 +12,10 @@ class DashboardMapHandler {
             dataLoaded: false,
             isLoadingData: false
         };
+
+        this.activePopup = null;
+        this.activePlotId = null;
+        this.isSwitchingSelection = false;
     }
 
     async initialize() {
@@ -19,7 +23,7 @@ class DashboardMapHandler {
             console.log('Initializing dashboard map for lahan:', this.lahanId);
             await this.loadLahanCenter();
             this.initMap();
-            return this.map;
+            return this.map; 
         } catch (error) {
             console.error('Map initialization error:', error);
             throw error;
@@ -126,6 +130,7 @@ class DashboardMapHandler {
         });
 
         this.addMapControls();
+        this.addScaleControl();
         this.bindMapEvents();
     }
 
@@ -137,6 +142,16 @@ class DashboardMapHandler {
             showCompass: true,
             showZoom: true
         }));
+    }
+
+    /**     
+     * Add scale control to map
+     */
+    addScaleControl() {
+        this.map.addControl(new maplibregl.ScaleControl({
+            maxWidth: 100,
+            unit: 'metric'
+        }), 'bottom-left');
     }
 
     /**
@@ -397,7 +412,14 @@ class DashboardMapHandler {
                 type: 'fill',
                 source: 'plots-source',
                 paint: {
-                    'fill-color': '#3388ff',
+                    'fill-color': [
+                        'step',
+                        ['get', 'progress_percent'],
+                        '#ef4444',
+                        50, '#f59e0b',
+                        75, '#3b82f6',
+                        100, '#22c55e'
+                    ],
                     'fill-opacity': 0.2
                 }
             });
@@ -414,7 +436,14 @@ class DashboardMapHandler {
                 type: 'line',
                 source: 'plots-source',
                 paint: {
-                    'line-color': '#3388ff',
+                    'line-color': [
+                        'step',
+                        ['get', 'progress_percent'],
+                        '#f03',
+                        50, '#f59e0b',
+                        75, '#3b82f6',
+                        100, '#22c55e'
+                    ],
                     'line-width': 3
                 }
             }, 'plots-fill');
@@ -460,20 +489,103 @@ class DashboardMapHandler {
         });
     }
 
+    // Update map visuals based on active selection
+    updateMapVisuals() {
+        if (!this.map) return;
+
+        // Define color expressions
+        const progressColorExpression = [
+            'step',
+            ['get', 'progress_percent'],
+            '#ef4444', 50, '#f59e0b', 75, '#3b82f6', 100, '#22c55e'
+        ];
+
+        // Define styles based on active selection
+        const fillColor = this.activePlotId 
+            ? ['case', ['==', ['get', 'plot_id'], this.activePlotId], '#d946ef', progressColorExpression]
+            : progressColorExpression;
+
+        const fillOpacity = this.activePlotId 
+            ? ['case', ['==', ['get', 'plot_id'], this.activePlotId], 0.6, 0.2]
+            : 0.2;
+
+        const lineColor = this.activePlotId 
+            ? ['case', ['==', ['get', 'plot_id'], this.activePlotId], '#d946ef', progressColorExpression]
+            : progressColorExpression;
+
+        const lineWidth = this.activePlotId 
+            ? ['case', ['==', ['get', 'plot_id'], this.activePlotId], 4, 2]
+            : 2; // Default line width
+
+        // Apply styles to layers
+        if (this.map.getLayer('plots-fill')) {
+            this.map.setPaintProperty('plots-fill', 'fill-color', fillColor);
+            this.map.setPaintProperty('plots-fill', 'fill-opacity', fillOpacity);
+        }
+        if (this.map.getLayer('plots-outline')) {
+            this.map.setPaintProperty('plots-outline', 'line-color', lineColor);
+            this.map.setPaintProperty('plots-outline', 'line-width', lineWidth);
+        }
+    }
+
     /**
      * Handle plot click and show popup
      */
-    handlePlotClick(e, popup) {
+    handlePlotClick(e) {
         if (!e.features || e.features.length === 0) return;
         
         const feature = e.features[0];
         const properties = feature.properties;
+        const plotId = properties.plot_id;
         const coordinates = this.getPolygonCenter(feature.geometry.coordinates[0]) || e.lngLat;
-        
-        const html = this.createPopupContent(properties);
-        popup.setLngLat(coordinates).setHTML(html).addTo(this.map);
-    }
 
+        if (this.activePlotId === plotId) return;
+
+        this.isSwitchingSelection = true; // Prevent visual reset during popup switch
+        if (this.activePopup) {
+            this.activePopup.remove(); // Close existing popup
+        }
+        this.isSwitchingSelection = false;
+
+        this.activePlotId = plotId;
+
+        this.updateMapVisuals();
+
+        // Create popup content
+        const popupNode = document.createElement('div');
+
+        // Set popup HTML content
+        popupNode.innerHTML = this.createPopupContent(properties);
+
+        // Bind close button event
+        const closeBtn = popupNode.querySelector('button'); 
+        if(closeBtn) {
+            closeBtn.onclick = (e) => {
+                e.preventDefault(); 
+                e.stopPropagation();
+                if (this.activePopup) this.activePopup.remove(); 
+            };
+        }
+
+        const popup = new maplibregl.Popup({
+            closeButton: false,
+            closeOnClick: true,
+            maxWidth: '300px'
+        })
+        .setLngLat(coordinates)
+        .setDOMContent(popupNode)
+        .addTo(this.map);
+
+        this.activePopup = popup;
+
+        popup.once('close', () => {
+            if (!this.isSwitchingSelection) {
+                this.activePlotId = null;
+                this.activePopup = null;
+                this.updateMapVisuals(); // Reset visuals
+            }
+        });
+    }
 
     /**
      * Create popup HTML content
@@ -487,8 +599,7 @@ class DashboardMapHandler {
 
         return `
             <div class="plot-popup-content p-2 relative">
-                <button class="absolute cursor-pointer top-3 right-1 w-4 h-4 bg-transparent text-red-500 flex items-center justify-center text-lg font-bold transition-all duration-200 hover:scale-110" 
-                        onclick="document.querySelector('.maplibregl-popup').remove()">
+                <button class="absolute cursor-pointer top-3 right-1 w-4 h-4 bg-transparent text-red-500 flex items-center justify-center text-lg font-bold transition-all duration-200 hover:scale-110">
                     ×
                 </button>
                 <h3 class="text-lg font-bold mb-2 text-gray-800 pr-10" title="${plotName}">${truncatedName}</h3>

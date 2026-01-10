@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LahanController;
+use App\Http\Controllers\LahanTeamController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PlotController;
 use App\Http\Controllers\TargetProgresReklamasiController;
@@ -18,6 +19,16 @@ use App\Http\Controllers\DokumentasiController;
 use App\Http\Controllers\FileRencanaController;
 use App\Http\Controllers\FileLaporanController;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/', function () {
+    // Redirect based on auth status
+    if (auth()->check()) {
+        return auth()->user()->role === 'admin' 
+            ? redirect()->route('admin.dashboard')
+            : redirect()->route('lahan.index');
+    }
+    return redirect()->route('login');
+});
 
 // Route for profile
 Route::middleware(['auth'])->group(function () {
@@ -36,6 +47,13 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('lahan/{lahan}/status', [LahanController::class, 'updateStatus'])
         ->name('lahan.update-status');
     Route::resource('lahan', LahanController::class);
+
+    Route::prefix('lahan/{lahan}/team')->name('lahan.team.')->group(function () {
+        Route::get('/', [LahanTeamController::class, 'index'])->name('index');
+        Route::post('/', [LahanTeamController::class, 'store'])->name('store');
+        Route::put('/{user}', [LahanTeamController::class, 'update'])->name('update');
+        Route::delete('/{user}', [LahanTeamController:: class, 'destroy'])->name('destroy');
+    });
 });
 
 // Route for progress management
@@ -85,12 +103,16 @@ Route::middleware(['auth'])->group(function () {
         Route::resource('{plot}/progres', ProgresReklamasiController::class)
             ->parameters(['progres' => 'progres']) 
             ->except('index', 'show');
+        Route::get('{plot}/progres/export', [ProgresReklamasiController::class, 'export'])
+            ->name('progres.export');
         Route::get('{plot}/activity-logs', [PlotController::class, 'getActivityLogs']);
     });
 
     // Anggaran Reklamasi routes
     Route::resource('lahan.anggaran', AnggaranReklamasiController::class)
         ->except('show');
+    Route::get('lahan/{lahan}/anggaran/export', [AnggaranReklamasiController::class, 'export'])
+        ->name('lahan.anggaran.export');
 
     // Pohon and related resources
     Route::prefix('lahan/{lahan}/pohon')->name('lahan.pohon.')->group(function () {
@@ -104,11 +126,15 @@ Route::middleware(['auth'])->group(function () {
             ->name('update');
         Route::delete('{pohon}/tahun/{tahun}', [PohonController::class, 'destroy'])
             ->name('destroy');
+        Route::get('export', [PohonController::class, 'export'])
+            ->name('export');
     });
 
     // Data Gudang routes
     Route::resource('lahan.gudang', DataGudangController::class)
         ->except('show');
+    Route::get('lahan/{lahan}/gudang/export', [DataGudangController::class, 'export'])
+        ->name('lahan.gudang.export');
 });
 
 // Route for administration
@@ -167,5 +193,5 @@ Route::middleware(['auth'])->group(function () {
         ->name('lahan.file-laporan.preview');
 });
 
-
 require __DIR__.'/auth.php';
+require __DIR__.'/admin.php';

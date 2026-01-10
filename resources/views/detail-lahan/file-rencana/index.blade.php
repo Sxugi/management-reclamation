@@ -46,15 +46,24 @@
                                     <div>
                                         <label class="block text-sm font-medium text-darkslategray-200 mb-2">Upload file</label>
                                         <div class="rounded-lg bg-white border-gainsboro border-solid border-[1px] overflow-hidden flex">
-                                            <label for="file-upload" class="flex-shrink-0 bg-whitesmoke-100 border-gainsboro border-solid border-r-[1px] border-t-[0px] border-b-[0px] border-l-[0px] px-4 py-2.5 cursor-pointer hover:bg-gray-100 transition-colors text-sm">
-                                                Choose File
-                                            </label>
-                                            <input type="file" 
-                                                   id="file-upload" 
-                                                   name="file" 
-                                                   accept=".pdf" 
-                                                   class="hidden" 
-                                                   @if(!$file) required @endif>
+                                            
+                                            @can('create', [\App\Models\ReklamasiFile::class, $lahan])  
+                                                <label for="file-upload" class="flex-shrink-0 bg-whitesmoke-100 border-gainsboro border-solid border-r-[1px] border-t-[0px] border-b-[0px] border-l-[0px] px-4 py-2.5 cursor-pointer hover:bg-gray-100 transition-colors text-sm">
+                                                    Choose File
+                                                </label>
+                                                <input type="file" 
+                                                    id="file-upload" 
+                                                    name="file" 
+                                                    accept=".pdf" 
+                                                    class="hidden" 
+                                                    @if(!$file) required @endif>
+                                            @else
+                                                <label class="flex-shrink-0 bg-whitesmoke-100 border-gainsboro border-solid border-r-[1px] border-t-[0px] border-b-[0px] border-l-[0px] px-4 py-2.5 text-sm opacity-50 cursor-not-allowed text-gray-500">
+                                                    Choose File 
+                                                </label>
+                                                <input type="file" disabled class="hidden">
+                                            @endcan
+                                            
                                             <div class="flex-1 bg-white px-4 py-2.5 text-sm overflow-hidden text-ellipsis whitespace-nowrap" 
                                                  id="file-name-display"
                                                  data-has-file="{{ $file ? 'true' : 'false' }}"
@@ -72,7 +81,11 @@
                                                 <svg class="inline w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                                                 </svg>
-                                                Pilih file baru untuk mengganti file yang ada
+                                                @can('create', [\App\Models\ReklamasiFile::class, $lahan])
+                                                    Pilih file baru untuk mengganti file yang ada
+                                                @else
+                                                    Anda tidak memiliki izin untuk mengubah file ini
+                                                @endcan
                                             </p>
                                         @endif
                                     </div>
@@ -127,35 +140,41 @@
                                         View Details
                                     </a>
 
-                                    <x-main.primary-button x-data="" 
-                                            x-on:click.prevent="$dispatch('open-modal', 'confirm-file-rencana-deletion-{{ $file->reklamasi_file_id }}')"
-                                            class="bg-red-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-red-600 transition-colors">
-                                        <span class="relative text-leading-5 font-medium">Delete</span>
-                                    </x-main.primary-button>
-                                    
-                                    <x-main.modal name="confirm-file-rencana-deletion-{{ $file->reklamasi_file_id }}" focusable>
-                                        <form method="POST" action="{{ route('lahan.file-rencana.destroy', [$lahan, $file]) }}" class="p-6">
-                                            @csrf
-                                            @method('DELETE')
+                                    @can('delete', [\App\Models\ReklamasiFile::class, $lahan])
+                                        <x-main.primary-button x-data="" 
+                                                x-on:click.prevent="$dispatch('open-modal', 'confirm-file-rencana-deletion-{{ $file->reklamasi_file_id }}')"
+                                                class="bg-red-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-red-600 transition-colors">
+                                            <span class="relative text-leading-5 font-medium">Delete</span>
+                                        </x-main.primary-button>
+                                        
+                                        <x-main.modal name="confirm-file-rencana-deletion-{{ $file->reklamasi_file_id }}" focusable>
+                                            <form method="POST" action="{{ route('lahan.file-rencana.destroy', [$lahan, $file]) }}" class="p-6">
+                                                @csrf
+                                                @method('DELETE')
 
-                                            <h2 class="text-lg font-medium text-gray-900">
-                                                {{ __('Are you sure you want to delete this file reclamation plan?') }}
-                                            </h2>
+                                                <h2 class="text-lg font-medium text-gray-900">
+                                                    {{ __('Are you sure you want to delete this file reclamation plan?') }}
+                                                </h2>
 
-                                            <p class="mt-1 text-sm text-gray-600">
-                                                {{ __('After this file is deleted, all related data will be permanently lost. This action cannot be undone.') }}
-                                            </p>
+                                                <p class="mt-1 text-sm text-gray-600">
+                                                    {{ __('After this file is deleted, all related data will be permanently lost. This action cannot be undone.') }}
+                                                </p>
 
-                                            <div class="mt-6 flex justify-end font-outfit">
-                                                <x-main.secondary-button @click="$dispatch('close')">
-                                                    {{ __('Cancel') }}
-                                                </x-main.secondary-button>
-                                                <x-main.danger-button type="submit" class="ml-3">
-                                                    {{ __('Delete') }}
-                                                </x-main.danger-button>
-                                            </div>
-                                        </form>
-                                    </x-main.modal>
+                                                <div class="mt-6 flex justify-end font-outfit">
+                                                    <x-main.secondary-button @click="$dispatch('close')">
+                                                        {{ __('Cancel') }}
+                                                    </x-main.secondary-button>
+                                                    <x-main.danger-button type="submit" class="ml-3">
+                                                        {{ __('Delete') }}
+                                                    </x-main.danger-button>
+                                                </div>
+                                            </form>
+                                        </x-main.modal>
+                                    @else
+                                        <x-main.primary-button disabled class="bg-red-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-red-600 transition-colors">
+                                            Delete
+                                        </x-main.primary-button>
+                                    @endcan
                                 </div>
                             </div>
                         </div>
@@ -184,6 +203,9 @@
     </div>
 
     <script>
+        // Check policy status
+        const canCreate = {{ auth()->user()->can('create', [\App\Models\ReklamasiFile::class, $lahan]) ? 'true' : 'false' }};
+
         // Function to reset file display to original state
         function resetFileDisplay() {
             const display = document.getElementById('file-name-display');
@@ -212,6 +234,8 @@
         
         // Function to update file name when user selects a file
         function updateFileName(input) {
+            if (!canCreate) return;
+
             const display = document.getElementById('file-name-display');
             const saveButton = document.getElementById('save-button');
             const buttonText = document.getElementById('button-text');
@@ -226,12 +250,14 @@
                 // Update display
                 display.innerHTML = `<span class="text-darkslategray-300">${fileName}</span>`;
                 
-                // Show button dengan dua cara
-                saveButton.classList.remove('hidden');
-                saveButton.style.display = '';
-                
-                // Update button text
-                buttonText.textContent = hasExistingFile ? 'Update' : 'Save';
+                // Only show button if user has permission
+                if(canCreate) {
+                    saveButton.classList.remove('hidden');
+                    saveButton.style.display = '';
+                    
+                    // Update button text
+                    buttonText.textContent = hasExistingFile ? 'Update' : 'Save';
+                }
             } else {
                 // User canceled - reset
                 resetFileDisplay();
@@ -241,13 +267,12 @@
         // Setup file input listener
         function setupFileInput() {
             const fileInput = document.getElementById('file-upload');
-            if (fileInput) {
+            if (fileInput && canCreate) {
                 // Remove existing listener if any
                 fileInput.removeEventListener('change', handleFileChange);
                 // Add new listener
                 fileInput.addEventListener('change', handleFileChange);
             }
-            
             // Reset display saat setup
             resetFileDisplay();
         }

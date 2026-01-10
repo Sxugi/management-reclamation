@@ -27,11 +27,10 @@ class UpdatePohonRequest extends FormRequest
         $dataPohon = $this->route('dataPohon');
 
         return [
-            'jenis_pohon' => [
+            'jenis_pohon_id' => [
                 'required',
-                'string',
-                'max:100',
-                Rule::unique('pohon')
+                'exists:jenis_pohon,jenis_pohon_id',
+                Rule::unique('pohon', 'jenis_pohon_id')
                     ->where(fn ($query) => $query->where('lahan_id', $lahan->lahan_id))
                     ->ignore($pohon?->pohon_id, 'pohon_id'),
             ],
@@ -59,7 +58,9 @@ class UpdatePohonRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'jenis_pohon.required' => 'Jenis pohon wajib diisi.',
+            'jenis_pohon_id.required' => 'Jenis pohon wajib dipilih.',
+            'jenis_pohon_id.exists' => 'Jenis pohon tidak valid.',
+            'jenis_pohon_id.unique' => 'Jenis pohon ini sudah ada di lahan ini.',
             'tahun.required' => 'Tahun wajib diisi.',
             'jumlah.required' => 'Jumlah wajib diisi.',
             'jumlah.min' => 'Jumlah minimal 1.',

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 class ActivityLog extends Model
 {
@@ -30,6 +31,7 @@ class ActivityLog extends Model
      */
     protected $fillable = [
         'plot_id',
+        'user_name',
         'action',
         'table_name',
         'record_id',
@@ -64,10 +66,18 @@ class ActivityLog extends Model
         string $action, 
         string $tableName, 
         ?int $recordId = null, 
-        ?string $description = null
+        ?string $description = null,
+        ?string $userName = null
     ): self {
+        $finalUserName = $userName;
+
+        if (is_null($finalUserName) && Auth::check()) {
+            $finalUserName = Auth::user()->name;
+        }
+
         return self::create([
             'plot_id' => $plotId,
+            'user_name' => $finalUserName,
             'action' => $action,
             'table_name' => $tableName,
             'record_id' => $recordId,

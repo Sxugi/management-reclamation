@@ -141,6 +141,7 @@ return new class extends Migration
             $table->foreignId('plot_id')
                 ->constrained('plot', 'plot_id')
                 ->cascadeOnDelete();
+            $table->string('user_name');
             $table->string('action');
             $table->string('table_name');
             $table->unsignedBigInteger('record_id');

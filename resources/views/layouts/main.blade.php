@@ -35,7 +35,7 @@
                 <!-- Main Content Area -->
                 <div class="flex-1 flex flex-col main-content">
                     <!-- Top Navigation -->
-                    <div class="w-full sticky top-0 z-50">
+                    <div class="w-full sticky top-0 z-40">
                         @include('layouts.header')
                     </div>
 

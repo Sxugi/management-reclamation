@@ -93,29 +93,29 @@ document.addEventListener("turbo:load", () => {
 
         // Setup Edit button
         if (editButton) {
-            if (data.edit_url) {
+            if (data.can_update && data.edit_url) {
+                editButton.disabled = false;
                 editButton.onclick = () => {
                     window.location.href = data.edit_url;
                 };
-                editButton.classList.remove('hidden');
             } else {
-                editButton.classList.add('hidden');
+                editButton.disabled = true;
                 editButton.onclick = null;
             }
         }
 
         // Setup Delete button
         if (deleteButton) {
-            if (data.id) {
+            if (data.can_delete && data.id) {
+                deleteButton.disabled = false;
                 deleteButton.onclick = () => {
                     window.closePohonModal();
                     window.dispatchEvent(
                         new CustomEvent('open-modal', { detail: `confirm-pohon-deletion-${data.id}-${data.tahun}` })
                     );
                 };
-                deleteButton.classList.remove('hidden');
             } else {
-                deleteButton.classList.add('hidden');
+                deleteButton.disabled = true;
                 deleteButton.onclick = null;
             }
         }

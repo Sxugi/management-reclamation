@@ -42,7 +42,8 @@
                     $parts[] = 'Total Min: Rp. ' . number_format(request('minTotal'), 0, ',', '.');
                 }
                 if(request('kategori_anggaran')) {
-                    $parts[] = 'Kategori: ' . e(request('kategori_anggaran'));
+                    $kategoryName = \App\Models\KategoriAnggaran::find(request('kategori_anggaran'))?->nama_kategori ?? request('kategori_anggaran');
+                    $parts[] = 'Kategori Anggaran: ' . e($kategoryName);
                 }
                 if(request('startQuarter') && request('endQuarter')) {
                     $parts[] = 'Quarter: ' . e(request('startQuarter')) . ' - ' . e(request('endQuarter'));

@@ -2,6 +2,7 @@ document.addEventListener("turbo:load", () => {
     window.openDetailModal = (data) => {
         const modal = document.getElementById('plotInfoModal');
         const content = document.getElementById('infoModalContent');
+        const editButton = document.getElementById('editButton');
         const deleteButton = document.getElementById('deleteButton');
         
         if (!modal || !content) return;
@@ -220,23 +221,35 @@ document.addEventListener("turbo:load", () => {
             ${logHtml}
         `;
 
-        document.getElementById('editButton').onclick = () => {
-            if (data.edit_url) {
-                window.location.href = data.edit_url;
+        if (editButton) {            
+            if (data.can_update && data.edit_url) {
+                editButton.disabled = false
+                editButton.onclick = () => {
+                    window.location.href = data.edit_url;
+                };
+            } else {
+                editButton.disabled = true;
+                editButton.onclick = null;
             }
-        };
+        }
 
         if (deleteButton) {
-            if (data.progres_id) {
-                deleteButton.onclick = () => {
-                    window.closeDetailModal();
-                    window.dispatchEvent(
-                        new CustomEvent('open-modal', { detail: `confirm-progres-deletion-${data.progres_id}` })
-                    );
-                };
-                deleteButton.classList.remove('hidden');
+            if (data.can_delete && data.progres_id) {
+                if (data.progres_id) {
+                    deleteButton.disabled = false
+                    deleteButton.onclick = () => {
+                        window.closeDetailModal();
+                        window.dispatchEvent(
+                            new CustomEvent('open-modal', { detail: `confirm-progres-deletion-${data.progres_id}` })
+                        );
+                    };
+                    deleteButton.classList.remove('hidden');
+                } else {
+                    deleteButton.classList.add('hidden');
+                    deleteButton.onclick = null;
+                }
             } else {
-                deleteButton.classList.add('hidden');
+                deleteButton.disabled = true;
                 deleteButton.onclick = null;
             }
         }

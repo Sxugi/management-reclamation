@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('lahan', function (Blueprint $table) {
             $table->bigIncrements('lahan_id');
-            $table->foreignId('user_id')->constrained('users', 'user_id')->onDelete('cascade');
             $table->string('nama_lahan');
             $table->decimal('luas_lahan', 10, 2);
             $table->year('tahun_awal');

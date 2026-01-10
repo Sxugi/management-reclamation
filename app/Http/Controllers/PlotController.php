@@ -7,33 +7,31 @@ use App\Models\Lahan;
 use App\Models\PlotProgres;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use App\Providers\View;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use App\Http\Requests\Plot\StorePlotRequest;
 use App\Http\Requests\Plot\UpdatePlotRequest;
 use App\Services\PlotService;
 use App\Services\ProgresReklamasiService;
 
-
 class PlotController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      * Uses nested route: /lahan/{lahan}/plot
      */
     public function index(Lahan $lahan)
     {
-        // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        // Check if user has access to view plots for this lahan
+        $this->authorize('viewAny', [Plot::class, $lahan]);
         
-        $plot = Plot::where('lahan_id', $lahan->lahan_id)->get();
+        $plot = Plot::where('lahan_id', $lahan->lahan_id)
+            ->orderBy('nama_plot')
+            ->get();
 
-        return view('detail-lahan.plot.index', [
-            'plot' => $plot,
-            'lahan' => $lahan,
-        ]);
+        return view('detail-lahan.plot.index', compact('plot', 'lahan'));
     }
 
     /**
@@ -42,14 +40,10 @@ class PlotController extends Controller
      */
     public function create(Lahan $lahan)
     {
-        // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        // Check if user can create plot in this lahan
+        $this->authorize('create', [Plot::class, $lahan]);
 
-        return view('detail-lahan.plot.create', [
-            'lahan' => $lahan,
-        ]);
+        return view('detail-lahan.plot.create', compact('lahan'));
     }
 
     /**
@@ -58,18 +52,34 @@ class PlotController extends Controller
      */
     public function store(StorePlotRequest $request, Lahan $lahan)
     {
-        $validated = $request->validated();
+        // Check if user can edit this lahan
+        $this->authorize('create', [Plot::class, $lahan]);
 
-        $validated['luas_area'] = (float) $validated['luas_area'];
+        DB::beginTransaction();
+        try {
+            $validated = $request->validated();
+            $validated['luas_area'] = (float) $validated['luas_area'];
+            $validated['lahan_id'] = $lahan->lahan_id;
+            $validated['polygon'] = PlotService::processPolygon($request->polygon);
 
-        $validated['lahan_id'] = $lahan->lahan_id;
+            $plot = Plot::create($validated);
 
-        $validated['polygon'] = PlotService::processPolygon($request->polygon);
+            DB::commit();
 
-        $plot = Plot::create($validated);
         
-        return redirect()->route('lahan.plot.index', $lahan->lahan_id)
-                        ->with('success', 'Plot berhasil ditambahkan');
+            return redirect()->route('lahan.plot.index', $lahan->lahan_id)
+                            ->with('success', 'Plot berhasil ditambahkan');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Failed to create plot', [
+                'lahan_id' => $lahan->lahan_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal menambahkan plot:  ' . $e->getMessage());
+        }
     }
 
     /**
@@ -78,41 +88,35 @@ class PlotController extends Controller
      */
     public function show(Plot $plot, Request $request)
     {
-        // Load plot with related lahan and target indikator
-        $plotData = Plot::with([
+        // Authorization check using policy
+        $this->authorize('view', $plot);
+
+        // Load plot with related lahan
+        $plot->load([
             'lahan',
             'target.indikator', 
             'activityLogs',
-        ])
-        ->where('plot_id', $plot->plot_id)
-        ->firstOrFail();
+        ]);
 
-        // Authorization check
-        if ($plotData->lahan->user_id !== Auth::id()) {
-            abort(403, 'Unauthorized action.');
-        }
-
-        // Separate query for progres with pagination
+        // Get progres data with pagination
         $progresData = ProgresReklamasiService::getFilteredData($request, $plot);
-
-        // Transform progres data for modal display
-        $progresData = PlotService::transformProgresForModal($progresData, $plot);
+        $progresData = PlotService:: transformProgresForModal($progresData, $plot);
 
         // Get kategori aktivitas options and filter status
         $kategori = ProgresReklamasiService::getKategoriAktivitasOptions();
         $hasFilter = ProgresReklamasiService::hasFilter($request);
 
+        // Get progress percentage
         $plotProgress = PlotProgres::where('plot_id', $plot->plot_id)->first();
         $progressPercent = $plotProgress ? $plotProgress->percent : 0;
-
         $progresDelta = ProgresReklamasiService::getProgresDelta($plot);
 
         return view('detail-lahan.plot.show', [
-            'plot' => $plotData,
-            'lahan' => $plotData->lahan,
-            'target' => $plotData->target,
+            'plot' => $plot,
+            'lahan' => $plot->lahan,
+            'target' => $plot->target,
             'progres' => $progresData,
-            'activityLogs' => $plotData->activityLogs,
+            'activityLogs' => $plot->activityLogs,
             'kategori' => $kategori,
             'hasFilter' => $hasFilter,
             'progressPercent' => $progressPercent,
@@ -126,17 +130,15 @@ class PlotController extends Controller
      */
     public function edit(Plot $plot)
     {
-        // Get the associated lahan
-        $lahan = Lahan::findOrFail($plot->lahan_id);
+        // Load lahan relation
+        $plot->load('lahan');
         
-        // Check if user owns the lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        // Check if user can update this plot
+        $this->authorize('update', $plot);
 
         return view('detail-lahan.plot.edit', [
             'plot' => $plot,
-            'lahan' => $lahan,
+            'lahan' => $plot->lahan,
         ]);
     }
 
@@ -146,26 +148,35 @@ class PlotController extends Controller
      */
     public function update(UpdatePlotRequest $request, Plot $plot)
     {
-        // Get the associated lahan
-        $lahan = Lahan::findOrFail($plot->lahan_id);
+        // Load lahan relation
+        $plot->load('lahan');
         
-        // Check if user owns the lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
+        // Check if user can update this plot
+        $this->authorize('update', $plot);
+
+        DB::beginTransaction();
+        try {
+            $validated = $request->validated();
+            $validated['luas_area'] = (float) $validated['luas_area'];
+            $validated['polygon'] = PlotService::processPolygon($request->polygon);
+
+            $plot->update($validated);
+
+            DB::commit();
+        
+            return redirect()->route('lahan.plot.index', $plot->lahan_id)
+                            ->with('success', 'Plot berhasil diperbarui');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log:: error('Failed to update plot', [
+                'plot_id' => $plot->plot_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return back()
+                ->withInput()
+                ->with('error', 'Gagal memperbarui plot: ' . $e->getMessage());
         }
-
-        $validated = $request->validated();
-
-        $validated['luas_area'] = (float) $validated['luas_area'];
-
-        $validated['lahan_id'] = $lahan->lahan_id;
-
-        $validated['polygon'] = PlotService::processPolygon($request->polygon);
-
-        $plot->update($validated);
-        
-        return redirect()->route('lahan.plot.index', $lahan->lahan_id)
-                        ->with('success', 'Plot berhasil diperbarui');
     }
 
     /**
@@ -174,27 +185,55 @@ class PlotController extends Controller
      */
     public function destroy(Plot $plot)
     {
-        // Get the associated lahan and its ID before deleting
-        $lahan = Lahan::findOrFail($plot->lahan_id);
-        $lahan_id = $lahan->lahan_id;
+        // Load lahan relation
+        $plot->load('lahan');
+
+        // Check if user can delete this plot (only owner)
+        $this->authorize('delete', $plot);
+
+        $lahan_id = $plot->lahan_id;
+        $plotName = $plot->nama_plot;
         
-        // Check if user owns the lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
+        DB::beginTransaction();
+        try {
+            $plot->delete();
+
+            DB::commit();
+        
+            return redirect()->route('lahan.plot.index', $lahan_id)
+                            ->with('success', 'Plot berhasil dihapus');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Failed to delete plot', [
+                'plot_id' => $plot->plot_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return redirect()
+                ->route('lahan.plot.index', $lahan_id)
+                ->with('error', 'Gagal menghapus plot:  ' . $e->getMessage());
         }
-        
-        $plot->delete();
-        
-        return redirect()->route('lahan.plot.index', $lahan_id)
-                        ->with('success', 'Plot berhasil dihapus');
     }
 
+    /**
+     * Get activity logs for a plot
+     */
     public function getActivityLogs(Request $request, Plot $plot)
     {
-        $sort = $request->input('sort', 'desc');
+        // Check if user can view this plot
+        $this->authorize('view', $plot);
+
+        $validated = $request->validate([
+            'sort' => 'nullable|in:asc,desc',
+            'per_page' => 'nullable|integer|min:5|max:50',
+        ]);
+
+        $sort = $validated['sort'] ?? 'desc';
+        $perPage = $validated['per_page'] ?? 5;
+
         $logs = ActivityLog::where('plot_id', $plot->plot_id)
             ->orderBy('created_at', $sort)
-            ->paginate(5);
+            ->paginate($perPage);
 
         return response()->json($logs);
     }

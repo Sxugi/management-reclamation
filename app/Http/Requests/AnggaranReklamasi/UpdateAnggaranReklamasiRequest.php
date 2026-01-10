@@ -30,7 +30,7 @@ class UpdateAnggaranReklamasiRequest extends FormRequest
             'bulan' => ['required', 'integer', 'between:1,12'],
             'quarter' => ['required', 'string', Rule::in(['Q1', 'Q2', 'Q3', 'Q4'])],
             'nominal' => ['required', 'numeric', 'min:0'],
-            'kategori_anggaran' => ['required', 'string', 'max:255',]
+            'kategori_anggaran_id' => ['required', 'exists:kategori_anggaran,kategori_anggaran_id']
         ];
     }
 
@@ -51,8 +51,8 @@ class UpdateAnggaranReklamasiRequest extends FormRequest
             'nominal.required' => 'Nominal anggaran harus diisi.',
             'nominal.numeric' => 'Nominal harus berupa angka.',
             'nominal.min' => 'Nominal tidak boleh negatif.',
-            'kategori_anggaran.required' => 'Kategori anggaran harus diisi.',
-            'kategori_anggaran.max' => 'Kategori anggaran maksimal 255 karakter.',
+            'kategori_anggaran_id.required' => 'Kategori anggaran wajib dipilih.',
+            'kategori_anggaran_id.exists' => 'Kategori anggaran tidak valid.',
         ];
     }
 
@@ -68,18 +68,18 @@ class UpdateAnggaranReklamasiRequest extends FormRequest
             $quarter = $this->quarter;
             $lahan_id = $this->route('lahan')->lahan_id;
             $jenis_anggaran = $this->jenis_anggaran;
-            $kategori_anggaran = $this->kategori_anggaran;
+            $kategori_anggaran_id = $this->kategori_anggaran_id;
             $anggaranId = $this->route('anggaran')?->anggaran_reklamasi_id;
 
             $service = app(AnggaranReklamasiService::class);
 
-            if ($service->isDuplicate($quarter, $tahun, $bulan, $lahan_id, $jenis_anggaran, $kategori_anggaran, $anggaranId)) {
-                $validator->errors()->add('kategori_anggaran', "Data dengan kategori ini sudah ada dalam Quarter $quarter $tahun, silahkan buat kategori baru atau gunakan yang sudah ada.");
+            if ($service->isDuplicate($quarter, $tahun, $bulan, $lahan_id, $jenis_anggaran, $kategori_anggaran_id, $anggaranId)) {
+                $validator->errors()->add('kategori_anggaran_id', "Data dengan kategori ini sudah ada dalam Quarter $quarter $tahun.");
                 return;
             }
 
             $validation = $service->validateQuarterSequence(
-                $quarter, $tahun, $bulan, $lahan_id, $jenis_anggaran, $kategori_anggaran, $anggaranId
+                $quarter, $tahun, $bulan, $lahan_id, $jenis_anggaran, $kategori_anggaran_id, $anggaranId
             );
 
             if (!$validation['valid']) {

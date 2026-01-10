@@ -22,7 +22,7 @@ class DashboardService
     /**
      * Smart cache key generation based on data freshness
      */
-    private static function getCacheConfig(int $lahanId, string $period, bool $hasRecentActivity = null): array
+    private static function getCacheConfig(int $lahanId, string $period, ?bool $hasRecentActivity = null): array
     {
         // Check if there's recent activity (last 24 hours) if not provided
         if ($hasRecentActivity === null) {
@@ -280,12 +280,12 @@ class DashboardService
             }
 
             return [
-                'today_percent' => 0.0,  // No activity today = 0% progress made today
+                'today_percent' => round($currentTotalProgress, 2), 
                 'yesterday_percent' => round($yesterdayAvg ?? 0, 2),
                 'delta' => 0.0,
                 'delta_type' => 'no_activity',
                 'is_fallback' => false,
-                'current_total_progress' => round($currentTotalProgress, 2),  // For reference
+                'current_total_progress' => round($currentTotalProgress, 2),
                 'message' => 'Tidak ada aktivitas hari ini'
             ];
         }
@@ -305,33 +305,10 @@ class DashboardService
 
         // If no today snapshot but there is activity, create one
         if ($todayAvg === null) {
-            $currentAvg = DB::table('plot_progres')
+            $todayAvg = DB::table('plot_progres')
                 ->join('plot', 'plot_progres.plot_id', '=', 'plot.plot_id')
                 ->where('plot.lahan_id', $lahanId)
                 ->avg('plot_progres.percent') ?? 0;
-            
-            $todayAvg = $currentAvg;
-
-            // Create snapshots for all plots for today
-            $plots = DB::table('plot')
-                ->leftJoin('plot_progres', 'plot.plot_id', '=', 'plot_progres.plot_id')
-                ->where('plot.lahan_id', $lahanId)
-                ->select('plot.plot_id', DB::raw('COALESCE(plot_progres.percent, 0) as percent'))
-                ->get();
-
-            foreach ($plots as $plot) {
-                DB::table('progres_snapshots')->updateOrInsert(
-                    [
-                        'plot_id' => $plot->plot_id,
-                        'date' => $today->format('Y-m-d')
-                    ],
-                    [
-                        'percent' => $plot->percent,
-                        'created_at' => now(),
-                        'updated_at' => now()
-                    ]
-                );
-            }
         }
 
         // If no yesterday snapshot, try to find the most recent one
@@ -355,16 +332,14 @@ class DashboardService
         $yesterdayAvg = $yesterdayAvg ?? 0;
         $delta = $todayAvg - $yesterdayAvg;
 
-        $result = [
-            'today_percent' => round($todayAvg, 2),  // This shows actual progress as of today
+        return [
+            'today_percent' => round($todayAvg, 2),
             'yesterday_percent' => round($yesterdayAvg, 2),
             'delta' => round($delta, 2),
             'delta_type' => $delta >= 0 ? 'increase' : 'decrease',
             'is_fallback' => false,
             'activity_count' => $todayProgressCount
         ];
-        
-        return $result;
     }
 
     /**
@@ -571,18 +546,7 @@ class DashboardService
                 ->exists();
 
             if (!$hasAnyProgress) {
-                Log::info('No historical progress data found for new lahan', [
-                    'lahan_id' => $lahanId,
-                    'period' => $period
-                ]);
-                
                 return []; // Return empty array instead of fake data
-            }
-
-            // For recent periods with recent activity, include today's data even if no snapshot exists
-            if ($cacheConfig['has_recent_activity'] && in_array($period, ['7days', '30days'])) {
-                // Ensure today's snapshot exists if there's recent activity
-                self::ensureTodaySnapshot($lahanId);
             }
 
             // Query for actual snapshots
@@ -595,68 +559,35 @@ class DashboardService
                 ->orderBy('period')
                 ->get();
 
-            if ($snapshots->isNotEmpty()) {
-                return $snapshots->map(function ($snapshot) {
-                    return [
-                        'date' => $snapshot->period,
-                        'avg_percent' => round((float)$snapshot->avg_percent, 2)
-                    ];
-                })->values()->toArray();
-            }
+            $data = $snapshots->map(function ($snapshot) {
+                return [
+                    'date' => $snapshot->period,
+                    'avg_percent' => round((float)$snapshot->avg_percent, 2)
+                ];
+            })->values()->toArray();
 
-            // If lahan has progress but no snapshots in date range, return empty
-            Log::info('Lahan has progress but no snapshots in date range', [
-                'lahan_id' => $lahanId,
-                'period' => $period,
-                'date_range' => [$startDate, $endDate]
-            ]);
+            if ($groupBy === 'daily') {
+                $todayStr = $endDate;
+                
+                $hasTodayInSnapshot = collect($data)->contains('date', $todayStr);
 
-            return [];
-        });
-    }
-
-    private static function ensureTodaySnapshot(int $lahanId): void
-    {
-        $today = Carbon::today();
-        
-        // Check if today's snapshots already exist
-        $hasTodaySnapshot = DB::table('progres_snapshots')
-            ->join('plot', 'progres_snapshots.plot_id', '=', 'plot.plot_id')
-            ->where('plot.lahan_id', $lahanId)
-            ->whereDate('date', $today)
-            ->exists();
-
-        if (!$hasTodaySnapshot) {
-            // Check if there was activity today
-            $hasActivityToday = DB::table('progres')
-                ->join('plot', 'progres.plot_id', '=', 'plot.plot_id')
-                ->where('plot.lahan_id', $lahanId)
-                ->whereDate('progres.created_at', $today)
-                ->exists();
-
-            if ($hasActivityToday) {
-                // Create snapshots for all plots for today
-                $plots = DB::table('plot')
-                    ->leftJoin('plot_progres', 'plot.plot_id', '=', 'plot_progres.plot_id')
-                    ->where('plot.lahan_id', $lahanId)
-                    ->select('plot.plot_id', DB::raw('COALESCE(plot_progres.percent, 0) as percent'))
-                    ->get();
-
-                foreach ($plots as $plot) {
-                    DB::table('progres_snapshots')->updateOrInsert(
-                        [
-                            'plot_id' => $plot->plot_id,
-                            'date' => $today->format('Y-m-d')
-                        ],
-                        [
-                            'percent' => $plot->percent,
-                            'created_at' => now(),
-                            'updated_at' => now()
-                        ]
-                    );
+                if (!$hasTodayInSnapshot) {
+                    $currentRealtimeAvg = DB::table('plot_progres')
+                        ->join('plot', 'plot_progres.plot_id', '=', 'plot.plot_id')
+                        ->where('plot.lahan_id', $lahanId)
+                        ->avg('plot_progres.percent');
+                    
+                    if ($currentRealtimeAvg !== null) {
+                        $data[] = [
+                            'date' => $todayStr,
+                            'avg_percent' => round((float)$currentRealtimeAvg, 2)
+                        ];
+                    }
                 }
             }
-        }
+
+            return $data;
+        });
     }
 
     /**

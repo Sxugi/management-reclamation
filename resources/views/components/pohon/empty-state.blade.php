@@ -23,8 +23,9 @@
                 if(request('year')) {
                     $parts[] = 'Tahun: ' . request('year');
                 }
-                if(request('jenis_pohon')) {
-                    $parts[] = 'Jenis Pohon: ' . e(request('jenis_pohon'));
+                if(request('pohonType')) {
+                    $pohonName = \App\Models\JenisPohon::find(request('pohonType'))?->nama_pohon ?? request('pohonType');
+                    $parts[] = 'Jenis Pohon: ' . e($pohonName);
                 }
                 if(request('minQuantity')) {
                     $parts[] = 'Minimal Jumlah: ' . e(request('minQuantity'));

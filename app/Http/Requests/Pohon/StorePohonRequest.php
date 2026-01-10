@@ -23,16 +23,16 @@ class StorePohonRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'jenis_pohon' => 'required|string|max:100',
+            'jenis_pohon_id' => 'required|exists:jenis_pohon,jenis_pohon_id',
             'tahun' => [
                 'required',
                 'integer',
                 'min:1900',
                 function ($attribute, $value, $fail) {
-                    $jenis = request('jenis_pohon');
+                    $jenisId = request('jenis_pohon_id');
                     $lahan = request()->route('lahan');
                     $pohon = \App\Models\Pohon::where('lahan_id', $lahan->lahan_id)
-                        ->where('jenis_pohon', $jenis)
+                        ->where('jenis_pohon_id', $jenisId)
                         ->first();
 
                     if ($pohon) {
@@ -41,7 +41,7 @@ class StorePohonRequest extends FormRequest
                             ->exists();
 
                         if ($exists) {
-                            $fail("Data pohon untuk jenis '{$jenis}' di tahun {$value} sudah ada.");
+                            $fail("Data pohon untuk jenis terpilih di tahun {$value} sudah ada.");
                         }
                     }
                 }
@@ -56,7 +56,8 @@ class StorePohonRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'jenis_pohon.required' => 'Jenis pohon wajib diisi.',
+            'jenis_pohon_id.required' => 'Jenis pohon wajib dipilih.',
+            'jenis_pohon_id.exists' => 'Jenis pohon yang dipilih tidak valid.',
             'tahun.required' => 'Tahun wajib diisi.',
             'jumlah.required' => 'Jumlah wajib diisi.',
             'jumlah.min' => 'Jumlah minimal 1.',

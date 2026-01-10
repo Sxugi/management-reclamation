@@ -19,7 +19,7 @@
                 <tr>
                     <x-main.sortable-header :rowspan="2" column="jenis_pohon" title="Jenis Pohon" class="h-6 py-3 border-gainsboro border-solid border text-sm" />
                     @if(empty($tahunList))
-                        <th scope="col" class="h-6 py-3 px-3 text-center leading-5 font-bold border-gainsboro border-solid text-sm">Tahun</th>
+                        <th scope="col" class="h-6 py-3 px-3 text-center leading-5 font-bold border-gainsboro border-solid border-r border-l text-sm">Tahun</th>
                     @else
                         <x-main.sortable-header :colspan="count($tahunList)" column="tahun" title="Tahun" class="text-center border-gainsboro border-solid border-l border-r text-sm p-2" />
                     @endif
@@ -35,19 +35,21 @@
                 @forelse($pohon ?? [] as $data)
                     <tr>
                         <td class="py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border border-l-0 whitespace-nowrap">
-                            {{ $data->jenis_pohon }}
+                            {{ $data->jenis->nama_pohon ?? '-' }}
                         </td>
                         @foreach($tahunList as $tahun)
                             @if(isset($data->dataPohonByTahun[$tahun]))
                                 <td class="py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border whitespace-nowrap cursor-pointer hover:bg-lightgray" 
                                 onclick="window.openPohonModal({
-                                    'jenis_pohon': '{{ $data->jenis_pohon }}',
+                                    'jenis_pohon': '{{ $data->jenis->nama_pohon ?? '-' }}',
                                     'tahun': '{{ $tahun }}',
                                     'jumlah': '{{ $data->dataPohonByTahun[$tahun]->jumlah ?? 0 }}',
                                     'created_at': '{{ $data->dataPohonByTahun[$tahun]->created_at ?? null }}',
                                     'updated_at': '{{ $data->dataPohonByTahun[$tahun]->updated_at ?? null }}',
                                     'edit_url': '{{ $data->dataPohonByTahun[$tahun] ? route('lahan.pohon.edit', [$lahan, $data, $data->dataPohonByTahun[$tahun]]) : null }}',
                                     'id': '{{ $data->pohon_id }}',
+                                    'can_update': {{ auth()->user()->can('update', $data) ? 'true' : 'false' }},
+                                    'can_delete': {{ auth()->user()->can('delete', $data) ? 'true' : 'false' }},
                                 })">
                                     {{ $data->dataPohonByTahun[$tahun]->jumlah ?? '-' }}
 
@@ -84,7 +86,7 @@
                     </tr>
                 @empty
                     @if($hasFilter)
-                        <tr class="border-none">
+                        <tr class="border-t border-solid border-gainsboro">
                             <td colspan="3"><x-pohon.empty-state :hasFilter="true" /></td>
                         </tr>
                     @else

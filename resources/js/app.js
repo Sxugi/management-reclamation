@@ -23,8 +23,10 @@ window.MaplibreGeocoder = MaplibreGeocoder;
 window.MapboxDraw = MapboxDraw;
 window.turf = turf;
 
+import './components/admin/user/detail-modal.js';
 import './components/dashboard/dashboard.js';
 import './components/lahan/map-component.js';
+import './components/lahan/team/detail-modal.js';
 import './components/plot/map-plot-component.js';
 import './components/plot/activity/detail-modal.js';
 import './components/plot/progres/form.js';

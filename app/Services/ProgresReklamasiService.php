@@ -17,6 +17,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class ProgresReklamasiService
 {
@@ -130,9 +135,10 @@ class ProgresReklamasiService
                 'label' => $indicatorConfig[$key]['label'],
                 'satuan' => $indicatorConfig[$key]['satuan'],
                 'description' => $indicatorConfig[$key]['description'] ?? null,
-                'total' => null,
+                'total' => 0,
                 'records_count' => 0,
                 'summary_type' => $indicatorConfig[$key]['summary_type'] ?? 'sum',
+                '_activity_breakdown' => []
             ];
         }
 
@@ -143,6 +149,8 @@ class ProgresReklamasiService
 
         // Aggregate values based on configured aggregation type
         foreach ($progressList as $progress) {
+            $activityId = $progress->jenis_aktivitas_id;
+
             foreach ($progress->fieldValues as $fieldValue) {
                 $fieldDef = $fieldValue->fieldDefinition;
                 if (!$fieldDef || !$fieldDef->indicator_key) continue;
@@ -154,12 +162,12 @@ class ProgresReklamasiService
                 $summaryType = $summary[$key]['summary_type'];
 
                 // Apply appropriate aggregation method
-                if ($summaryType === 'max') {
-                    if ($summary[$key]['total'] === null || $value > $summary[$key]['total']) {
-                        $summary[$key]['total'] = $value;
+                if ($summaryType === 'sum') {
+                    if (!isset($summary[$key]['_activity_breakdown'][$activityId])) {
+                        $summary[$key]['_activity_breakdown'][$activityId] = 0;
                     }
-                } elseif ($summaryType === 'sum') {
-                    $summary[$key]['total'] = ($summary[$key]['total'] ?? 0) + $value;
+                    $summary[$key]['_activity_breakdown'][$activityId] += $value;
+
                 } elseif ($summaryType === 'count') {
                     $summary[$key]['total'] = ($summary[$key]['total'] ?? 0) + 1;
                 }
@@ -170,6 +178,21 @@ class ProgresReklamasiService
 
         // Ensure all indicators have numeric values
         foreach ($summary as $key => &$item) {
+            if ($item['summary_type'] === 'sum') {
+                $contributors = $item['_activity_breakdown'];
+                $activeActivityCount = count($contributors);
+
+                if ($activeActivityCount > 0) {
+                    $grandTotal = array_sum($contributors);
+                    
+                    $item['total'] = $grandTotal / $activeActivityCount;
+                } else {
+                    $item['total'] = 0;
+                }
+            }
+
+            unset($item['_activity_breakdown']);
+
             if ($item['total'] === null) {
                 $item['total'] = 0;
             }
@@ -432,6 +455,7 @@ class ProgresReklamasiService
                 'total' => null,
                 'records_count' => 0,
                 'summary_type' => $indicatorConfig[$key]['summary_type'] ?? 'sum',
+                '_activity_breakdown' => []
             ];
         }
 
@@ -443,6 +467,8 @@ class ProgresReklamasiService
 
         // Aggregate values using configured aggregation methods
         foreach ($progressList as $progress) {
+            $activityId = $progress->jenis_aktivitas_id;
+
             foreach ($progress->fieldValues as $fieldValue) {
                 $fieldDef = $fieldValue->fieldDefinition;
                 if (!$fieldDef || !$fieldDef->indicator_key) continue;
@@ -453,10 +479,12 @@ class ProgresReklamasiService
                 $value = (float) $fieldValue->field_value;
                 $summaryType = $summary[$key]['summary_type'];
 
-                if ($summaryType === 'max') {
-                    $summary[$key]['total'] = max($summary[$key]['total'] ?? 0, $value);
-                } elseif ($summaryType === 'sum') {
-                    $summary[$key]['total'] = ($summary[$key]['total'] ?? 0) + $value;
+                if ($summaryType === 'sum') {
+                    if (!isset($summary[$key]['_activity_breakdown'][$activityId])) {
+                        $summary[$key]['_activity_breakdown'][$activityId] = 0;
+                    }
+                    $summary[$key]['_activity_breakdown'][$activityId] += $value;
+
                 } elseif ($summaryType === 'count') {
                     $summary[$key]['total'] = ($summary[$key]['total'] ?? 0) + 1;
                 }
@@ -467,6 +495,20 @@ class ProgresReklamasiService
 
         // Ensure all indicators have numeric values
         foreach ($summary as $key => &$item) {
+            if ($item['summary_type'] === 'sum') {
+                $contributors = $item['_activity_breakdown']; 
+                $activeActivityCount = count($contributors);
+
+                if ($activeActivityCount > 0) {
+                    $grandTotal = array_sum($contributors);
+                    $item['total'] = $grandTotal / $activeActivityCount;
+                } else {
+                    $item['total'] = 0;
+                }
+            }
+
+            unset($item['_activity_breakdown']);
+
             if ($item['total'] === null) {
                 $item['total'] = 0;
             }
@@ -935,5 +977,165 @@ class ProgresReklamasiService
             ]);
             throw new \Exception("Failed to cleanup old field values: " . $e->getMessage());
         }
+    }
+
+    /**
+     * Export progres reklamasi to Excel
+     */
+    public function exportExcel(Plot $plot)
+    {
+        $plot->load('lahan');
+
+        // Config Mapping Field
+        $fieldMap = [];
+        $rawCategories = config('indicators.categories', []); // Ensure default to empty array
+        foreach ($rawCategories as $cat) {
+            foreach ($cat['activities'] as $act) {
+                foreach ($act['fields'] as $key => $conf) {
+                    $fieldMap[$key] = [
+                        'label' => $conf['label'] ?? ucwords(str_replace('_', ' ', $key)),
+                        'satuan' => $conf['satuan'] ?? ''
+                    ];
+                }
+            }
+        }
+
+        // Fetch Data Progres
+        $dataProgres = ProgresReklamasi::with([
+                'jenisAktivitas.kategoriAktivitas',
+                'fieldValues.fieldDefinition',
+                'dokumentasi'
+            ])
+            ->where('plot_id', $plot->plot_id)
+            ->orderBy('tanggal', 'desc')
+            ->get();
+
+        // Create Spreadsheet
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->getDefaultStyle()->getFont()->setName('Calibri');
+        $spreadsheet->getDefaultStyle()->getFont()->setSize(11);
+
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Progres ' . substr($plot->nama_plot, 0, 20));
+
+        // --- TITLE (Row 1) ---
+        $lahanName = $plot->lahan ? strtoupper($plot->lahan->nama_lahan) : 'LAHAN';
+        $plotName = strtoupper($plot->nama_plot);
+        $titleText = "DATA PROGRES REKLAMASI - {$lahanName} (BLOK {$plotName})";
+
+        $sheet->setCellValue('A1', $titleText);
+        $sheet->mergeCells('A1:G1');
+        
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 14],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+        ]);
+        $sheet->getRowDimension('1')->setRowHeight(30);
+
+        // --- HEADER (Row 2) ---
+        $headers = ['No', 'Tanggal', 'Kategori', 'Aktivitas', 'Detail Data (Input)', 'Catatan', 'Dokumentasi (Link)'];
+        $sheet->fromArray($headers, null, 'A2');
+
+        $sheet->getStyle('A2:G2')->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => '44546A']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]]
+        ]);
+        $sheet->getRowDimension('2')->setRowHeight(25);
+
+        // --- EMPTY STATE ---
+        if ($dataProgres->isEmpty()) {
+            $sheet->mergeCells('A3:G5');
+            $sheet->setCellValue('A3', "BELUM ADA DATA PROGRES");
+            
+            $sheet->getStyle('A3')->applyFromArray([
+                'font' => ['italic' => true, 'color' => ['rgb' => '777777'], 'size' => 12],
+                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+                'fill' => ['fillType' => \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F2F2F2']],
+                'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'CCCCCC']]]
+            ]);
+            
+            // Widths
+            foreach (range('A', 'D') as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
+            $sheet->getColumnDimension('E')->setWidth(40);
+            $sheet->getColumnDimension('F')->setWidth(20);
+            $sheet->getColumnDimension('G')->setWidth(30);
+
+            return $this->outputStream($spreadsheet, $plot->nama_plot);
+        }
+
+        // --- DATA CONTENT (Row 3 onwards) ---
+        $row = 3;
+        $no = 1;
+
+        foreach ($dataProgres as $progres) {
+            // Format Detail
+            $detailString = [];
+            foreach ($progres->fieldValues as $fv) {
+                $fieldKey = $fv->fieldDefinition->field_key;
+                $label = $fv->fieldDefinition->label ?? ($fieldMap[$fieldKey]['label'] ?? $fieldKey);
+                $satuan = $fv->fieldDefinition->unit ?? ($fieldMap[$fieldKey]['satuan'] ?? '');
+                $detailString[] = "- {$label}: {$fv->field_value} {$satuan}";
+            }
+            $formattedDetails = implode("\n", $detailString);
+            if (!empty($formattedDetails)) $formattedDetails .= "\n"; 
+
+            // Format Dokumentasi
+            $docLinks = [];
+            if ($progres->dokumentasi->count() > 0) {
+                foreach ($progres->dokumentasi as $index => $doc) {
+                    $url = asset('storage/' . $doc->image_path); 
+                    $docLinks[] = "Foto " . ($index + 1) . ": " . $url;
+                }
+            }
+            $docString = implode("\n", $docLinks);
+            if (!empty($docString)) $docString .= "\n";
+
+            $catatan = $progres->catatan;
+            if (!empty($catatan)) $catatan .= "\n";
+
+            // Set Values
+            $sheet->setCellValue('A' . $row, $no++);
+            $sheet->setCellValue('B' . $row, $progres->tanggal ? $progres->tanggal->format('d-m-Y') : '-');
+            $sheet->setCellValue('C' . $row, $progres->jenisAktivitas->kategoriAktivitas->label ?? '-');
+            $sheet->setCellValue('D' . $row, $progres->jenisAktivitas->label ?? '-');
+            $sheet->setCellValue('E' . $row, $formattedDetails);
+            $sheet->setCellValue('F' . $row, $catatan ?? '-');
+            $sheet->setCellValue('G' . $row, $docString);
+
+            // Styling
+            $sheet->getStyle('A' . $row . ':D' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER)->setVertical(Alignment::VERTICAL_TOP);
+            $sheet->getStyle('E' . $row . ':G' . $row)->getAlignment()->setVertical(Alignment::VERTICAL_TOP)->setWrapText(true)->setIndent(1);
+
+            $row++;
+        }
+
+        // Finishing Border
+        $lastRow = $row - 1;
+        if ($lastRow >= 3) {
+            $sheet->getStyle('A3:G' . $lastRow)->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        }
+        
+        // Widths
+        foreach (range('A', 'D') as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
+        $sheet->getColumnDimension('E')->setWidth(55); 
+        $sheet->getColumnDimension('F')->setWidth(30);
+        $sheet->getColumnDimension('G')->setWidth(50);
+
+        return $this->outputStream($spreadsheet, $plot->nama_plot);
+    }
+
+    private function outputStream($spreadsheet, $plotName) {
+        $fileName = 'Progres_Reklamasi_' . str_replace(' ', '_', $plotName) . '_' . date('Ymd_His') . '.xlsx';
+        $writer = new Xlsx($spreadsheet);
+        
+        return new StreamedResponse(function () use ($writer) {
+            $writer->save('php://output');
+        }, 200, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment;filename="' . $fileName . '"',
+            'Cache-Control' => 'max-age=0',
+        ]);
     }
 }

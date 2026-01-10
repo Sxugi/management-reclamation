@@ -8,11 +8,12 @@
     <p class="text-gray-500 text-center mb-6 max-w-md">
         Anda belum memiliki dokumentasi untuk lahan ini. Mulai dokumentasikan aktivitas dan perkembangan lahan Anda.
     </p>
-    <a href="{{ route('lahan.dokumentasi.create', $lahan) }}" 
-        class="inline-flex rounded-md bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white text-sm no-underline hover:bg-slategray-200 font-medium">
+    <button onclick="window.location='{{ route('lahan.dokumentasi.create', $lahan) }}'" 
+        class="inline-flex rounded-md bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white text-sm no-underline hover:bg-slategray-200 font-medium cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        @disabled(!auth()->user()->can('create', [App\Models\Dokumentasi::class, $lahan]))>
         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
         </svg>
         Tambah Dokumentasi
-    </a>
+    </button>
 </div>

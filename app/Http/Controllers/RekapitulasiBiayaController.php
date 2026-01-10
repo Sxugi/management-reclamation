@@ -10,18 +10,19 @@ use App\Http\Requests\RekapitulasiBiaya\StoreRekapitulasiBiayaRequest;
 use App\Http\Requests\RekapitulasiBiaya\UpdateRekapitulasiBiayaRequest;
 use App\Services\RekapitulasiBiayaService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class RekapitulasiBiayaController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      */
     public function index(Lahan $lahan)
     {
         // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('viewAny', [BiayaReklamasi::class, $lahan]);
 
         $rekapitulasi_biaya = BiayaReklamasi::with('detailBiayaReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
@@ -42,9 +43,7 @@ class RekapitulasiBiayaController extends Controller
     public function create(Lahan $lahan)
     {
         // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('create', [BiayaReklamasi::class, $lahan]);
 
         $rekapitulasi_biaya = BiayaReklamasi::with('detailBiayaReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
@@ -64,36 +63,36 @@ class RekapitulasiBiayaController extends Controller
     public function store(StoreRekapitulasiBiayaRequest $request, Lahan $lahan)
     {
         // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('create', [BiayaReklamasi::class, $lahan]);
 
         // Validate the request
         $validated = $request->validated();
 
+        DB::beginTransaction();
         try {
-            DB::transaction(function () use ($validated, $lahan) {
-                $rekapitulasiBiaya = BiayaReklamasi::create([
-                    'lahan_id'    => $lahan->lahan_id,
-                    'tahun'       => $validated['tahun'],
-                    'tipe'        => 'rekapitulasi',
-                    'currency'    => $validated['currency'],
-                    'subtotal_1'  => $validated['subtotal_1'],
-                    'subtotal_2'  => $validated['subtotal_2'],
-                ]);
+            $rekapitulasiBiaya = BiayaReklamasi::create([
+                'lahan_id'    => $lahan->lahan_id,
+                'tahun'       => $validated['tahun'],
+                'tipe'        => 'rekapitulasi',
+                'currency'    => $validated['currency'],
+                'subtotal_1'  => $validated['subtotal_1'],
+                'subtotal_2'  => $validated['subtotal_2'],
+            ]);
 
-                foreach ($validated['detail'] as $data) {
-                    $rekapitulasiBiaya->detailBiayaReklamasi()->create([
-                        'kegiatan' => $data['kegiatan'],
-                        'kategori' => $data['kategori'],
-                        'biaya'    => $data['biaya'],
-                    ]);
-                }
-            });
+            foreach ($validated['detail'] as $data) {
+                $rekapitulasiBiaya->detailBiayaReklamasi()->create([
+                    'kegiatan' => $data['kegiatan'],
+                    'kategori' => $data['kategori'],
+                    'biaya'    => $data['biaya'],
+                ]);
+            }
+
+            DB::commit();
 
             return redirect()->route('lahan.rekapitulasi-biaya.index', $lahan->lahan_id)
                 ->with('success', 'Rekapitulasi Biaya tahun ' . $validated['tahun'] . ' berhasil ditambahkan.');
         } catch (\Exception $e) {
+            DB::rollBack();
             \Log::error('Error creating rekapitulasi biaya', [
                 'user' => Auth::user()->username,
                 'lahan_id' => $lahan->lahan_id,
@@ -117,9 +116,7 @@ class RekapitulasiBiayaController extends Controller
         }
 
         // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('update', $rekapitulasi_biaya);
 
         $rekapitulasi_biaya_collection = BiayaReklamasi::with('detailBiayaReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
@@ -151,37 +148,37 @@ class RekapitulasiBiayaController extends Controller
         }
 
         // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('update', $rekapitulasi_biaya);
 
         // Validate the request
         $validated = $request->validated();
 
+        DB::beginTransaction();
         try {
-            DB::transaction(function () use ($validated, $rekapitulasi_biaya) {
-                $rekapitulasi_biaya->update([
-                    'tahun'      => $validated['tahun'],
-                    'currency'    => $validated['currency'],
-                    'subtotal_1' => $validated['subtotal_1'],
-                    'subtotal_2' => $validated['subtotal_2'],
+            $rekapitulasi_biaya->update([
+                'tahun'      => $validated['tahun'],
+                'currency'    => $validated['currency'],
+                'subtotal_1' => $validated['subtotal_1'],
+                'subtotal_2' => $validated['subtotal_2'],
+            ]);
+
+            $rekapitulasi_biaya->detailBiayaReklamasi()->delete();
+
+            foreach ($validated['detail'] as $data) {
+                $rekapitulasi_biaya->detailBiayaReklamasi()->create([
+                    'kegiatan' => $data['kegiatan'],
+                    'kategori' => $data['kategori'],
+                    'biaya'    => $data['biaya'],
                 ]);
+            }
 
-                $rekapitulasi_biaya->detailBiayaReklamasi()->delete();
-
-                foreach ($validated['detail'] as $data) {
-                    $rekapitulasi_biaya->detailBiayaReklamasi()->create([
-                        'kegiatan' => $data['kegiatan'],
-                        'kategori' => $data['kategori'],
-                        'biaya'    => $data['biaya'],
-                    ]);
-                }
-            });
+            DB::commit();
 
             return redirect()->route('lahan.rekapitulasi-biaya.index', $lahan->lahan_id)
                 ->with('success', 'Rekapitulasi Biaya tahun ' . $validated['tahun'] . ' berhasil diperbarui.');
 
         } catch (\Exception $e) {
+            DB::rollBack();
             \Log::error('Error updating rekapitulasi biaya', [
                 'user' => Auth::user()->username,
                 'lahan_id' => $lahan->lahan_id,
@@ -196,6 +193,8 @@ class RekapitulasiBiayaController extends Controller
 
     public function generatePDF(Lahan $lahan, Request $request, RekapitulasiBiayaService $pdfService)
     {   
+        $this->authorize('generatePDF', [BiayaReklamasi::class, $lahan]);
+        
         $tahun = $request->input('tahun');
 
         // Check if theres data for the specified lahan and year

@@ -11,10 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
+        Schema::create('jenis_pohon', function (Blueprint $table) {
+            $table->bigIncrements('jenis_pohon_id');
+            $table->string('nama_pohon')->unique();
+            $table->timestamps();
+        });
+
         Schema::create('pohon', function (Blueprint $table) {
             $table->bigIncrements('pohon_id');
             $table->foreignId('lahan_id')->constrained('lahan', 'lahan_id')->onDelete('cascade');
-            $table->string('jenis_pohon', 100);
+            $table->foreignId('jenis_pohon_id')->constrained('jenis_pohon', 'jenis_pohon_id')->onDelete('cascade');
             $table->timestamps();
         });
 
@@ -32,6 +38,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('jenis_pohon');
+        Schema::dropIfExists('pohon');
         Schema::dropIfExists('data_pohon');
     }
 };

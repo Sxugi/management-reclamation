@@ -41,9 +41,10 @@
                 <x-main.input-label for="pohonType" class="block text-sm font-medium text-gray-700 mb-1">Jenis Pohon</x-main.input-label>
                 <select id="pohonType" name="pohonType" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
                     <option value="">Pilih Jenis Pohon</option>
-                    @foreach($jenisPohonList as $jenis)
-                        <option value="{{ $jenis }}" @selected(request('pohonType') === $jenis)>
-                            {{ $jenis }}
+                    @foreach($jenisPohonList as $item)
+                        <option value="{{ $item->jenis_pohon_id }}" 
+                            {{ request('pohonType') == $item->jenis_pohon_id ? 'selected' : '' }}>
+                            {{ $item->nama_pohon }}
                         </option>
                     @endforeach
                 </select>

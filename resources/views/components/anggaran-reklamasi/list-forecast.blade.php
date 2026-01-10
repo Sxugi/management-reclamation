@@ -102,6 +102,8 @@
                             'updated_at' => $item['updated_at'],
                             'edit_url' => route('lahan.anggaran.edit', [$lahan->lahan_id, $item['id']]),
                             'delete_url' => route('lahan.anggaran.destroy', [$lahan->lahan_id, $item['id']]),
+                            'can_update' => auth()->user()->can('update', \App\Models\AnggaranReklamasi::find($item['id'])),
+                            'can_delete' => auth()->user()->can('delete', \App\Models\AnggaranReklamasi::find($item['id'])),
                         ];
                     })->values();
                 @endphp

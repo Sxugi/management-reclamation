@@ -32,7 +32,7 @@ class AnggaranReklamasi extends Model
     protected $fillable = [
         'lahan_id',
         'jenis_anggaran',
-        'kategori_anggaran',
+        'kategori_anggaran_id',
         'tahun',
         'bulan',
         'nominal',
@@ -51,5 +51,13 @@ class AnggaranReklamasi extends Model
     public function lahan(): BelongsTo
     {
         return $this->belongsTo(Lahan::class, 'lahan_id', 'lahan_id');
+    }
+
+    /**
+     * Get the kategori anggaran that owns the AnggaranReklamasi.
+     */
+    public function kategori(): BelongsTo
+    {
+        return $this->belongsTo(KategoriAnggaran::class, 'kategori_anggaran_id', 'kategori_anggaran_id');
     }
 }

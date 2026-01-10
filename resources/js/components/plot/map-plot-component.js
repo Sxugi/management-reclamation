@@ -11,6 +11,9 @@ document.addEventListener('alpine:init', () => {
         currentBasemap: 'arcgis_hybrid',
         selectedPolygonId: null,
         enableDraw: initialData.enableDraw || false,
+        activePopup: null,
+        isSwitchingSelection: false, 
+        selectedPolygonId: null,
 
         // Initialize the map when the component loads
         init() {
@@ -54,8 +57,13 @@ document.addEventListener('alpine:init', () => {
             // Add only zoom controls without pan controls
             this.map.addControl(new maplibregl.NavigationControl({
                 showCompass: true,
-                showZoom: true
+                showZoom: true,
             }));
+
+            this.map.addControl(new maplibregl.ScaleControl({
+                maxWidth: 100,
+                unit: 'metric'
+            }), 'bottom-left');
             
             // Initialize drawing tools when map loads
             this.map.on('load', () => {
@@ -168,6 +176,35 @@ document.addEventListener('alpine:init', () => {
                 });
             }
         },
+
+        // Update map styles based on selected polygon
+        updateMapStyles() {
+            if (!this.map) return;
+            
+            // Define style expressions based on selection
+            const id = this.selectedPolygonId;
+            
+            const colorExpr = id 
+                ? ['case', ['==', ['get', 'plot_id'], id], '#f03', '#3388ff']
+                : '#3388ff';
+                
+            const opacityExpr = id 
+                ? ['case', ['==', ['get', 'plot_id'], id], 0.5, 0.2]
+                : 0.2;
+                
+            const widthExpr = id 
+                ? ['case', ['==', ['get', 'plot_id'], id], 4, 2]
+                : 2;
+
+            if (this.map.getLayer('plots-fill')) {
+                this.map.setPaintProperty('plots-fill', 'fill-color', colorExpr);
+                this.map.setPaintProperty('plots-fill', 'fill-opacity', opacityExpr);
+            }
+            if (this.map.getLayer('plots-outline')) {
+                this.map.setPaintProperty('plots-outline', 'line-color', colorExpr);
+                this.map.setPaintProperty('plots-outline', 'line-width', widthExpr);
+            }
+        },
         
         // Load existing polygons from initialData
         loadExistingPolygons() {
@@ -202,96 +239,137 @@ document.addEventListener('alpine:init', () => {
                 this.draw.add(geojsonData);
             } else {
                 // Add single source for all plots
-                this.map.addSource('plots-source', {
-                    type: 'geojson',
-                    data: geojsonData,
-                });
+                if (this.map.getSource('plots-source')) {
+                    this.map.getSource('plots-source').setData(geojsonData);
+                } else {
+                    this.map.addSource('plots-source', {
+                        type: 'geojson',
+                        data: geojsonData,
+                    });
+                }
 
                 console.log('Loaded existing polygons:', geojsonData);
             
                 // Add fill layer
-                this.map.addLayer({
-                    id: 'plots-fill',
-                    type: 'fill',
-                    source: 'plots-source',
-                    paint: {
-                        'fill-color': '#3388ff',
-                        'fill-opacity': 0.2
-                    }
-                });
+                if (!this.map.getLayer('plots-fill')) {
+                    this.map.addLayer({
+                        id: 'plots-fill',
+                        type: 'fill',
+                        source: 'plots-source',
+                        paint: {
+                            'fill-color': '#3388ff', // Default blue color
+                            'fill-opacity': 0.2
+                        }
+                    });
+                }
                 
                 // Add outline layer
-                this.map.addLayer({
-                    id: 'plots-outline',
-                    type: 'line',
-                    source: 'plots-source',
-                    paint: {
-                        'line-color': '#3388ff',
-                        'line-width': 3
-                    }
-                }, 'plots-fill');
+                if (!this.map.getLayer('plots-outline')) {
+                    this.map.addLayer({
+                        id: 'plots-outline',
+                        type: 'line',
+                        source: 'plots-source',
+                        paint: {
+                            'line-color': '#3388ff', // Default blue color
+                            'line-width': 2
+                        }
+                    }, 'plots-fill');
+                }
                 
-                // Create a popup but don't add it to the map yet
-                const popup = new maplibregl.Popup({
-                    closeButton: false,
-                    closeOnClick: true
-                });
+                // Variable to store the active popup
+                let currentPopup = null;
 
-                // Add click event for the polygons (use hitbox for better detection)
+                // Listen for clicks on the 'plots-fill' layer
                 this.map.on('click', 'plots-fill', (e) => {
+                    // Check if a polygon was actually clicked
                     if (e.features.length > 0) {
-                        // Get clicked feature
                         const feature = e.features[0];
                         const properties = feature.properties;
                         const plotId = properties.plot_id;
                         const plotName = properties.nama_plot || "-";
-                        const truncatedName = properties.nama_plot.length > 12 ? properties.nama_plot.substring(0, 12) + '...' : properties.nama_plot;
 
-                        let coordinates;
-                        coordinates = this.getPolygonCenter(
-                            feature.geometry.coordinates[0]
-                        );
+                        if (this.selectedPolygonId === plotId) return;
+
+                        this.isSwitchingSelection = true;
+                        if (this.activePopup) {
+                            this.activePopup.remove();
+                        }
+                        this.isSwitchingSelection = false;
+
+                        this.selectedPolygonId = plotId;
+
+                        this.updateMapStyles();
                         
-                        // Create popup HTML content with better formatting
-                        const html = `
+                        // Shorten name if it is too long (e.g., "Very Long N..."")
+                        const truncatedName = plotName.length > 12 
+                            ? plotName.substring(0, 12) + '...' 
+                            : plotName;
+
+                        // Calculate center point for the popup
+                        const coordinates = this.getPolygonCenter(feature.geometry.coordinates[0]);
+                        
+                        // Create a temporary container div
+                        const popupNode = document.createElement('div');
+                        
+                        // Insert the HTML structure
+                        popupNode.innerHTML = `
                             <div class="plot-popup-content p-2 relative">
-                                <button class="absolute cursor-pointer top-3 right-1 w-4 h-4 bg-transparent text-red-500 flex items-center justify-center text-lg font-bold transition-all duration-200 hover:scale-110" 
-                                        onclick="document.querySelector('.maplibregl-popup').remove()">
+                                <button class="btn-close-popup absolute cursor-pointer top-3 right-1 w-4 h-4 text-red-500 flex items-center justify-center text-lg font-bold transition-all duration-200 hover:scale-110">
                                     ×
                                 </button>
-                                <h3 class="text-lg font-bold mb-2 text-gray-800 pr-10" title="${plotName}">${truncatedName}</h3>
+
+                                <h3 class="text-lg font-bold mb-2 pr-10" title="${plotName}">${truncatedName}</h3>
+                                
                                 <div class="flex justify-between items-center mb-2">
                                     <span class="text-sm text-gray-600">Luas Area:</span>
                                     <span class="font-semibold text-blue-700">${properties.luas_area} Ha</span>
                                 </div>
+                                
                                 <div class="mt-2 text-center">
                                     <a href="/plot/${plotId}" 
-                                    class="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded shadow transition no-underline"
-                                    aria-label="Lihat detail plot ${properties.nama_plot}">
+                                    class="inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-4 rounded shadow transition no-underline text-sm">
                                         Lihat Detail
                                     </a>
                                 </div>
                             </div>
                         `;
-                        
-                        // Set popup position and content
-                        popup.setLngLat(coordinates)
-                            .setHTML(html)
-                            .addTo(this.map);
+
+                        // Find the button inside our new div and tell it what to do
+                        popupNode.querySelector('.btn-close-popup').addEventListener('click', (ev) => {
+                            ev.preventDefault();
+                            if (this.activePopup) this.activePopup.remove();
+                        });
+
+                        const popup = new maplibregl.Popup({
+                            closeButton: false,
+                            closeOnClick: true,
+                            maxWidth: '300px'
+                        })
+                        .setLngLat(coordinates)
+                        .setDOMContent(popupNode)
+                        .addTo(this.map);
+
+                        this.activePopup = popup;
+
+                        // This runs automatically when the popup is closed
+                        popup.on('close', () => {
+                            if (!this.isSwitchingSelection) {
+                                this.selectedPolygonId = null;
+                                this.activePopup = null;
+                                this.updateMapStyles(); // Reset ke biru semua
+                            }
+                        });
                     }
                 });
 
-                // Change cursor to pointer when over a plot
+                // Cursor events
                 this.map.on('mouseenter', 'plots-fill', () => {
                     this.map.getCanvas().style.cursor = 'pointer';
                 });
-
-                // Remove hover state when leaving the layer
                 this.map.on('mouseleave', 'plots-fill', () => {
                     this.map.getCanvas().style.cursor = '';
                 });
             }
-            
             // Fit map to show all polygons
             this.fitMapToPolygons();
         },

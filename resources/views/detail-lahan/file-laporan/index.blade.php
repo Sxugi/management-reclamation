@@ -61,14 +61,23 @@
                                     <div id="file-upload-section" class="hidden">
                                         <label class="block text-sm font-medium text-darkslategray-200 mb-2">Upload file</label>
                                         <div class="rounded-lg bg-white border-gainsboro border-solid border-[1px] overflow-hidden flex">
-                                            <label for="file-upload" class="flex-shrink-0 bg-whitesmoke-100 border-gainsboro border-solid border-r-[1px] border-t-[0px] border-b-[0px] border-l-[0px] px-4 py-2.5 cursor-pointer hover:bg-gray-100 transition-colors text-sm">
-                                                Choose File
-                                            </label>
-                                            <input type="file" 
-                                                   name="file" 
-                                                   id="file-upload" 
-                                                   accept=".pdf" 
-                                                   class="hidden">
+
+                                            @can('create', [\App\Models\ReklamasiFile::class, $lahan])
+                                                <label for="file-upload" class="flex-shrink-0 bg-whitesmoke-100 border-gainsboro border-solid border-r-[1px] border-t-[0px] border-b-[0px] border-l-[0px] px-4 py-2.5 cursor-pointer hover:bg-gray-100 transition-colors text-sm">
+                                                    Choose File
+                                                </label>
+                                                <input type="file" 
+                                                    name="file" 
+                                                    id="file-upload" 
+                                                    accept=".pdf" 
+                                                    class="hidden">
+                                            @else
+                                                <label class="flex-shrink-0 bg-whitesmoke-100 border-gainsboro border-solid border-r-[1px] border-t-[0px] border-b-[0px] border-l-[0px] px-4 py-2.5 text-sm opacity-50 cursor-not-allowed text-gray-500">
+                                                    Choose File
+                                                </label>
+                                                <input type="file" disabled class="hidden">
+                                            @endcan
+
                                             <div class="flex-1 bg-white px-4 py-2.5 text-sm overflow-hidden text-ellipsis whitespace-nowrap" 
                                                  id="file-name-display"
                                                  data-original-file="">
@@ -126,36 +135,42 @@
                                         View Details
                                     </a>
 
-                                    <x-main.primary-button 
-                                        x-data="" 
-                                        x-on:click.prevent="$dispatch('open-modal', 'confirm-laporan-deletion-{{ $year }}')"
-                                        class="bg-red-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-red-600 transition-colors">
-                                        <span class="relative text-leading-5 font-medium">Delete</span>
-                                    </x-main.primary-button>
+                                    @can('delete', [\App\Models\ReklamasiFile::class, $lahan])
+                                        <x-main.primary-button 
+                                            x-data="" 
+                                            x-on:click.prevent="$dispatch('open-modal', 'confirm-laporan-deletion-{{ $year }}')"
+                                            class="bg-red-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-red-600 transition-colors">
+                                            <span class="relative text-leading-5 font-medium">Delete</span>
+                                        </x-main.primary-button>
 
-                                    <x-main.modal name="confirm-laporan-deletion-{{ $year }}" focusable>
-                                        <form method="POST" action="{{ route('lahan.file-laporan.destroy', [$lahan, $year]) }}" class="p-6">
-                                            @csrf
-                                            @method('DELETE')
+                                        <x-main.modal name="confirm-laporan-deletion-{{ $year }}" focusable>
+                                            <form method="POST" action="{{ route('lahan.file-laporan.destroy', [$lahan, $year]) }}" class="p-6">
+                                                @csrf
+                                                @method('DELETE')
 
-                                            <h2 class="text-lg font-medium text-gray-900">
-                                                {{ __('Are you sure you want to delete this file reclamation report?') }}
-                                            </h2>
+                                                <h2 class="text-lg font-medium text-gray-900">
+                                                    {{ __('Are you sure you want to delete this file reclamation report?') }}
+                                                </h2>
 
-                                            <p class="mt-1 text-sm text-gray-600">
-                                                {{ __('After this file is deleted, all related data will be permanently lost. This action cannot be undone.') }}
-                                            </p>
+                                                <p class="mt-1 text-sm text-gray-600">
+                                                    {{ __('After this file is deleted, all related data will be permanently lost. This action cannot be undone.') }}
+                                                </p>
 
-                                            <div class="mt-6 flex justify-end font-outfit">
-                                                <x-main.secondary-button @click="$dispatch('close')">
-                                                    {{ __('Cancel') }}
-                                                </x-main.secondary-button>
-                                                <x-main.danger-button type="submit" class="ml-3">
-                                                    {{ __('Delete') }}
-                                                </x-main.danger-button>
-                                            </div>
-                                        </form>
-                                    </x-main.modal>
+                                                <div class="mt-6 flex justify-end font-outfit">
+                                                    <x-main.secondary-button @click="$dispatch('close')">
+                                                        {{ __('Cancel') }}
+                                                    </x-main.secondary-button>
+                                                    <x-main.danger-button type="submit" class="ml-3">
+                                                        {{ __('Delete') }}
+                                                    </x-main.danger-button>
+                                                </div>
+                                            </form>
+                                        </x-main.modal>
+                                    @else
+                                        <x-main.primary-button disabled class="bg-red-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-red-600 transition-colors">
+                                            Delete
+                                        </x-main.primary-button>
+                                    @endcan
                                 </div>
                             @endforeach
                         </div>
@@ -167,6 +182,12 @@
 
     <script>
         window.laporanData = @json($file);
+
+        // Pass policy permissions to JavaScript
+        window.userPermissions = {
+            canCreate: {{ auth()->user()->can('create', [\App\Models\ReklamasiFile::class, $lahan]) ? 'true' : 'false' }},
+            canDelete: {{ auth()->user()->can('delete', [\App\Models\ReklamasiFile::class, $lahan]) ? 'true' : 'false' }}
+        };
 
         // Function to set file name display
         function setFileNameDisplay(name, isSelected = false) {
@@ -183,7 +204,7 @@
             const saveButton = document.getElementById('save-button');
             if (!saveButton) return;
             
-            if (show) {
+            if (show && window.userPermissions.canCreate) {
                 saveButton.classList.remove('hidden');
                 saveButton.style.display = '';
             } else {
@@ -332,6 +353,9 @@
 
         // Handle file input change
         function updateFileName(input) {
+            // Prevent interaction if user has no permission
+            if (!window.userPermissions.canCreate) return;
+            
             const selectedYear = document.getElementById('tahun-select')?.value;
             const buttonText = document.getElementById('button-text');
 

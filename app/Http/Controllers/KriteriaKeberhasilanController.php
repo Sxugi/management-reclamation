@@ -6,24 +6,24 @@ use App\Models\Lahan;
 use App\Models\KriteriaKeberhasilan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Providers\View;
+use Illuminate\Support\Facades\DB;
 use App\Http\Requests\KriteriaKeberhasilan\UpdatePenatagunaanRequest;
 use App\Http\Requests\KriteriaKeberhasilan\UpdateRevegetasiRequest;
 use App\Http\Requests\KriteriaKeberhasilan\UpdatePenyelesaianRequest;
 use App\Services\KriteriaKeberhasilanService;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 
 class KriteriaKeberhasilanController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display the specified resource.
      */
     public function show(Lahan $lahan)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('viewAny', [KriteriaKeberhasilan::class, $lahan]);
 
         $kriteria = KriteriaKeberhasilan::firstOrCreate(
             ['lahan_id' => $lahan->lahan_id]
@@ -52,9 +52,7 @@ class KriteriaKeberhasilanController extends Controller
      */
     public function edit(Lahan $lahan)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('create', [KriteriaKeberhasilan::class, $lahan]);
 
         $kriteria = KriteriaKeberhasilan::firstOrCreate(
             ['lahan_id' => $lahan->lahan_id]
@@ -83,9 +81,7 @@ class KriteriaKeberhasilanController extends Controller
      */
     public function updatePenatagunaan(UpdatePenatagunaanRequest $request, Lahan $lahan)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('create', [KriteriaKeberhasilan::class, $lahan]);
 
         $validated = $request->validated();
 
@@ -129,9 +125,7 @@ class KriteriaKeberhasilanController extends Controller
      */
     public function updateRevegetasi(UpdateRevegetasiRequest $request, Lahan $lahan)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('create', [KriteriaKeberhasilan::class, $lahan]);
 
         $validated = $request->validated();
 
@@ -175,9 +169,7 @@ class KriteriaKeberhasilanController extends Controller
      */
     public function updatePenyelesaian(UpdatePenyelesaianRequest $request, Lahan $lahan)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('create', [KriteriaKeberhasilan::class, $lahan]);
 
         $validated = $request->validated();
 
@@ -221,10 +213,9 @@ class KriteriaKeberhasilanController extends Controller
      */
     public function generatePDF(Lahan $lahan, Request $request, KriteriaKeberhasilanService $pdfService)
     {
+        $this->authorize('generatePDF', [KriteriaKeberhasilan::class, $lahan]);
+
         try {
-            if ($lahan->user_id !== Auth::id()) {
-                abort(403, 'Unauthorized action.');
-            }
             $errors = $pdfService->validatePDFGeneration($lahan);
 
             if (!empty($errors)) {

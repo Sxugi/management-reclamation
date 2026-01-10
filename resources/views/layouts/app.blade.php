@@ -16,22 +16,22 @@
             padding: 0;
         }
     </style>
-    <body class="font-sans antialiased h-full">
-        <div class="min-h-full bg-whitesmoke">
+    <body class="font-sans antialiased h-full bg-whitesmoke">
+        <div class="min-h-full">
             <div class="w-full">
                 @include('layouts.navigation')
             </div>
 
             @isset($header)
                 <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
+                    <div class="mx-auto py-4 px-4 sm:px-6 lg:px-8">
                         {{ $header }}
                     </div>
                 </header>
             @endisset
 
             <main class="py-6 px-4 sm:px-6 lg:px-8">
-                <div class="mx-auto max-w-7xl">
+                <div class="mx-auto">
                     {{ $slot }}
                 </div>
             </main>

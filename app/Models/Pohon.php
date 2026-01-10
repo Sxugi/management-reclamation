@@ -32,7 +32,7 @@ class Pohon extends Model
      */
     protected $fillable = [
         'lahan_id',
-        'jenis_pohon',
+        'jenis_pohon_id',
     ];
 
     public function getRouteKeyName(): string
@@ -46,6 +46,14 @@ class Pohon extends Model
     public function lahan(): BelongsTo
     {
         return $this->belongsTo(Lahan::class, 'lahan_id', 'lahan_id');
+    }
+
+    /**
+     * Get the jenis pohon that owns the pohon.
+     */
+    public function jenis(): BelongsTo
+    {
+        return $this->belongsTo(JenisPohon::class, 'jenis_pohon_id', 'jenis_pohon_id');
     }
 
     /**

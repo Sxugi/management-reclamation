@@ -10,17 +10,18 @@ use App\Http\Requests\RencanaReklamasi\StoreRencanaReklamasi;
 use App\Http\Requests\RencanaReklamasi\UpdateRencanaReklamasi;
 use App\Services\RencanaReklamasiService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class RencanaReklamasiController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      */
     public function index(Lahan $lahan)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('viewAny', [DataReklamasi::class, $lahan]);
 
         $rencana_reklamasi = DataReklamasi::with('detailDataReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
@@ -37,9 +38,7 @@ class RencanaReklamasiController extends Controller
      */
     public function create(Lahan $lahan)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('create', [DataReklamasi::class, $lahan]);
         
         $rencana_reklamasi = DataReklamasi::with('detailDataReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
@@ -55,33 +54,33 @@ class RencanaReklamasiController extends Controller
      */
     public function store(StoreRencanaReklamasi $request, Lahan $lahan)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('create', [DataReklamasi::class, $lahan]);
 
         $validated = $request->validated();
 
+        DB::beginTransaction();
         try {
-            DB::transaction(function () use ($validated, $lahan) {
-                $dataReklamasi = DataReklamasi::create([
-                    'lahan_id' => $lahan->lahan_id,
-                    'tahun' => $validated['tahun'],
-                    'tipe' => 'rencana',
-                ]);
+            $dataReklamasi = DataReklamasi::create([
+                'lahan_id' => $lahan->lahan_id,
+                'tahun' => $validated['tahun'],
+                'tipe' => 'rencana',
+            ]);
 
-                foreach ($validated['detail'] as $data) {
-                    $dataReklamasi->detailDataReklamasi()->create([
-                        'kegiatan' => $data['kegiatan'],
-                        'kategori' => $data['kategori'],
-                        'volume' => $data['volume'],
-                        'satuan' => $data['satuan'] ?? null,
-                    ]);
-                }
-            });
+            foreach ($validated['detail'] as $data) {
+                $dataReklamasi->detailDataReklamasi()->create([
+                    'kegiatan' => $data['kegiatan'],
+                    'kategori' => $data['kategori'],
+                    'volume' => $data['volume'],
+                    'satuan' => $data['satuan'] ?? null,
+                ]);
+            }
+
+            DB::commit();
 
             return redirect()->route('lahan.rencana-reklamasi.index', $lahan->lahan_id)
                 ->with('success', 'Rencana Reklamasi tahun ' . $validated['tahun'] . ' berhasil ditambahkan.');
         } catch (\Exception $e) {
+            DB::rollBack();
             \Log::error('Error creating rencana reklamasi', [
                 'user' => Auth::user()->username,
                 'lahan_id' => $lahan->lahan_id,
@@ -103,9 +102,7 @@ class RencanaReklamasiController extends Controller
             abort(404, 'Rencana reklamasi not found for this lahan.');;
         }
 
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('update', $rencana_reklamasi);
 
         $rencana_reklamasi_collection = DataReklamasi::with('detailDataReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
@@ -130,39 +127,39 @@ class RencanaReklamasiController extends Controller
     public function update(UpdateRencanaReklamasi $request, Lahan $lahan, DataReklamasi $rencana_reklamasi)
     {
         if ($rencana_reklamasi->lahan_id !== $lahan->lahan_id) {
-            abort(404);
+            abort(404, 'Rencana reklamasi not found for this lahan.');
         }
 
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403);
-        }
+        $this->authorize('update', $rencana_reklamasi);
 
         $validated = $request->validated();
 
+        DB::beginTransaction();
         try {
-            DB::transaction(function () use ($validated, $rencana_reklamasi) {
-                $rencana_reklamasi->update([
-                    'tahun' => $validated['tahun'],
-                ]);
+            $rencana_reklamasi->update([
+                'tahun' => $validated['tahun'],
+            ]);
 
-                $rencana_reklamasi->detailDataReklamasi()->delete();
+            $rencana_reklamasi->detailDataReklamasi()->delete();
 
-                foreach ($validated['detail'] as $data) {
-                    if (isset($data['volume']) && (float)$data['volume'] > 0) {
-                        $rencana_reklamasi->detailDataReklamasi()->create([
-                            'kegiatan' => $data['kegiatan'],
-                            'kategori' => $data['kategori'],
-                            'volume' => $data['volume'],
-                            'satuan' => $data['satuan'] ?? null,
-                        ]);
-                    }
+            foreach ($validated['detail'] as $data) {
+                if (isset($data['volume']) && (float)$data['volume'] > 0) {
+                    $rencana_reklamasi->detailDataReklamasi()->create([
+                        'kegiatan' => $data['kegiatan'],
+                        'kategori' => $data['kategori'],
+                        'volume' => $data['volume'],
+                        'satuan' => $data['satuan'] ?? null,
+                    ]);
                 }
-            });
+            }
+
+            DB::commit();
 
             return redirect()->route('lahan.rencana-reklamasi.index', $lahan->lahan_id)
                 ->with('success', 'Rencana Reklamasi ' . $validated['tahun'] . ' berhasil diperbarui.');
 
         } catch (\Exception $e) {
+            DB::rollBack();
             \Log::error('Error updating rencana reklamasi', [
                 'user' => Auth::user()->username,
                 'lahan_id' => $lahan->lahan_id,
@@ -180,9 +177,7 @@ class RencanaReklamasiController extends Controller
      */
     public function generatePDF(Lahan $lahan, RencanaReklamasiService $pdfService)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403);
-        }
+        $this->authorize('generatePDF', [DataReklamasi::class, $lahan]);
 
         $pdfResponse = $pdfService->generate($lahan);
 

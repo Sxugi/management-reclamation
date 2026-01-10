@@ -10,18 +10,19 @@ use App\Http\Requests\RekapitulasiReklamasi\StoreRekapitulasiReklamasiRequest;
 use App\Http\Requests\RekapitulasiReklamasi\UpdateRekapitulasiReklamasiRequest;
 use App\Services\RekapitulasiReklamasiService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class RekapitulasiReklamasiController extends Controller
 {
+    use AuthorizesRequests;
+    
     /**
      * Display a listing of the resource.
      */
     public function index(Lahan $lahan)
     {
         // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('viewAny', [DataReklamasi::class, $lahan]);
 
         $rekapitulasi_reklamasi = DataReklamasi::with('detailDataReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
@@ -39,9 +40,7 @@ class RekapitulasiReklamasiController extends Controller
     public function create(Lahan $lahan)
     {
         // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('create', [DataReklamasi::class, $lahan]);
 
         $rekapitulasi_reklamasi = DataReklamasi::with('detailDataReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
@@ -58,34 +57,34 @@ class RekapitulasiReklamasiController extends Controller
     public function store(StoreRekapitulasiReklamasiRequest $request, Lahan $lahan)
     {
         // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('create', [DataReklamasi::class, $lahan]);
 
         // Validate the request
         $validated = $request->validated();
 
+        DB::beginTransaction();
         try {
-            DB::transaction(function () use ($validated, $lahan) {
-                $dataReklamasi = DataReklamasi::create([
-                    'lahan_id' => $lahan->lahan_id,
-                    'tahun' => $validated['tahun'],
-                    'tipe' => 'rekapitulasi',
-                ]);
+            $dataReklamasi = DataReklamasi::create([
+                'lahan_id' => $lahan->lahan_id,
+                'tahun' => $validated['tahun'],
+                'tipe' => 'rekapitulasi',
+            ]);
 
-                foreach ($validated['detail'] as $data) {
-                    $dataReklamasi->detailDataReklamasi()->create([
-                        'kegiatan' => $data['kegiatan'],
-                        'kategori' => $data['kategori'],
-                        'volume' => $data['volume'],
-                        'satuan' => $data['satuan'] ?? null,
-                    ]);
-                }
-            });
+            foreach ($validated['detail'] as $data) {
+                $dataReklamasi->detailDataReklamasi()->create([
+                    'kegiatan' => $data['kegiatan'],
+                    'kategori' => $data['kategori'],
+                    'volume' => $data['volume'],
+                    'satuan' => $data['satuan'] ?? null,
+                ]);
+            }
+
+            DB::commit();
 
             return redirect()->route('lahan.rekapitulasi-reklamasi.index', $lahan->lahan_id)
                 ->with('success', 'Rekapitulasi Reklamasi tahun ' . $validated['tahun'] . ' berhasil ditambahkan.');
         } catch (\Exception $e) {
+            DB::rollBack();
             \Log::error('Error creating rekapitulasi reklamasi', [
                 'user' => Auth::user()->username,
                 'lahan_id' => $lahan->lahan_id,
@@ -109,9 +108,7 @@ class RekapitulasiReklamasiController extends Controller
         }
 
         // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('update', $rekapitulasi_reklamasi);
 
         $rekapitulasi_reklamasi_collection = DataReklamasi::with('detailDataReklamasi')
             ->where('lahan_id', $lahan->lahan_id)
@@ -141,37 +138,37 @@ class RekapitulasiReklamasiController extends Controller
         }
 
         // Check if user owns this lahan
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('update', $rekapitulasi_reklamasi);
 
         // Validate the request
         $validated = $request->validated();
 
+        DB::beginTransaction();
         try {
-            DB::transaction(function () use ($validated, $rekapitulasi_reklamasi) {
-                $rekapitulasi_reklamasi->update([
-                    'tahun' => $validated['tahun'],
-                ]);
+            $rekapitulasi_reklamasi->update([
+                'tahun' => $validated['tahun'],
+            ]);
 
-                $rekapitulasi_reklamasi->detailDataReklamasi()->delete();
+            $rekapitulasi_reklamasi->detailDataReklamasi()->delete();
 
-                foreach ($validated['detail'] as $data) {
-                    if (isset($data['volume']) && (float)$data['volume'] > 0) {
-                        $rekapitulasi_reklamasi->detailDataReklamasi()->create([
-                            'kegiatan' => $data['kegiatan'],
-                            'kategori' => $data['kategori'],
-                            'volume' => $data['volume'],
-                            'satuan' => $data['satuan'] ?? null,
-                        ]);
-                    }
+            foreach ($validated['detail'] as $data) {
+                if (isset($data['volume']) && (float)$data['volume'] > 0) {
+                    $rekapitulasi_reklamasi->detailDataReklamasi()->create([
+                        'kegiatan' => $data['kegiatan'],
+                        'kategori' => $data['kategori'],
+                        'volume' => $data['volume'],
+                        'satuan' => $data['satuan'] ?? null,
+                    ]);
                 }
-            });
+            }
+
+            DB::commit();
 
             return redirect()->route('lahan.rekapitulasi-reklamasi.index', $lahan->lahan_id)
                 ->with('success', 'Rekapitulasi Reklamasi ' . $validated['tahun'] . ' berhasil diperbarui.');
 
         } catch (\Exception $e) {
+            DB::rollBack();
             \Log::error('Error updating rekapitulasi reklamasi', [
                 'user' => Auth::user()->username,
                 'lahan_id' => $lahan->lahan_id,
@@ -187,6 +184,8 @@ class RekapitulasiReklamasiController extends Controller
     public function generatePDF(Lahan $lahan, Request $request, RekapitulasiReklamasiService $pdfService)
 
     {
+        $this->authorize('generatePDF', [DataReklamasi::class, $lahan]);
+        
         $tahun = $request->input('tahun');
 
         // Check if theres data for the specified lahan and year

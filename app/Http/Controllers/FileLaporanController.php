@@ -7,17 +7,19 @@ use App\Models\Lahan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class FileLaporanController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      */
     public function index(Lahan $lahan)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('viewAny', [ReklamasiFile::class, $lahan]);
 
         // Get all laporan file grouped by year
         $file = $lahan->reklamasiFile()
@@ -34,41 +36,61 @@ class FileLaporanController extends Controller
      */
     public function store(Lahan $lahan, Request $request)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('create', [ReklamasiFile::class, $lahan]);
 
         $validated = $request->validate([
             'file' => 'required|file|mimes:pdf|max:10240',
             'tahun' => 'required|integer'
         ]);
 
-        // Check if file for this year already exists
-        $existing = $lahan->reklamasiFile()
-                         ->laporan()
-                         ->where('tahun', $request->tahun)
-                         ->first();
+        DB::beginTransaction();
+        $newPath = null;
 
-        if ($existing) {
-            // Replace existing file
-            Storage::disk('private')->delete($existing->file_path);
-            $existing->delete();
+        try {
+            $file = $request->file('file');
+            $newPath = $file->store("reklamasi_files/laporan/{$request->tahun}", 'private');
+
+            // Check if file for this year already exists
+            $existing = $lahan->reklamasiFile()
+                            ->laporan()
+                            ->where('tahun', $request->tahun)
+                            ->first();
+
+            $oldPath = $existing ? $existing->file_path : null;
+
+            if ($existing) {
+                $existing->delete();
+            }
+
+            ReklamasiFile::create([
+                'lahan_id' => $lahan->lahan_id,
+                'tipe' => 'laporan',
+                'file_name' => $file->getClientOriginalName(),
+                'file_path' => $newPath,
+                'file_size' => $file->getSize(),
+                'mime_type' => $file->getMimeType(),
+                'tahun' => $request->tahun,
+            ]);
+
+            DB::commit();
+
+            return back()->with('success', "Laporan tahun {$request->tahun} berhasil diunggah.");
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            if ($newPath && Storage::disk('private')->exists($newPath)) {
+                Storage::disk('private')->delete($newPath);
+            }
+
+            \Log::error('Error uploading laporan file', [
+                'lahan_id' => $lahan->lahan_id,
+                'tahun' => $request->tahun,
+                'error' => $e->getMessage()
+            ]);
+
+            return back()->with('error', 'Gagal mengunggah file laporan.');
         }
-
-        $file = $request->file('file');
-        $path = $file->store("reklamasi_files/laporan/{$request->tahun}", 'private');
-
-        ReklamasiFile::create([
-            'lahan_id' => $lahan->lahan_id,
-            'tipe' => 'laporan',
-            'file_name' => $file->getClientOriginalName(),
-            'file_path' => $path,
-            'file_size' => $file->getSize(),
-            'mime_type' => $file->getMimeType(),
-            'tahun' => $request->tahun,
-        ]);
-
-        return back()->with('success', "Laporan tahun {$request->tahun} berhasil diunggah.");
     }
 
     /**
@@ -76,21 +98,39 @@ class FileLaporanController extends Controller
      */
     public function destroy(Lahan $lahan, $tahun)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('delete', [ReklamasiFile::class, $lahan]);
 
         $file = $lahan->reklamasiFile()
                      ->laporan()
                      ->where('tahun', $tahun)
                      ->first();
 
-        if ($file) {
-            Storage::disk('private')->delete($file->file_path);
-            $file->delete();
+        if (!$file) {
+            return back()->with('error', 'File laporan tidak ditemukan.');
         }
 
-        return back()->with('success', "Laporan tahun {$tahun} berhasil dihapus.");
+        DB::beginTransaction();
+        try {
+            $path = $file->file_path;
+            $file->delete();
+
+            DB::commit();
+
+            if ($path && Storage::disk('private')->exists($path)) {
+                Storage::disk('private')->delete($path);
+            }
+
+            return back()->with('success', "Laporan tahun {$tahun} berhasil dihapus.");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error deleting laporan file', [
+                'lahan_id' => $lahan->lahan_id,
+                'tahun' => $tahun,
+                'error' => $e->getMessage()
+            ]);
+
+            return back()->with('error', 'Gagal menghapus file laporan.');
+        }
     }
 
     /**
@@ -98,9 +138,7 @@ class FileLaporanController extends Controller
      */
     public function preview(Lahan $lahan, Request $request)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('view', [ReklamasiFile::class, $lahan]);
 
         $tahun = $request->input('tahun');
 

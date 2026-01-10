@@ -7,17 +7,19 @@ use App\Models\Lahan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class FileRencanaController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display a listing of the resource.
      */
     public function index(Lahan $lahan)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('viewAny', [ReklamasiFile::class, $lahan]);
 
         $file = $lahan->reklamasiFile()->rencana()->first();
 
@@ -29,33 +31,56 @@ class FileRencanaController extends Controller
      */
     public function store(Lahan $lahan, Request $request)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('create', [ReklamasiFile::class, $lahan]);
 
         $validated = $request->validate([
             'file' => 'required|file|mimes:pdf|max:10240',
         ]);
 
-        $existing = $lahan->reklamasiFile()->rencana()->first();
-        if ($existing) {
-            Storage::disk('private')->delete($existing->file_path);
-            $existing->delete();
+        DB::beginTransaction();
+        $newPath = null;
+
+        try {
+            $file = $request->file('file');
+            $newPath = $file->store('reklamasi_files/rencana', 'private');
+
+            $existing = $lahan->reklamasiFile()->rencana()->first();
+            $oldPath = $existing ? $existing->file_path : null;
+
+            if ($existing) {
+                    $existing->delete();
+                }
+
+            ReklamasiFile::create([
+                'lahan_id'  => $lahan->lahan_id,
+                'tipe'      => 'rencana',
+                'file_name' => $file->getClientOriginalName(),
+                'file_path' => $newPath,
+                'file_size' => $file->getSize(),
+                'mime_type' => $file->getMimeType(),
+            ]);
+
+            DB::commit();
+
+            if ($oldPath && Storage::disk('private')->exists($oldPath)) {
+                Storage::disk('private')->delete($oldPath);
+            }
+
+            return back()->with('success', 'File rencana berhasil diunggah.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            if ($newPath && Storage::disk('private')->exists($newPath)) {
+                Storage::disk('private')->delete($newPath);
+            }
+
+            \Log::error('Error uploading file rencana', [
+                'lahan_id' => $lahan->lahan_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return back()->with('error', 'Gagal mengunggah file: ' . $e->getMessage());
         }
-
-        $file = $request->file('file');
-        $path = $file->store('reklamasi_files/rencana', 'private');
-
-        ReklamasiFile::create([
-            'lahan_id'  => $lahan->lahan_id,
-            'tipe'      => 'rencana',
-            'file_name' => $file->getClientOriginalName(),
-            'file_path' => $path,
-            'file_size' => $file->getSize(),
-            'mime_type' => $file->getMimeType(),
-        ]);
-
-        return back()->with('success', 'File rencana berhasil diunggah.');
     }
 
     /**
@@ -63,18 +88,35 @@ class FileRencanaController extends Controller
      */
     public function destroy(Lahan $lahan)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('delete', [ReklamasiFile::class, $lahan]);
 
         $file = $lahan->reklamasiFile()->rencana()->first();
 
-        if ($file) {
-            Storage::disk('private')->delete($file->file_path);
-            $file->delete();
+        if (!$file) {
+            return back()->with('error', 'File tidak ditemukan.');
         }
 
-        return back()->with('success', 'File rencana berhasil dihapus.');
+        DB::beginTransaction();
+        try {
+            $path = $file->file_path;
+            $file->delete();
+
+            DB::commit();
+
+            if ($path && Storage::disk('private')->exists($path)) {
+                Storage::disk('private')->delete($path);
+            }
+
+            return back()->with('success', 'File rencana berhasil dihapus.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Error deleting file rencana', [
+                'lahan_id' => $lahan->lahan_id,
+                'error' => $e->getMessage()
+            ]);
+
+            return back()->with('error', 'Gagal menghapus file.');
+        }
     }
     
     /**
@@ -82,9 +124,7 @@ class FileRencanaController extends Controller
      */
     public function preview(Lahan $lahan)
     {
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        $this->authorize('view', [ReklamasiFile::class, $lahan]);
 
         $file = $lahan->reklamasiFile()->rencana()->first();
         

@@ -7,18 +7,19 @@ use App\Services\DashboardService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class DashboardController extends Controller
 {
+    use AuthorizesRequests;
+
     /**
      * Display the dashboard for a specific lahan.
      */
     public function dashboard(Lahan $lahan)
     {
-        // Basic ownership check (consider moving to policy)
-        if ($lahan->user_id !== Auth::user()->user_id) {
-            abort(403, 'Unauthorized action.');
-        }
+        // Use policy instead of manual check
+        $this->authorize('view', $lahan);
 
         return view('detail-lahan.dashboard', compact('lahan'));
     }
@@ -30,9 +31,8 @@ class DashboardController extends Controller
     public function getDashboardData(Request $request, Lahan $lahan)
     {
         try {
-            if ($lahan->user_id !== Auth::user()->user_id) {
-                return response()->json(['error' => 'Unauthorized'], 403);
-            }
+            // Use policy authorization
+            $this->authorize('view', $lahan);
 
             $type = $request->get('type');
             
@@ -83,9 +83,8 @@ class DashboardController extends Controller
     public function getHistoricalData(Request $request, Lahan $lahan)
     {
         try {
-            if ($lahan->user_id !== Auth::user()->user_id) {
-                return response()->json(['error' => 'Unauthorized'], 403);
-            }
+            // Use policy authorization
+            $this->authorize('view', $lahan);
 
             $type = $request->get('type');
             $period = $request->get('period', '30days');
@@ -123,9 +122,8 @@ class DashboardController extends Controller
     public function getIndicatorData(Request $request, Lahan $lahan)
     {
         try {
-            if ($lahan->user_id !== Auth::user()->user_id) {
-                return response()->json(['error' => 'Unauthorized'], 403);
-            }
+            // Use policy authorization
+            $this->authorize('view', $lahan);
 
             $type = $request->get('type');
 

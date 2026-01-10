@@ -49,6 +49,22 @@ class LoginRequest extends FormRequest
                 'email' => __('auth.failed'),
             ]);
         }
+
+        $user = Auth::user();
+
+        if ($user->status !== 'active') {
+            Auth::guard('web')->logout();
+
+            $message = match ($user->status) {
+                'inactive'  => 'Akun Anda inactive (belum aktif). Hubungi admin.',
+                'suspended' => 'Akun Anda disuspend karena pelanggaran.',
+                default     => 'Status akun Anda tidak valid untuk login.',
+            };
+
+            throw ValidationException::withMessages([
+                'email' => $message,
+            ]);
+        }
     }
 
     /**
