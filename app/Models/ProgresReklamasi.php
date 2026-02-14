@@ -89,7 +89,8 @@ class ProgresReklamasi extends Model
 
     public function indikator()
     {
-        return $this->belongsTo(IndikatorProgresReklamasi::class, 'indikator_id', 'indikator_id');
+        return $this->belongsTo(IndikatorProgresReklamasi::class, 'indikator_id', 'indikator_id')
+                    ->withDefault();
     }
 
     public function jenisAktivitas()
@@ -110,5 +111,30 @@ class ProgresReklamasi extends Model
     public function getKategoriAttribute()
     {
         return $this->jenisAktivitas?->kategoriAktivitas;
+    }
+
+    /**
+     * Get field values as associative array
+     */
+    public function getFieldValuesArrayAttribute()
+    {
+        $values = [];
+        
+        foreach ($this->fieldValues as $fieldValue) {
+            if ($fieldValue->fieldDefinition) {
+                $key = $fieldValue->fieldDefinition->field_key;
+                $values[$key] = $fieldValue->field_value;
+                
+                // Special handling for 'jenis_pohon_id' to get the name
+                if ($key === 'jenis_pohon_id' && is_numeric($fieldValue->field_value)) {
+                    $jenisPohon = \App\Models\JenisPohon::find($fieldValue->field_value);
+                    if ($jenisPohon) {
+                        $values['jenis_pohon_nama'] = $jenisPohon->nama_lokal ?? $jenisPohon->nama_ilmiah;
+                    }
+                }
+            }
+        }
+        
+        return $values;
     }
 }

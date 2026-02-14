@@ -4,56 +4,75 @@ A Laravel-based web application for managing land reclamation progress tracking,
 
 ## Features
 
-- **Plot Management**: Track multiple reclamation plots with detailed progress monitoring
-- **Progress Tracking**: Record and monitor various reclamation activities with dynamic field definitions
-- **Target Management**: Set and track progress against specific environmental restoration targets
-- **Documentation System**: Upload and manage photographic evidence and documentation
-- **Progress Analytics**: Calculate overall progress percentages and generate trend analysis
-- **Historical Snapshots**: Maintain timeline accuracy with historical progress data
-- **Activity Categorization**: Organize activities by categories (Revegetasi, Monitoring, etc.)
-- **Indicator-based Tracking**: Support for multiple environmental indicators with configurable aggregation
+- **Admin Dashboard**: Centralized control for user management and master data configuration (Tree Types & Budget Categories).
+- **Role-Based Access Control (RBAC)**: Granular permission system with Admin, Owner, Editor, and Viewer roles.
+- **Land & Team Management**: Assign specific teams to reclamation sites with defined access levels.
+- **Plot Management**: Track multiple reclamation plots with detailed progress monitoring.
+- **Progress Tracking**: Record and monitor various reclamation activities with dynamic field definitions.
+- **Target Management**: Set and track progress against specific environmental restoration targets.
+- **Documentation System**: Upload and manage photographic evidence and documentation.
+- **Progress Analytics**: Calculate overall progress percentages and generate trend analysis.
+- **Historical Snapshots**: Maintain timeline accuracy with historical progress data.
+
+## Roles & Permissions
+
+### System Roles
+- **Super Admin**: 
+  - Full access to the system.
+  - **Exclusive right to create new "Lahan" (Sites).**
+  - Manages Users (Create, Edit, Suspend).
+  - Manages Master Data (Tree Species, Budget Categories).
+  - Can view and manage all Lahan.
+
+### Lahan (Site) Team Roles
+Users can be assigned to specific "Lahan" with the following roles:
+- **Owner**: Full control over the specific Lahan, including team management (add/remove members).
+- **Editor**: Can input progress, upload documentation, and edit data within the assigned Lahan.
+- **Viewer**: Read-only access to the Lahan's data and reports.
 
 ## Simplified Route Overview
+
+**Admin Panel (New)**
+- **Dashboard**: Overview of system stats (Total Users, Active Users, Admins).
+- **User Management**: Add new users, manage roles, suspend/activate accounts.
+- **Master Data**: 
+  - **Jenis Pohon**: Add/Edit tree species available for input by users.
+  - **Kategori Anggaran**: Add/Edit budget categories for financial planning.
 
 **Authentication & User**
 - Login, password reset, email verification, logout
 - Profile view/update/delete
 
 **Land & Plot Management**
-- Manage lahan (sites) and associated plots (blocks)
-- Set plot-specific targets
-- View plot activity logs
+- **Create Lahan**: Restricted to Admin only.
+- **Team Management**: Manage members and assign roles (Owner/Editor/Viewer) for specific Lahan.
+- Manage associated plots (blocks).
+- Set plot-specific targets.
 
 **Progress Entries**
-- Create, edit, update, delete reclamation progress records
-- Attach/remove documentation files
-- Dynamic form based on selected activity type
+- Create, edit, update, delete reclamation progress records (Editors & Owners).
+- Attach/remove documentation files.
+- Dynamic form based on selected activity type.
 
 **Dashboard & Analytics**
-- Fetch consolidated stats (totals, daily/weekly changes)
-- Retrieve progress per block
-- Map data (plots + progress)
-- Historical progress series (overall & per block)
-- Indicator data (all, specific, enhanced, block breakdowns)
-- Summary metrics
+- Fetch consolidated stats (totals, daily/weekly changes).
+- Retrieve progress per block.
+- Map data (plots + progress).
+- Historical progress series.
+- Indicator data and summary metrics.
 
 **Planning & Budget**
-- Manage reclamation plans and cost plans (with PDF exports)
-- Track reclamation budget
-- Generate recapitulation (progress & cost) reports (PDF)
+- Manage reclamation plans and cost plans.
+- Track reclamation budget based on Admin-defined categories.
+- Generate recapitulation reports.
 
-**Success Criteria**
-- View & update success criteria sections
-- Export criteria report (PDF)
-
-**Documentation & Files**
-- General documentation CRUD
-- Plan files list/upload/delete + preview
-- Report files list/upload/delete + preview
+**Success Criteria & Documentation**
+- View & update success criteria sections.
+- General documentation and file management.
 
 **Biological & Inventory**
-- Tree/species records (create, manage yearly data, remove by year)
-- Warehouse/inventory records CRUD
+- Tree/species records (based on Admin-defined species).
+- Warehouse/inventory records CRUD.
 
 ## Requirements
 
@@ -174,7 +193,8 @@ return [
 - Controllers: HTTP handling (dashboard, progress, planning, files, criteria, etc.)
 - Services: Business logic (ProgresReklamasiService, DashboardService)
 - Models: Plot, ProgresReklamasi, TargetProgresReklamasi, ProgresSnapshot, FieldDefinition, ProgresFieldValue, etc.
-- Storage: Public disk for documentation (with cleanup procedures)
+- Policies: Authorization logic for Lahan access (Owner/Editor/Viewer)
+- Storage: Public disk for documentation
 - Snapshots: Maintain historical integrity & trend analysis
 
 ## Usage

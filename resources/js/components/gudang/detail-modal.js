@@ -38,19 +38,29 @@ document.addEventListener("turbo:load", () => {
             });
         };
 
+        // Get transaction badge HTML
+        const getTransactionBadge = (type) => {
+            if (type === 'MASUK') {
+                return '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 border border-green-200"><span class="mr-1">⬇️</span> Barang Masuk</span>';
+            } else if (type === 'KELUAR') {
+                return '<span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-800 border border-red-200"><span class="mr-1">⬆️</span> Barang Keluar</span>';
+            }
+            return '-';
+        };
+
         // Get status badge class
         const getStatusBadgeClass = (status) => {
             switch(status) {
                 case 'Tersedia':
-                    return 'bg-green-100 text-green-800 border border-green-200';
+                    return 'bg-green-100 text-xs text-green-800 border border-green-200';
                 case 'Kosong':
-                    return 'bg-orange-100 text-orange-800 border border-orange-200';
+                    return 'bg-orange-100 text-xs text-orange-800 border border-orange-200';
                 case 'Rusak':
-                    return 'bg-red-100 text-red-800 border border-red-200';
+                    return 'bg-red-100 text-xs text-red-800 border border-red-200';
                 case 'Digunakan':
-                    return 'bg-yellow-100 text-yellow-800 border border-yellow-200';
+                    return 'bg-yellow-100 text-xs text-yellow-800 border border-yellow-200';
                 default:
-                    return 'bg-gray-100 text-gray-800 border border-gray-200';
+                    return 'bg-gray-100  text-xs text-gray-800 border border-gray-200';
             }
         };
 
@@ -70,9 +80,19 @@ document.addEventListener("turbo:load", () => {
             }
         };
 
+        const getLabelLocation = (type) => {
+            if (type === 'MASUK') {
+                return 'Lokasi Penyimpanan';
+            } else if (type === 'KELUAR') {
+                return 'Lokasi Tujuan';
+            }
+            return '-';
+        };
+
         // Build rich HTML content
         content.innerHTML = `
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Informasi Barang -->
                 <div class="bg-white border border-gainsboro rounded-xl p-6 shadow-lg">
                     <h3 class="text-lg font-semibold text-darkslategray mb-4 flex items-center gap-2">
                         <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
@@ -83,6 +103,14 @@ document.addEventListener("turbo:load", () => {
                         Informasi Barang
                     </h3>
                     <div class="space-y-4">
+                        ${data. sku ? `
+                        <div>
+                            <label class="block text-xs font-semibold text-slategray uppercase tracking-wide mb-2">SKU / Kode</label>
+                            <div class="bg-gray-50 border border-gainsboro rounded-lg p-2">
+                                <div class="text-sm font-mono font-medium text-darkslategray">${data.sku}</div>
+                            </div>
+                        </div>
+                        ` : ''}
                         <div>
                             <label class="block text-xs font-semibold text-slategray uppercase tracking-wide mb-2">Nama Barang</label>
                             <div class="bg-gray-50 border border-gainsboro rounded-lg p-2">
@@ -104,6 +132,7 @@ document.addEventListener("turbo:load", () => {
                     </div>
                 </div>
 
+                <!-- Status & Lokasi -->
                 <div class="bg-white border border-gainsboro rounded-xl p-6 shadow-lg">
                     <h3 class="text-lg font-semibold text-darkslategray mb-4 flex items-center gap-2">
                         <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center mr-3">
@@ -115,22 +144,28 @@ document.addEventListener("turbo:load", () => {
                     </h3>
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-xs font-semibold text-slategray uppercase tracking-wide mb-2">Status Barang</label>
+                            <label class="block text-xs font-semibold text-slategray uppercase tracking-wide mb-2">Jenis Transaksi</label>
                             <div class="flex items-center">
-                                <span class="inline-flex items-center px-3 py-2 rounded-full text-sm font-medium ${getStatusBadgeClass(data.status_barang)}">
+                                ${getTransactionBadge(data.jenis_transaksi)}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slategray uppercase tracking-wide mb-2">Kondisi Barang</label>
+                            <div class="flex items-center">
+                                <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeClass(data.status_barang)}">
                                     <span class="mr-2">${getStatusIcon(data.status_barang)}</span>
                                     ${data.status_barang || '-'}
                                 </span>
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slategray uppercase tracking-wide mb-2">Lokasi Penyimpanan</label>
+                            <label class="block text-xs font-semibold text-slategray uppercase tracking-wide mb-2">${getLabelLocation(data.jenis_transaksi)}</label>
                             <div class="bg-gray-50 border border-gainsboro rounded-lg p-2">
                                 <div class="text-sm font-medium text-darkslategray">${data.lokasi_penyimpanan || '-'}</div>
                             </div>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slategray uppercase tracking-wide mb-2">Tanggal Masuk</label>
+                            <label class="block text-xs font-semibold text-slategray uppercase tracking-wide mb-2">Tanggal Transaksi</label>
                             <div class="bg-gray-50 border border-gainsboro rounded-lg p-2">
                                 <div class="text-sm font-medium text-darkslategray">${formatDate(data.tanggal_masuk)}</div>
                             </div>
@@ -150,7 +185,7 @@ document.addEventListener("turbo:load", () => {
                         </div>
                         Catatan
                     </h3>
-                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-2">
+                    <div class="bg-amber-50 border border-amber-200 rounded-lg p-3">
                         <div class="text-sm text-darkslategray whitespace-pre-wrap leading-relaxed">${data.catatan}</div>
                     </div>
                 </div>
@@ -158,7 +193,7 @@ document.addEventListener("turbo:load", () => {
         
             <div class="bg-white border border-gainsboro rounded-xl p-6 shadow-lg">
                 <h3 class="text-lg font-semibold text-darkslategray mb-4 flex items-center gap-2">
-                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                    <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
                         <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M8.6665 14C7.13317 14 5.79717 13.4918 4.6585 12.4753C3.51984 11.4589 2.86695 10.1893 2.69984 8.66667H4.0665C4.22206 9.82222 4.73606 10.7778 5.6085 11.5333C6.48095 12.2889 7.50028 12.6667 8.6665 12.6667C9.9665 12.6667 11.0694 12.214 11.9752 11.3087C12.8809 10.4033 13.3336 9.30044 13.3332 8C13.3327 6.69956 12.8801 5.59689 11.9752 4.692C11.0703 3.78711 9.96739 3.33422 8.6665 3.33333C7.89984 3.33333 7.18317 3.51111 6.5165 3.86667C5.84984 4.22222 5.28873 4.71111 4.83317 5.33333H6.6665V6.66667H2.6665V2.66667H3.99984V4.23333C4.5665 3.52222 5.25828 2.97222 6.07517 2.58333C6.89206 2.19444 7.75584 2 8.6665 2C9.49984 2 10.2805 2.15844 11.0085 2.47533C11.7365 2.79222 12.3698 3.21978 12.9085 3.758C13.4472 4.29622 13.8749 4.92956 14.1918 5.658C14.5087 6.38644 14.6669 7.16711 14.6665 8C14.6661 8.83289 14.5078 9.61356 14.1918 10.342C13.8758 11.0704 13.4481 11.7038 12.9085 12.242C12.3689 12.7802 11.7356 13.208 11.0085 13.5253C10.2814 13.8427 9.50073 14.0009 8.6665 14ZM10.5332 10.8L7.99984 8.26667V4.66667H9.33317V7.73333L11.4665 9.86667L10.5332 10.8Z" fill="currentColor"/>
                         </svg>

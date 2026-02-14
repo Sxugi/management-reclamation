@@ -18,7 +18,7 @@
                 <x-lahan.map />
 
                 <!-- Form Column -->
-                <x-lahan.form />
+                <x-lahan.form :users="$users ?? []" />
             </div>
         </div>
     </div>

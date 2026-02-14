@@ -24,7 +24,7 @@ class DashboardChartRenderer {
     /**
      * Main chart renderer - routes to specific chart types
      */
-    async renderChart(canvasId, view, period) {
+    async renderChart(canvasId, view, param) {
         if (this.isRendering) {
             console.log('Chart render already in progress, skipping...');
             return;
@@ -40,14 +40,23 @@ class DashboardChartRenderer {
 
         try {
             this.destroyExistingChart();
-            console.log('Rendering chart:', { view, period });
+            console.log('Rendering chart:', { view, param  });
+
+            if (view === 'planted' && param === 'all') {
+                this.updateLayoutMode('split');
+            } else {
+                this.updateLayoutMode('full');
+            }
 
             switch (view) {
                 case 'overall':
-                    await this.renderOverallChart(canvas, period);
+                    await this.renderOverallChart(canvas, param);
                     break;
                 case 'indicator':
-                    await this.renderIndicatorChart(canvas, period);
+                    await this.renderIndicatorChart(canvas, param );
+                    break;
+                case 'planted':
+                    await this.renderPlantedTreesChart(canvas, param);
                     break;
                 default:
                     this.renderEmptyState(canvas, 'Unknown view type');
@@ -57,6 +66,41 @@ class DashboardChartRenderer {
             this.renderErrorState(canvas);
         } finally {
             this.isRendering = false;
+        }
+    }
+
+    /**
+     * Update layout mode based on chart type (split for planted, full for others)
+     */
+    updateLayoutMode(mode) {
+        const chartContainer = document.getElementById('chart-container');
+        const detailsContainer = document.getElementById('planted-details-container');
+
+        if (!chartContainer || !detailsContainer) return;
+
+        if (mode === 'split') {
+            // Mode Split: Chart 2 column, Show detail
+            chartContainer.classList.remove('lg:col-span-3');
+            chartContainer.classList.add('lg:col-span-2');
+            
+            detailsContainer.classList.remove('hidden');
+            detailsContainer.classList.add('flex');
+        } else {
+            // Mode Default: Chart full width, Hide detail
+            chartContainer.classList.remove('lg:col-span-2');
+            chartContainer.classList.add('lg:col-span-3');
+            
+            detailsContainer.classList.add('hidden');
+            detailsContainer.classList.remove('flex');
+            
+            // Clear detail content when not in planted view
+            const detailsContent = document.getElementById('planted-details');
+            if(detailsContent) detailsContent.innerHTML = '';
+        }
+
+        // Trigger chart resize after layout change
+        if (this.chart) {
+            setTimeout(() => this.chart.resize(), 300);
         }
     }
 
@@ -200,6 +244,349 @@ class DashboardChartRenderer {
             console.error('Error rendering indicator chart:', error);
             this.renderErrorState(canvas);
         }
+    }
+
+    /**
+     * Render planted trees distribution chart (Donut)
+     * Handles data loading, empty states, and triggering the sidebar render.
+     */
+    async renderPlantedTreesChart(canvas, category = 'all') {
+        // Load data
+        const plantedData = await this.dataService.loadPlantedTreesDistribution();
+        
+        // Check for empty data
+        if (!plantedData || !plantedData.by_category || plantedData.by_category.length === 0) {
+            this.renderEmptyState(canvas, 'no_planting_data');
+            return;
+        }
+
+        // Prepare Chart Data (Switch logic inside here)
+        const chartData = this.preparePlantedTreesChartData(plantedData, category);
+
+        if (chartData.data.length === 0) {
+             this.renderEmptyState(canvas, 'no_data_for_category', null, null, `No data for ${category}`);
+             return;
+        }
+
+        // Create Chart
+        this.createPlantedTreesDonutChart(canvas, chartData, category);
+
+        // Render Sidebar Details
+        this.renderPlantedTreesDetails(plantedData, category);
+    }
+
+    /**
+     * Filter helper for category selection
+     */
+    filterPlantedDataByCategory(categoryData, category) {
+        if (category === 'all') return categoryData;
+        return categoryData.filter(c => c.kategori.toLowerCase() === category.toLowerCase());
+    }
+
+    /**
+     * Prepare chart data based on selected category
+     */
+    preparePlantedTreesChartData(plantedData, selectedCategory) {
+        let labels = [];
+        let data = [];
+        let backgroundColors = [];
+
+        if (selectedCategory === 'all') {
+            // --- MODE: ALL CATEGORIES ---
+            const items = plantedData.by_category;
+            
+            labels = items.map(c => {
+                const cleanName = this.formatLabel(c.kategori);
+                return `${cleanName}: ${c.total_trees.toLocaleString('id-ID')} pohon`;
+            });
+
+            data = items.map(c => c.total_trees);
+            backgroundColors = this.getCategoryColorsArray(items);
+
+        } else {
+            // --- MODE: SPECIFIC CATEGORY ---
+            const speciesList = plantedData.by_species.filter(s => 
+                s.kategori.toLowerCase() === selectedCategory.toLowerCase()
+            );
+
+            labels = speciesList.map(s => {
+                const cleanName = this.formatLabel(s.nama);
+                return `${cleanName}: ${s.total_trees.toLocaleString('id-ID')} btg`;
+            });
+
+            data = speciesList.map(s => s.total_trees);
+            
+            backgroundColors = speciesList.map((_, index) => 
+                this.chartColors[index % this.chartColors.length]
+            );
+        }
+
+        return { labels, data, backgroundColors };
+    }
+
+    /**
+     * Map category names to specific hex colors
+     */
+    getCategoryColorsArray(data) {
+        const colorMap = {
+            'PIONIR': '#10b981',    // Emerald
+            'LOKAL': '#3b82f6',     // Blue
+            'MPTS': '#f59e0b',      // Amber
+            'COVER_CROP': '#8b5cf6' // Purple
+        };
+        return data.map(c => colorMap[c.kategori.toUpperCase()] || '#6b7280');
+    }
+
+    /**
+     * Helper to get Tailwind class colors for UI elements
+     */
+    getCategoryColor(categoryName) {
+        if (!categoryName) return 'bg-gray-500';
+        
+        const tailwindMap = {
+            'PIONIR': 'bg-emerald-500',
+            'LOKAL': 'bg-blue-500',
+            'MPTS': 'bg-amber-500',
+            'COVER_CROP': 'bg-purple-500'
+        };
+        
+        return tailwindMap[categoryName.toUpperCase()] || 'bg-gray-500';
+    }
+
+    /**
+     * Helper to format text (remove underscores, capitalize words)
+     */
+    formatLabel(text) {
+        if (!text) return '';
+        return text
+            .toString()
+            .replace(/_/g, ' ') // Replace underscore with space
+            .toLowerCase()
+            .replace(/\b\w/g, c => c.toUpperCase()); // Capitalize first letter of each word
+    }
+
+    /**
+     * Create the Donut Chart with "Center Text" plugin
+     */
+    createPlantedTreesDonutChart(canvas, chartData, selectedCategory) {
+        const self = this;
+
+        const centerTextPlugin = {
+            id: 'centerText',
+            beforeDraw: function(chart) {
+                if (chart.config.type !== 'doughnut') return;
+                
+                const { ctx, chartArea: { top, bottom, left, right, width, height } } = chart;
+        
+                ctx.save();
+                
+                // Calculate Total
+                const total = chartData.data.reduce((a, b) => a + b, 0);
+                
+                // Labels
+                let subLabel = "Pohon Tanam"; 
+
+                if (selectedCategory !== 'all') {
+                    subLabel = "Total (Btg)";
+                }
+                
+                // Draw Big Number
+                const fontSizeBig = (height / 100).toFixed(2);
+                ctx.font = `bold ${fontSizeBig}em 'Outfit', sans-serif`;
+                ctx.fillStyle = "#1f2937"; 
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                
+                const centerX = (left + right) / 2;
+                const centerY = (top + bottom) / 2;
+                
+                ctx.fillText(total.toLocaleString('id-ID'), centerX, centerY - (height * 0.05));
+                
+                // Draw Label
+                const fontSizeSmall = (height / 280).toFixed(2);
+                ctx.font = `500 ${fontSizeSmall}em 'Outfit', sans-serif`;
+                ctx.fillStyle = "#9ca3af";
+                
+                ctx.fillText(subLabel, centerX, centerY + (height * 0.10));
+
+                // Draw Category Name (Optional styling)
+                if (selectedCategory !== 'all') {
+                    ctx.font = `bold ${(fontSizeSmall * 0.8).toFixed(2)}em 'Outfit', sans-serif`;
+                    // Simple color logic
+                    ctx.fillStyle = '#6b7280'; 
+                }
+                
+                ctx.restore();
+            }
+        };
+
+        if (this.chart) {
+            this.chart.destroy();
+        }
+
+        this.chart = new Chart(canvas, {
+            type: 'doughnut',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    data: chartData.data,
+                    backgroundColor: chartData.backgroundColors,
+                    borderWidth: 0, 
+                    hoverOffset: 10
+                }]
+            },
+            options: this.getPlantedTreesChartOptions(),
+            plugins: [centerTextPlugin]
+        });
+    }
+
+    /**
+     * Configuration options for the Donut Chart
+     */
+    getPlantedTreesChartOptions() {
+        return {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '75%',
+            layout: { padding: 20 },
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        font: { size: 11, family: "'Outfit', sans-serif" },
+                        usePointStyle: true,
+                        boxWidth: 8,
+                        generateLabels: (chart) => {
+                            const data = chart.data;
+                            if (data.labels.length && data.datasets.length) {
+                                return data.labels.map((label, i) => {
+                                    const text = label.split(':')[0]; 
+                                    const meta = chart.getDatasetMeta(0);
+                                    const style = meta.controller.getStyle(i);
+                                    
+                                    return {
+                                        text: text,
+                                        fillStyle: style.backgroundColor,
+                                        strokeStyle: style.borderColor,
+                                        lineWidth: style.borderWidth,
+                                        hidden: isNaN(data.datasets[0].data[i]) || meta.data[i].hidden,
+                                        index: i
+                                    };
+                                });
+                            }
+                            return [];
+                        }
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    titleColor: '#1f2937',
+                    bodyColor: '#4b5563',
+                    borderColor: '#e5e7eb',
+                    borderWidth: 1,
+                    padding: 12,
+                    callbacks: {
+                        label: (context) => {
+                            const value = context.parsed;
+                            const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                            const percentage = ((value / total) * 100).toFixed(1);
+                            
+                            // Simplified label parsing
+                            let rawLabel = context.label || '';
+                            let name = rawLabel.split(':')[0];
+
+                            return ` ${name}: ${value.toLocaleString('id-ID')} btg (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        };
+    }
+
+    /**
+     * Render the sidebar list with Expandable Categories
+     */
+    renderPlantedTreesDetails(plantedData, selectedCategory) {
+        const detailsContainer = document.getElementById('planted-details');
+        if (!detailsContainer) return;
+
+        const speciesByCategory = this.groupSpeciesByCategory(plantedData.by_species || []);
+        let listHtml = '';
+        
+        plantedData.by_category.forEach(category => {
+            const isExpanded = selectedCategory !== 'all' && selectedCategory === category.kategori.toLowerCase();
+            const species = speciesByCategory[category.kategori] || [];
+            
+            const catBgClass = this.getCategoryColor(category.kategori).replace('bg-', 'text-'); 
+            const catKey = category.kategori.toLowerCase();
+
+            listHtml += `
+                <div class="group bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-all hover:shadow-md mb-3">
+                    <button class="w-full p-3 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors"
+                            onclick="togglePlantedCategory('${catKey}')">
+                        
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-bold ${catBgClass}">
+                                ${category.kategori.substring(0, 2)}
+                            </div>
+                            <div class="text-left">
+                                <div class="font-bold text-gray-700 text-xs">${category.kategori}</div>
+                                <div class="text-[10px] text-gray-400">${category.species_count} Species</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center gap-3">
+                            <div class="text-right">
+                                 <div class="font-bold text-gray-800 text-xs">
+                                    ${category.total_trees.toLocaleString('id-ID')} btg
+                                </div>
+                            </div>
+                            <svg id="${catKey}-icon" 
+                                class="w-4 h-4 text-gray-400 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}" 
+                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </button>
+                    
+                    <div id="${catKey}-detail" 
+                        class="${isExpanded ? '' : 'hidden'} bg-gray-50 border-t border-gray-100 p-2 space-y-1">
+                        
+                        ${species.length > 0 ? species.map(s => `
+                            <div class="flex items-center justify-between py-1.5 px-2 rounded hover:bg-white transition-colors border border-transparent hover:border-gray-200">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-gray-300"></div>
+                                    <span class="text-gray-600 text-xs font-medium">${s.nama}</span>
+                                </div>
+                                <span class="text-gray-500 text-[10px] font-mono">
+                                    ${s.total_trees.toLocaleString('id-ID')} btg
+                                </span>
+                            </div>
+                        `).join('') : '<div class="text-[10px] text-center text-gray-400 py-1">No detail available</div>'}
+                        
+                    </div>
+                </div>
+            `;
+        });
+        
+        detailsContainer.innerHTML = listHtml;
+    }
+    
+    /**
+     * Helper: Group linear species array into object by category
+     */
+    groupSpeciesByCategory(speciesArray) {
+        if (!Array.isArray(speciesArray)) return {};
+
+        return speciesArray.reduce((acc, species) => {
+            const cat = species.kategori;
+            if (!cat) return acc;
+
+            if (!acc[cat]) acc[cat] = [];
+            acc[cat].push(species);
+            return acc;
+        }, {});
     }
 
     /**
@@ -513,6 +900,7 @@ class DashboardChartRenderer {
      * Main empty state renderer
      */
     renderEmptyState(canvas, type, period = null, count = null, message = null, data = null) {
+        this.destroyExistingChart();
         this.prepareCanvas(canvas, (canvas, dimensions) => {
             const ctx = canvas.getContext('2d');
             if (!ctx) return;
@@ -547,6 +935,12 @@ class DashboardChartRenderer {
                 case 'indicator_no_data':
                     this.drawIndicatorNoDataState(ctx, dimensions, data);
                     break;
+                case 'no_planting_data':
+                    this.drawNoPlantingDataState(ctx, dimensions);
+                    break;
+                case 'no_data_for_category':
+                    this.drawNoCategoryDataState(ctx, dimensions, message);
+                    break;
                 default:
                     this.drawGenericState(ctx, dimensions, message || 'Tidak ada data');
             }
@@ -557,6 +951,13 @@ class DashboardChartRenderer {
      * Render error state
      */
     renderErrorState(canvas) {
+        if (type instanceof Error) {
+            error = type;
+            type = 'generic';
+        }
+
+        this.destroyExistingChart();
+
         this.prepareCanvas(canvas, (canvas, dimensions) => {
             const ctx = canvas.getContext('2d');
             if (!ctx) return;
@@ -670,6 +1071,27 @@ class DashboardChartRenderer {
         
         this.drawSubtitle(ctx, 'Coba ubah periode waktu atau', centerX, yOffset, width, '#3730a3');
         this.drawSubtitle(ctx, 'tambahkan data progres', centerX, yOffset + 20, width, '#3730a3');
+    }
+
+    /**
+     * Draw no planting data state
+     */
+    drawNoPlantingDataState(ctx, { centerX, centerY, width }) {
+        this.drawIcon(ctx, centerX, centerY - 60, '🌱', '#fef3c7', '#d97706', 40);
+        this.drawTitle(ctx, 'Belum Ada Data Penanaman', centerX, centerY - 5, width, '#92400e');
+        this.drawSubtitle(ctx, 'Belum ada aktivitas penanaman pohon', centerX, centerY + 25, width, '#a16207');
+        this.drawSubtitle(ctx, 'yang tercatat untuk lahan ini', centerX, centerY + 45, width, '#a16207');
+        this.drawHint(ctx, '💡 Tip: Mulai catat aktivitas penanaman pohon', centerX, centerY + 75, width, '#d97706');
+    }
+
+    /**
+     * Draw no category data state (filtered category has no data)
+     */
+    drawNoCategoryDataState(ctx, { centerX, centerY, width }, message) {
+        this.drawIcon(ctx, centerX, centerY - 50, '🔍', '#f3f4f6', '#6b7280', 35);
+        this.drawTitle(ctx, 'Tidak Ada Data', centerX, centerY, width, '#374151');
+        this.drawSubtitle(ctx, message || 'Tidak ada data untuk kategori ini', centerX, centerY + 30, width, '#6b7280');
+        this.drawSubtitle(ctx, 'Coba pilih kategori lain atau "Semua Kategori"', centerX, centerY + 50, width, '#6b7280');
     }
 
     /**
@@ -917,24 +1339,26 @@ class DashboardChartRenderer {
         const container = canvas.parentElement;
         if (!container) return;
 
+        canvas.style.height = '0px'; 
+        
+        // Get container dimensions
+        const rect = container.getBoundingClientRect();
+        
+        // Set canvas size
         canvas.style.width = '100%';
         canvas.style.height = '100%';
         
-        const rect = container.getBoundingClientRect();
-        const width = rect.width || 800;
-        const height = rect.height || 400;
-        
         const dpr = window.devicePixelRatio || 1;
-        canvas.width = width * dpr;
-        canvas.height = height * dpr;
+        canvas.width = rect.width * dpr;
+        canvas.height = rect.height * dpr;
         
         const ctx = canvas.getContext('2d');
         if (ctx) {
             ctx.scale(dpr, dpr);
         }
         
-        canvas._logicalWidth = width;
-        canvas._logicalHeight = height;
+        canvas._logicalWidth = rect.width;
+        canvas._logicalHeight = rect.height;
     }
 
     /**

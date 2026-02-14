@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Storage;
+use Clickbar\Magellan\Database\Eloquent\HasPostgisColumns;
+use Clickbar\Magellan\Data\Geometries\Point;
 
 class ProgresDokumentasi extends Model
 {
@@ -32,6 +34,18 @@ class ProgresDokumentasi extends Model
     protected $fillable = [
         'progres_id',
         'image_path',
+        'location',
+    ];
+
+    protected $casts = [
+        'location' => Point::class,
+    ];
+
+    protected $postgisColumns = [
+        'location' => [
+            'type' => 'geometry',
+            'srid' => 4326,
+        ],
     ];
 
     public function getImageUrlAttribute()

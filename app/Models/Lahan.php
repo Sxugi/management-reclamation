@@ -36,21 +36,31 @@ class Lahan extends Model
      */
     protected $fillable = [
         'nama_lahan',
-        'luas_lahan',   
+        'luas_lahan',
+        'luas_lahan_original',
         'tahun_awal',
         'tahun_akhir',
-        'pic_reklamasi',
+        'pic_id',
         'location',
-        'status',
+        'fase',
     ];
 
     protected $casts = [
         'location' => Point::class,
-        'luas_lahan' => 'decimal: 2',
+        'luas_lahan' => 'decimal:2',
+        'luas_lahan_original' => 'decimal:2',
         'tahun_awal' => 'integer',
         'tahun_akhir' => 'integer',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
+    ];
+
+    public const FASE = [
+        'BARU' => 'Lahan Baru',
+        'PERAWATAN' => 'Perawatan',
+        'REHAB' => 'Rehabilitasi',
+        'PENGAYAAN' => 'Pengayaan',
+        'SELESAI' => 'Selesai', 
     ];
 
     /**
@@ -119,6 +129,14 @@ class Lahan extends Model
     public function editableByUsers()
     {
         return $this->users()->wherePivotIn('role', ['owner', 'editor']);
+    }
+
+    /** 
+     * Get PIC (person in charge) user
+     */
+    public function pic(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'pic_id', 'user_id');
     }
 
     /**
@@ -257,7 +275,7 @@ class Lahan extends Model
      * @param string $role  'owner', 'editor', or 'viewer'
      * @return void
      */
-    public function assignUser($user, string $role = 'viewer'): void
+    public function assignUser($user, string $role = 'owner'): void
     {
         $userId = $user instanceof User ? $user->user_id : $user;
         
@@ -352,15 +370,23 @@ class Lahan extends Model
     }
 
     /**
-     * Scope: Get lahan by status
+     * Scope: Get lahan by fase
      * 
      * @param \Illuminate\Database\Eloquent\Builder $query
-     * @param string $status
+     * @param string $fase
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeByStatus(Builder $query, string $status): Builder
+    public function scopeByFase(Builder $query, string $fase): Builder
     {
-        return $query->whereRaw('LOWER(status) = ?', [strtolower($status)]);
+        return $query->where('fase', $fase);
+    }
+
+    /** 
+     * Scope: Get Active Lahan
+     */
+    public function scopeActive(Builder $query): Builder
+    {
+        return $query->where('fase', '!=', self::FASE['SELESAI']);
     }
 
     /**
@@ -369,8 +395,87 @@ class Lahan extends Model
      * @param \Illuminate\Database\Eloquent\Builder $query
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeActive(Builder $query): Builder
+    public function scopeArsip(Builder $query): Builder
     {
-        return $query->whereRaw('LOWER(status) = ?', ['active']);
+        return $query->where('fase', self::FASE['SELESAI']);
+    }
+
+    /**
+     * Get total luas area dari semua plot
+     * 
+     * @return float
+     */
+    public function getTotalLuasPlotAttribute(): float
+    {
+        return (float) $this->plots()->sum('luas_area');
+    }
+
+    /**
+     * Get sisa luas lahan yang tersedia
+     * 
+     * @return float
+     */
+    public function getSisaLuasAttribute(): float
+    {
+        $totalLuasPlot = $this->plots()->sum('luas_area');
+        return max(0, $this->luas_lahan - $totalLuasPlot);
+    }
+
+    /**
+     * Get persentase penggunaan lahan berdasarkan original
+     * 
+     * @return float
+     */
+    public function getPersentasePenggunaanAttribute(): float
+    {
+        $baseline = $this->luas_lahan_original ?? $this->luas_lahan;
+        
+        if ($baseline <= 0) {
+            return 0;
+        }
+
+        $totalLuasPlot = $this->plots()->sum('luas_area');
+        return round(($totalLuasPlot / $baseline) * 100, 2);
+    }
+
+    /**
+     * Check if luas lahan has been expanded from original
+     * 
+     * @return bool
+     */
+    public function isLuasExpanded(): bool
+    {
+        return $this->luas_lahan > ($this->luas_lahan_original ?? $this->luas_lahan);
+    }
+
+    /**
+     * Get selisih antara current luas dengan original
+     * 
+     * @return float
+     */
+    public function getSelisihLuasAttribute(): float
+    {
+        return $this->luas_lahan - ($this->luas_lahan_original ?? $this->luas_lahan);
+    }
+
+    /**
+     * Get status luas lahan
+     * 
+     * @return string 'normal'|'expanded'|'available'
+     */
+    public function getStatusLuasAttribute(): string
+    {
+        $total = $this->total_luas_plot;
+        $original = $this->luas_lahan_original ?? $this->luas_lahan;
+
+        if ($total > $original) {
+            return 'expanded';
+        }
+
+        if ($total < $original) {
+            return 'available';
+        }
+
+        return 'normal';
     }
 }

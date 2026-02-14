@@ -108,8 +108,8 @@
             </a>
 
             @if(auth()->user()->role === 'user')
-                <button @click="open = false; $dispatch('open-modal', 'contact-admin-modal')" 
-                class="w-full flex items-center gap-3 px-4 py-3 text-sm text-darkslategray hover:bg-green-50 transition-colors cursor-pointer group text-left">
+                <a @click="open = false; $dispatch('open-modal', 'contact-admin-modal')" 
+                    class="flex items-center gap-3 px-4 py-3 text-sm text-darkslategray hover:bg-purple-50 transition-colors no-underline group cursor-pointer">
                     <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-green-100 group-hover:bg-green-200 transition-colors">
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" class="text-green-600" xmlns="http://www.w3.org/2000/svg">
                             <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -122,8 +122,24 @@
                     <svg class="w-4 h-4 text-gray-400 group-hover:text-darkslategray group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
                     </svg>
-                </button>
+                </a>
             @endif
+
+            <a href="{{ route('guide.index') }}" 
+               class="flex items-center gap-3 px-4 py-3 text-sm text-darkslategray hover:bg-orange-50 transition-colors no-underline group">
+                <div class="flex items-center justify-center w-8 h-8 rounded-lg bg-orange-100 group-hover:bg-orange-200 transition-colors">
+                    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" class="text-orange-600" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd" d="M0.75 1.74974V14.808L8.25 17.058V6.93824L9.75 6.48824V17.058L17.25 14.808V1.75049L15.9487 0.882739L9 2.96699L2.05125 0.881989L0.75 1.74974ZM14.25 5.14199L11.25 6.04199V7.60799L14.25 6.70799V5.14199Z" fill="currentColor"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <p class="font-medium">Guide</p>
+                    <p class="text-xs text-gray-500">System guide</p>
+                </div>
+                <svg class="w-4 h-4 text-gray-400 group-hover:text-darkslategray group-hover:translate-x-1 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                </svg>
+            </a>
 
             <!-- Settings Link (Optional) -->
             @if(auth()->user()->role === 'admin')

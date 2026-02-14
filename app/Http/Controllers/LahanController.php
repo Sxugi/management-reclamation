@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Lahan;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +44,9 @@ class LahanController extends Controller
         // Check if user can create lahan
         $this->authorize('create', Lahan::class);
 
-        return view('lahan.create');
+        $users = User::where('role', 'user')->orderBy('name')->get();
+
+        return view('lahan.create', compact('users'));
     }
 
     /**
@@ -59,8 +62,13 @@ class LahanController extends Controller
             // Validate the request data
             $validated = $request->validated();
             $validated['location'] = Point::make($validated['longitude'], $validated['latitude']);
+            $validated['luas_lahan_original'] = $validated['luas_lahan'];
 
             $lahan = Lahan::create($validated);
+
+            if (isset($validated['pic_id'])) {
+                $lahan->assignUser($validated['pic_id'], 'owner');
+            }
 
             DB::commit();
             return redirect()
@@ -95,9 +103,10 @@ class LahanController extends Controller
         // Check if user owns this lahan or is an admin
         $this->authorize('update', $lahan);
 
+        $users = User::where('role', 'user')->orderBy('name')->get();
         $point = $lahan->location;
 
-        return view('lahan.edit', compact('lahan', 'point'));
+        return view('lahan.edit', compact('lahan', 'point', 'users'));
     }
 
     /**
@@ -113,7 +122,16 @@ class LahanController extends Controller
             $validated = $request->validated();
             $validated['location'] = Point::make($validated['longitude'], $validated['latitude']);
 
+            $oldPicId = $lahan->pic_id;
             $lahan->update($validated);
+
+            // Update PIC if changed
+            if (isset($validated['pic_id']) && $validated['pic_id'] != $oldPicId) {
+                $lahan->assignUser($validated['pic_id'], 'owner');
+                if ($oldPicId) {
+                     $lahan->users()->updateExistingPivot($oldPicId, ['role' => 'viewer']);
+                }
+            }
 
             DB::commit();
 
@@ -156,32 +174,79 @@ class LahanController extends Controller
     }
 
     /**
-     * Update the specified lahan status.
+     * Update the specified lahan fase.
      */
-    public function updateStatus(Request $request, Lahan $lahan)
+    public function updateFase(Request $request, Lahan $lahan)
     {
         // Check if user owns this lahan or is an admin
         $this->authorize('update', $lahan);
 
         $validated = $request->validate([
-            'status' => 'required|in:Active,Non - Active,Finished',
+            'fase' => ['required', 'string', \Illuminate\Validation\Rule::in(\App\Models\Lahan::FASE)],
         ]);
         
         DB::beginTransaction();
         try {
-            $lahan->update(['status' => $validated['status']]);
+            $lahan->update(['fase' => $validated['fase']]);
 
             DB::commit();
 
             return redirect()
                 ->back()
-                ->with('success', 'Status lahan berhasil diperbarui.');
+                ->with('success', "Fase lahan berhasil diperbarui menjadi {$validated['fase']}.");
 
         } catch (\Exception $e) {
             DB::rollBack();
             \Log::error('Failed to update lahan status: ' . $e->getMessage());
             
             return back()->with('error', 'Gagal memperbarui status:  ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get monitoring trend data for a given lahan and jenis pohon
+     */
+    public function getMonitoringTrend(Lahan $lahan, Request $request)
+    {
+        $jenisPohonId = $request->input('jenis_pohon_id');
+        
+        if (!$jenisPohonId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Jenis pohon ID is required'
+            ], 400);
+        }
+
+        try {
+            $trendData = \App\Services\MonitoringService::getCachedMonitoringTrend($lahan, $jenisPohonId);
+            
+            $jenisPohon = \App\Models\JenisPohon::find($jenisPohonId);
+            
+            return response()->json([
+                'success' => true,
+                'jenis_pohon' => [
+                    'id' => $jenisPohon->jenis_pohon_id,
+                    'nama' => $jenisPohon->nama_pohon,
+                    'kategori' => $jenisPohon->kategori,
+                ],
+                'lahan' => [
+                    'id' => $lahan->lahan_id,
+                    'nama' => $lahan->nama_lahan,
+                ],
+                'trend_data' => $trendData
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error getting monitoring trend', [
+                'lahan_id' => $lahan->lahan_id,
+                'jenis_pohon_id' => $jenisPohonId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch trend data'
+            ], 500);
         }
     }
 }

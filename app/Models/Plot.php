@@ -5,7 +5,10 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Clickbar\Magellan\Data\Geometries\Polygon;
+use Illuminate\Support\Str;
 
 class Plot extends Model
 {
@@ -31,6 +34,7 @@ class Plot extends Model
      * @var array
      */
     protected $fillable = [
+        'uuid',
         'lahan_id',
         'nama_plot',
         'luas_area',
@@ -47,6 +51,23 @@ class Plot extends Model
         'luas_area' => 'float',
     ];
 
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted()
+    {
+        static::creating(function ($plot) {
+            if (empty($plot->uuid)) {
+                $plot->uuid = (string) Str::uuid();
+            }
+        });
+    }
+
+    /**
+     * Get the coordinates of the polygon as an array.
+     *
+     * @return array
+     */
     public function getCoordinatesAttribute()
     {
         if (!$this->polygon) {
@@ -91,5 +112,10 @@ class Plot extends Model
     public function activityLogs()
     {
         return $this->hasMany(ActivityLog::class, 'plot_id', 'plot_id');
+    }
+
+    public function handover(): HasOne
+    {
+        return $this->hasOne(PlotHandover::class, 'plot_id', 'plot_id');
     }
 }

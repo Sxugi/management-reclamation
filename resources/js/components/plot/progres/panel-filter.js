@@ -36,6 +36,7 @@ class ProgresReklamasiFilterPanel {
         document.getElementById('startDate').value = '';
         document.getElementById('endDate').value = '';
         document.getElementById('category').value = '';
+        document.getElementById('activity').value = '';
         document.getElementById('hasDokumentasi').checked = false;
 
         const form = document.getElementById('filterForm');

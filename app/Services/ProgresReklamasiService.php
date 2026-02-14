@@ -3,6 +3,9 @@
 namespace App\Services;
 
 use App\Models\Plot;
+use App\Models\Pohon;
+use App\Models\JenisPohon;
+use App\Models\DataPohonRealisasi;
 use App\Models\ProgresReklamasi;
 use App\Models\PlotProgres;
 use App\Models\ProgresSnapshot;
@@ -12,6 +15,7 @@ use App\Models\ProgresDokumentasi;
 use App\Models\IndikatorProgresReklamasi;
 use App\Models\TargetProgresReklamasi;
 use App\Models\KategoriAktivitas;
+use App\Models\JenisAktivitas;
 use App\Models\ActivityLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,12 +26,14 @@ use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\StreamedResponse;
+use Clickbar\Magellan\Data\Geometries\Point;
 
 class ProgresReklamasiService
 {
     protected static array $allowedSorts = [
         'tanggal',
         'kategori',
+        'jenis_aktivitas_id',
     ];
 
     /**
@@ -37,6 +43,29 @@ class ProgresReklamasiService
     {
         $kategori = KategoriAktivitas::all();
         return $kategori->pluck('label', 'kategori_id')->toArray();
+    }
+
+    /**
+     * Get activity type options for form dropdowns
+     */
+    public static function getJenisAktivitasOptions(): array
+    {
+        $jenisAktivitas = JenisAktivitas::all();
+        return $jenisAktivitas->pluck('label', 'jenis_aktivitas_id')->toArray();
+    }
+
+    /**
+     * Get existing 'jenis_pohon_id' field value for a given progress record
+     */
+    private function getExistingJenisPohonId(int $progressId): ?int
+    {
+        $val = DB::table('progres_field_values as pfv')
+            ->join('field_definitions as fd', 'pfv.field_definition_id', '=', 'fd.field_definition_id')
+            ->where('pfv.progres_id', $progressId)
+            ->where('fd.field_key', 'jenis_pohon_id')
+            ->value('pfv.field_value');
+            
+        return $val ? (int)$val : null;
     }
 
     /**
@@ -74,6 +103,16 @@ class ProgresReklamasiService
             if ($kategoriId) {
                 $query->whereHas('jenisAktivitas', function($q) use ($kategoriId) {
                     $q->where('kategori_id', $kategoriId);
+                });
+            }
+        }
+
+        if ($request->filled('activity')) {
+            $label = $request->activity;
+            $jenisAktivitasId = JenisAktivitas::where('label', $label)->value('jenis_aktivitas_id');
+            if ($jenisAktivitasId) {
+                $query->whereHas('jenisAktivitas', function($q) use ($jenisAktivitasId) {
+                    $q->where('jenis_aktivitas_id', $jenisAktivitasId);
                 });
             }
         }
@@ -116,6 +155,7 @@ class ProgresReklamasiService
                $request->filled('startDate') ||
                $request->filled('endDate') ||
                $request->filled('category') ||
+               $request->filled('activity') ||
                $request->filled('hasDokumentasi');
     }
 
@@ -145,6 +185,7 @@ class ProgresReklamasiService
         // Process all progress records for the plot
         $progressList = ProgresReklamasi::with(['fieldValues.fieldDefinition'])
             ->where('plot_id', $plot->plot_id)
+            ->whereNotNull('indikator_id')
             ->get();
 
         // Aggregate values based on configured aggregation type
@@ -463,6 +504,7 @@ class ProgresReklamasiService
         $progressList = ProgresReklamasi::with(['fieldValues.fieldDefinition'])
             ->where('plot_id', $plot->plot_id)
             ->where('tanggal', '<=', $date)
+            ->whereNotNull('indikator_id')
             ->get();
 
         // Aggregate values using configured aggregation methods
@@ -579,6 +621,19 @@ class ProgresReklamasiService
                 // Update progress calculations and snapshots
                 self::updatePlotProgress($plot, $requestData['tanggal']);
 
+                if (isset($requestData['jenis_pohon_id'])) {
+                    // Clear monitoring cache
+                    \App\Services\MonitoringService::clearCache(
+                        $plot->lahan, 
+                        (int)$requestData['jenis_pohon_id']
+                    );
+                }
+
+                if (isset($requestData['jenis_pohon_id'])) {
+                    $year = \Carbon\Carbon::parse($requestData['tanggal'])->year;
+                    $this->syncInventoryPohon($plot->plot_id, (int)$requestData['jenis_pohon_id'], $year);
+                }
+
                 return $progress;
             } catch (\Exception $e) {
                 Log::error("Failed to create progress record", [
@@ -599,8 +654,10 @@ class ProgresReklamasiService
         $oldActivityId = $progress->jenis_aktivitas_id;
         $newActivityId = $requestData['jenis_aktivitas_id'];
         $isCategoryChanged = $oldActivityId != $newActivityId;
+        $oldPohonId = $this->getExistingJenisPohonId($progress->progres_id);
+        $oldYear = \Carbon\Carbon::parse($progress->tanggal)->year;
 
-        return DB::transaction(function() use ($progress, $requestData, $oldActivityId, $newActivityId, $isCategoryChanged) {
+        return DB::transaction(function() use ($progress, $requestData, $oldActivityId, $newActivityId, $isCategoryChanged, $oldPohonId, $oldYear) {
             try {
                 // Clean up incompatible field values if category changed
                 if ($isCategoryChanged) {
@@ -641,6 +698,25 @@ class ProgresReklamasiService
                 // Recalculate progress and snapshots
                 self::updatePlotProgress($progress->plot, $requestData['tanggal']);
 
+                if (isset($requestData['jenis_pohon_id'])) {
+                    // Clear monitoring cache
+                    \App\Services\MonitoringService::clearCache(
+                        $progress->plot->lahan, 
+                        (int)$requestData['jenis_pohon_id']
+                    );
+                }
+
+                $newPohonId = isset($requestData['jenis_pohon_id']) ? (int)$requestData['jenis_pohon_id'] : null;
+                $newYear = \Carbon\Carbon::parse($requestData['tanggal'])->year;
+
+                if ($newPohonId) {
+                    $this->syncInventoryPohon($progress->plot_id, $newPohonId, $newYear);
+                }
+
+                if ($oldPohonId && ($oldPohonId !== $newPohonId || $oldYear !== $newYear)) {
+                    $this->syncInventoryPohon($progress->plot_id, $oldPohonId, $oldYear);
+                }
+
                 return $progress;
             } catch (\Exception $e) {
                 Log::error("Failed to update progress record", [
@@ -658,18 +734,16 @@ class ProgresReklamasiService
      */
     public function delete(ProgresReklamasi $progress): void
     {
-        DB::transaction(function() use ($progress) {
-            $plotId = $progress->plot_id;
-            $progressId = $progress->progres_id;
+        $plotId = $progress->plot_id;
+        $pohonId = $this->getExistingJenisPohonId($progress->progres_id);
+        $year = \Carbon\Carbon::parse($progress->tanggal)->year;
 
+        DB::transaction(function() use ($progress, $plotId, $pohonId, $year) {
             try {
-                $deletedFilesCount = 0;
-
                 // Remove files from storage and database records
                 foreach ($progress->dokumentasi as $documentation) {
                     if ($documentation->image_path && Storage::disk('public')->exists($documentation->image_path)) {
                         Storage::disk('public')->delete($documentation->image_path);
-                        $deletedFilesCount++;
                     }
                     $documentation->delete();
                 }
@@ -690,8 +764,20 @@ class ProgresReklamasiService
                     $description
                 );
 
+                if ($pohonId) {
+                    $this->syncInventoryPohon($plotId, $pohonId, $year);
+                }
+
                 // Recalculate progress after deletion
                 self::updatePlotProgress($progress->plot, $progress->tanggal);
+
+                if (isset($requestData['jenis_pohon_id'])) {
+                    // Clear monitoring cache
+                    \App\Services\MonitoringService::clearCache(
+                        $progress->plot->lahan, 
+                        (int)$requestData['jenis_pohon_id']
+                    );
+                }
             } catch (\Exception $e) {
                 Log::error("Failed to delete progress record", [
                     'progress_id' => $progressId,
@@ -709,6 +795,19 @@ class ProgresReklamasiService
     private function extractMainValueData(int $activityId, array $requestData): array
     {
         try {
+            // Get activity type
+            $jenisAktivitas = JenisAktivitas::find($activityId);
+            
+            // Check if this is a monitoring activity (NO indicator needed)
+            if ($jenisAktivitas && $this->isMonitoringActivity($jenisAktivitas->field)) {
+                // Monitoring activities don't have indicator_id
+                return [
+                    'value' => $this->extractMonitoringValue($jenisAktivitas->field, $requestData),
+                    'indikator_id' => null, // ← NULL for monitoring
+                    'source' => 'monitoring_activity'
+                ];
+            }
+            
             // Primary method: find field with indicator mapping
             $primaryField = FieldDefinition::where('jenis_aktivitas_id', $activityId)
                 ->whereNotNull('indicator_key')
@@ -756,6 +855,55 @@ class ProgresReklamasiService
     }
 
     /**
+     * Check if activity is monitoring type (doesn't require indicator)
+     */
+    private function isMonitoringActivity(string $activityField): bool
+    {
+        $monitoringActivities = [
+            'monitoring_survival_rate',
+            'monitoring_pertumbuhan',
+            'monitoring_kualitas_air',
+            'monitoring_biodiversitas',
+        ];
+        
+        return in_array($activityField, $monitoringActivities);
+    }
+
+    /**
+     * Extract representative value for monitoring activities
+     * Since monitoring doesn't have targets, we use a representative metric
+     */
+    private function extractMonitoringValue(string $activityField, array $requestData): float
+    {
+        switch ($activityField) {
+            case 'monitoring_survival_rate':
+                // Calculate survival rate as value
+                $hidup = (int)($requestData['jumlah_bibit_hidup'] ?? 0);
+                $mati = (int)($requestData['jumlah_bibit_mati'] ?? 0);
+                $total = $hidup + $mati;
+                
+                return $total > 0 ? round(($hidup / $total) * 100, 2) : 0;
+                
+            case 'monitoring_pertumbuhan':
+                // Use average height as representative value
+                return (float)($requestData['tinggi_tanaman_rata'] ?? 0);
+                
+            case 'monitoring_kualitas_air':
+                // Use pH or main parameter
+                return (float)($requestData['ph'] ?? 0);
+                
+            default:
+                // Default: find first numeric value
+                foreach ($requestData as $key => $value) {
+                    if (is_numeric($value) && (float)$value > 0) {
+                        return (float)$value;
+                    }
+                }
+                return 0;
+        }
+    }
+
+    /**
      * Find indicator ID by matching name with indicators table
      */
     private function findIndicatorIdByName(?string $indicatorName): ?int
@@ -782,7 +930,6 @@ class ProgresReklamasiService
     {
         try {
             $fieldDefinitions = FieldDefinition::where('jenis_aktivitas_id', $activityId)->get();
-            $savedCount = 0;
 
             foreach ($fieldDefinitions as $fieldDef) {
                 if (!array_key_exists($fieldDef->field_key, $requestData)) continue;
@@ -796,7 +943,6 @@ class ProgresReklamasiService
                         'field_definition_id' => $fieldDef->field_definition_id,
                         'field_value' => $fieldValue,
                     ]);
-                    $savedCount++;
                 }
             }
 
@@ -856,24 +1002,32 @@ class ProgresReklamasiService
         if (empty($requestData['dokumentasi'])) return;
 
         try {
-            $savedCount = 0;
-
             foreach ($requestData['dokumentasi'] as $uploadedFile) {
                 if (!$uploadedFile || !$uploadedFile->isValid()) continue;
 
                 try {
                     // Store file in public disk under organized folder
                     $filePath = $uploadedFile->store('progres_dokumentasi', 'public');
+
+                    // Extract GPS coordinates if needed
+                    $gps = $this->extractGpsCoordinates($uploadedFile->getRealPath());
+
+                    $locationPoint = null;
+
+                    if ($gps && isset($gps['lat']) && isset($gps['lng'])) {
+                        $locationPoint = Point::make($gps['lng'], $gps['lat']);
+                    }
                     
                     ProgresDokumentasi::create([
                         'progres_id' => $progressId,
                         'image_path' => $filePath,
+                        'location'   => $locationPoint,
                     ]);
-                    $savedCount++;
 
                 } catch (\Exception $fileException) {
                     Log::error("Error saving individual file", [
                         'progress_id' => $progressId,
+                        'file_name' => $uploadedFile->getClientOriginalName(),
                         'error' => $fileException->getMessage()
                     ]);
                 }
@@ -885,6 +1039,60 @@ class ProgresReklamasiService
                 'error' => $e->getMessage()
             ]);
         }
+    }
+
+    /**
+     *  Extract GPS coordinates from image EXIF data
+     */
+    private function extractGpsCoordinates($filePath)
+    {
+        try {
+            // Cek apakah file adalah gambar dan fungsi exif tersedia
+            if (!function_exists('exif_read_data')) return null;
+            
+            // Baca EXIF
+            // '@' digunakan untuk suppress error jika format gambar tidak support EXIF
+            $exif = @exif_read_data($filePath);
+
+            if (!$exif || !isset($exif['GPSLatitude'], $exif['GPSLongitude'], $exif['GPSLatitudeRef'], $exif['GPSLongitudeRef'])) {
+                return null;
+            }
+
+            // Konversi DMS (Degrees Minutes Seconds) ke Decimal
+            $lat = $this->gpsToDecimal($exif['GPSLatitude'], $exif['GPSLatitudeRef']);
+            $lng = $this->gpsToDecimal($exif['GPSLongitude'], $exif['GPSLongitudeRef']);
+
+            return ['lat' => $lat, 'lng' => $lng];
+
+        } catch (\Exception $e) {
+            return null; // Abaikan error, lanjut simpan file tanpa koordinat
+        }
+    }
+
+    /**
+     * Convert GPS coordinates from DMS format to Decimal format
+     */
+    private function gpsToDecimal($coordinate, $hemisphere)
+    {
+        for ($i = 0; $i < 3; $i++) {
+            $part = explode('/', $coordinate[$i]);
+            if (count($part) == 1) {
+                $coordinate[$i] = $part[0];
+            } else if (count($part) == 2) {
+                $coordinate[$i] = floatval($part[0]) / floatval($part[1]);
+            } else {
+                $coordinate[$i] = 0;
+            }
+        }
+
+        $decimal = $coordinate[0] + ($coordinate[1] / 60) + ($coordinate[2] / 3600);
+
+        // Jika S (South) atau W (West), buat negatif
+        if ($hemisphere == 'S' || $hemisphere == 'W') {
+            $decimal = $decimal * -1;
+        }
+
+        return $decimal;
     }
 
     /**
@@ -910,8 +1118,6 @@ class ProgresReklamasiService
                 ->orderBy('progres_dokumentasi_id')
                 ->get();
 
-            $deletedCount = 0;
-
             // Remove files by index
             foreach ($removedIndices as $index) {
                 if (!isset($existingDocuments[$index])) continue;
@@ -925,7 +1131,6 @@ class ProgresReklamasiService
 
                 // Remove database record
                 $document->delete();
-                $deletedCount++;
             }
         } catch (\Exception $e) {
             Log::error("Error handling removed documentation files", [
@@ -980,11 +1185,77 @@ class ProgresReklamasiService
     }
 
     /**
+     * Synchronize inventory data for specific tree type and year
+     * Calculates total planted trees from daily reports and updates inventory
+     */
+    public function syncInventoryPohon(int $plotId, int $jenisPohonId, $year): void
+    {
+        // Config whitelist
+        $allowedActivities = [
+            'penanaman_pionir',
+            'penanaman_lokal',
+            'penanaman_mpts',
+            'penyulaman'
+        ];
+
+        $allowedFields = [
+            'jumlah_bibit', 
+            'jumlah_tanaman'
+        ];
+
+        // Query total dari EAV
+        $total = DB::table('progres')
+            ->join('jenis_aktivitas', 'progres.jenis_aktivitas_id', '=', 'jenis_aktivitas.jenis_aktivitas_id')
+            ->join('progres_field_values as fv_pohon', 'progres.progres_id', '=', 'fv_pohon.progres_id')
+            ->join('field_definitions as fd_pohon', 'fv_pohon.field_definition_id', '=', 'fd_pohon.field_definition_id')
+            ->join('progres_field_values as fv_jumlah', 'progres.progres_id', '=', 'fv_jumlah.progres_id')
+            ->join('field_definitions as fd_jumlah', 'fv_jumlah.field_definition_id', '=', 'fd_jumlah.field_definition_id')
+            ->where('progres.plot_id', $plotId)
+            ->whereYear('progres.tanggal', $year)
+            ->whereIn('jenis_aktivitas.field', $allowedActivities)
+            ->where('fd_pohon.field_key', 'jenis_pohon_id')
+            ->where('fv_pohon.field_value', $jenisPohonId)
+            ->whereIn('fd_jumlah.field_key', $allowedFields)
+            ->sum(DB::raw('CAST(fv_jumlah.field_value AS DECIMAL)'));
+        
+        $plot = DB::table('plot')->where('plot_id', $plotId)->first();
+        if (!$plot) return;
+
+        $pohon = Pohon::firstOrCreate([
+            'lahan_id' => $plot->lahan_id,
+            'jenis_pohon_id' => $jenisPohonId
+        ]);
+
+        if ($total > 0) {
+            // Update realisasi
+            DataPohonRealisasi::updateOrCreate(
+                [
+                    'pohon_id' => $pohon->pohon_id,
+                    'plot_id'  => $plotId,
+                    'tahun'    => $year
+                ],
+                [
+                    'jumlah_batang' => $total
+                ]
+            );
+        } else {
+            // Delete if zero
+            DataPohonRealisasi::where([
+                'pohon_id' => $pohon->pohon_id,
+                'plot_id'  => $plotId,
+                'tahun'    => $year
+            ])->delete();
+        }
+    }
+
+    /**
      * Export progres reklamasi to Excel
      */
     public function exportExcel(Plot $plot)
     {
         $plot->load('lahan');
+
+        $pohonMap = JenisPohon::pluck('nama_pohon', 'jenis_pohon_id')->toArray();
 
         // Config Mapping Field
         $fieldMap = [];
@@ -1076,7 +1347,14 @@ class ProgresReklamasiService
                 $fieldKey = $fv->fieldDefinition->field_key;
                 $label = $fv->fieldDefinition->label ?? ($fieldMap[$fieldKey]['label'] ?? $fieldKey);
                 $satuan = $fv->fieldDefinition->unit ?? ($fieldMap[$fieldKey]['satuan'] ?? '');
-                $detailString[] = "- {$label}: {$fv->field_value} {$satuan}";
+                $value = $fv->field_value;
+                if ($fv->fieldDefinition->field_type === 'dynamic_select') {
+                    // Map pohon ID to name
+                    $value = $pohonMap[$value] ?? $value;
+                } elseif ($fieldKey === 'metode_sampling') {
+                    $value = ucwords(str_replace('_', ' ', $value));
+                }
+                $detailString[] = "- {$label}: {$value} {$satuan}";
             }
             $formattedDetails = implode("\n", $detailString);
             if (!empty($formattedDetails)) $formattedDetails .= "\n"; 

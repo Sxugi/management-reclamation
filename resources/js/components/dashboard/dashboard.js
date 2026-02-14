@@ -43,6 +43,7 @@ class ReclamationDashboard {
                 await this.chartFilter.init();
             }
             this.bindEvents();
+            this.setupProgressHoverInteraction();
             
             console.log('Dashboard initialized successfully');
         } catch (e) {
@@ -77,19 +78,141 @@ class ReclamationDashboard {
 
     updateStatsCards(stats) {
         try {
-            const elements = {
-                'jumlah-blok': stats.jumlah_blok_lahan ?? '-',
-                'total-progres': (Math.round(stats.total_progres_reklamasi || 0)) + '%',
-                'progres-hari-ini': (Math.round(stats.progres_hari_ini?.today_percent || 0)) + '%',
-                'blok-selesai': stats.jumlah_blok_selesai ?? 0
-            };
+            // Jumlah Blok Lahan
+            this.updateElement('jumlah-blok', stats.jumlah_blok_lahan ?? '-');
+            
+            // Total Luas Area
+            const totalLuas = stats.total_luas_area;
+            this.updateElement('total-luas-area', 
+                totalLuas ? `${this.formatDecimal(totalLuas, 2)} ha` : '- ha'
+            );
+            
+            // Progres Hari Ini (DELTA)
+            this.updateDailyProgress(stats.progres_hari_ini);
+            
+            // Aktivitas Terakhir
+            const aktivitasTerakhir = stats.aktivitas_terakhir ?? 0;
+            this.updateElement('aktivitas-terakhir', 
+                this.formatRelativeTime(aktivitasTerakhir)
+            );
 
-            Object.entries(elements).forEach(([id, value]) => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = value;
-            });
+            // Total Bibit Ditanam
+            const totalBibit = stats.revegetasi?.total_bibit_ditanam;
+            this.updateElement('total-bibit', 
+                totalBibit ? `${this.formatNumber(totalBibit)} btg` : '- btg'
+            );
+
+            // Total Berat Benih Cover Crops
+            const beratBenih = stats.revegetasi?.total_berat_benih_cover_crops;
+            this.updateElement('total-benih-cover', 
+                beratBenih ? `${this.formatDecimal(beratBenih, 2)} kg` : '- kg'
+            );
+            
+            // Area Bervegetasi
+            const areaBervegetasi = stats.revegetasi?.total_area_bervegetasi;
+            this.updateElement('area-bervegetasi', 
+                areaBervegetasi ? `${this.formatDecimal(areaBervegetasi, 2)} ha` : '- ha'
+            );
+
+            // Persentase Area Bervegetasi (Coverage)
+            const persentaseArea = stats.revegetasi?.persentase_area_bervegetasi;
+            this.updateElement('persentase-area-bervegetasi', 
+                persentaseArea !== undefined ? `${this.formatDecimal(persentaseArea, 1)}%` : '-%'
+            );
+
+            // Total Kompos/Organik
+            const totalKompos = stats.input_resources?.total_kompos;
+            this.updateElement('total-kompos', 
+                totalKompos ? `${this.formatNumber(totalKompos)} kg` : '- kg'
+            );
+            
+            // Total Pupuk Anorganik
+            const totalPupuk = stats.input_resources?.total_pupuk_anorganik;
+            this.updateElement('total-pupuk', 
+                totalPupuk ? `${this.formatNumber(totalPupuk)} kg` : '- kg'
+            );
+
+            // Total Aktivitas Pemeliharaan
+            const totalAktivitas = stats.maintenance?.total_aktivitas_pemeliharaan;
+            this.updateElement('total-aktivitas', 
+                totalAktivitas !== undefined ? `${totalAktivitas} kali` : '- kali'
+            );
+
+            // Total Tanaman Disulam
+            const totalTanamanDisulam = stats.maintenance?.total_tanaman_disulam;
+            this.updateElement('total-tanaman-disulam', 
+                totalTanamanDisulam !== undefined ? `${totalTanamanDisulam} batang` : '- batang'
+            );
+            
+            // Tinggi Tanaman Rata-rata
+            const tinggiRata = stats.monitoring?.tinggi_tanaman_rata;
+            this.updateElement('tinggi-rata', 
+                tinggiRata ? `${Math.round(tinggiRata)} cm` : '-'
+            );
+
+            // Survival Rate
+            const survivalRate = stats.monitoring?.survival_rate_rata;
+            this.updateElement('survival-rate', 
+                survivalRate ? `${this.formatDecimal(survivalRate, 1)}%` : '-'
+            );
         } catch (e) {
-            console.warn('Error updating stats cards:', e);
+            console.error('Error updating stats cards:', e);
+            this.showStatsError();
+        }
+    }
+
+    updateDailyProgress(dailyProgress) {
+        if (!dailyProgress) {
+            this.updateElement('progres-hari-ini', '-%');
+            this.updateElement('progres-message', 'Memuat...');
+            return;
+        }
+
+        const delta = dailyProgress.delta_percent || 0;
+        const progressEl = document.getElementById('progres-hari-ini');
+        const messageEl = document.getElementById('progres-message');
+        const badgeEl = document.getElementById('activity-badge');
+        const detailEl = document.getElementById('today-total');
+
+        if (!progressEl) {
+            console.warn('Progress element not found');
+            return;
+        }
+
+        // Format delta with sign
+        const sign = delta > 0 ? '+' : (delta < 0 ? '' : '');
+        const displayValue = `${sign}${Math.abs(delta).toFixed(1)}%`;
+        
+        // Determine color based on delta
+        const colorClass = delta > 0 
+            ? 'text-green-600' 
+            : (delta < 0 ? 'text-red-600' : 'text-gray-400');
+        
+        // Update main value
+        progressEl.textContent = displayValue;
+        progressEl.className = `stat-value-large ${colorClass}`;
+        
+        // Update message
+        if (messageEl) {
+            messageEl.textContent = dailyProgress.message || 'Tidak ada perubahan';
+        }
+        
+        // Update activity badge
+        if (badgeEl) {
+            if (dailyProgress.has_activity_today) {
+                badgeEl.classList.remove('hidden');
+                badgeEl.innerHTML = `
+                    <span class="inline-block w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse mr-1"></span>
+                    ${dailyProgress.activity_count || 0} Aktivitas
+                `;
+            } else {
+                badgeEl.classList.add('hidden');
+            }
+        }
+        
+        // Update detail (total progress) for hover
+        if (detailEl && dailyProgress.today_total !== undefined) {
+            detailEl.textContent = dailyProgress.today_total.toFixed(1);
         }
     }
 
@@ -364,6 +487,7 @@ class ReclamationDashboard {
     bindEvents() {
         this.bindChartViewSelector();
         this.bindIndividualBlocksToggle();
+        this.bindTreeCategorySelector();
         this.bindPeriodSelector();
         this.bindIndicatorSelector();
         this.bindBlockSelector();
@@ -416,6 +540,19 @@ class ReclamationDashboard {
         });
     }
 
+    bindTreeCategorySelector() {
+        const treeCategorySelector = document.getElementById('tree-category');
+        if (!treeCategorySelector) return;
+
+        treeCategorySelector.addEventListener('change', async () => {
+            const view = document.getElementById('chart-view')?.value;
+            if (view === 'planted') {
+                const category = treeCategorySelector.value;
+                await this.chartRenderer.renderChart('main-chart', 'planted', category);
+            }
+        });
+    }
+
     bindBlockSelector() {
         const blockSelector = document.getElementById('block-selector');
         if (!blockSelector) return;
@@ -438,14 +575,17 @@ class ReclamationDashboard {
         const indicatorSelector = document.getElementById('indicator-selector');
         const blockSelector = document.getElementById('block-selector');
         const individualBlocksToggle = document.getElementById('individual-blocks-toggle');
-        const chartTitle = document.getElementById('chart-title');
         const periodSelector = document.getElementById('chart-period');
+        const treeCategorySelector = document.getElementById('tree-category');
+        const chartTitle = document.getElementById('chart-title');
+        const plantedDetails = document.getElementById('planted-details');
         
         // Update title based on view
         if (chartTitle) {
             const titles = {
                 'overall': 'Grafik Progres Keseluruhan',
                 'indicator': 'Grafik Progres Indikator',
+                'planted': 'Sebaran Pohon Tertanam per Kategori',
             };
             chartTitle.textContent = titles[view] || 'Grafik Progres';
         }
@@ -454,10 +594,18 @@ class ReclamationDashboard {
         this.toggleElementVisibility(indicatorSelector, view === 'indicator');
         this.toggleElementVisibility(blockSelector, view === 'indicator');
         this.toggleElementVisibility(individualBlocksToggle, view === 'overall');
-        this.toggleElementVisibility(periodSelector, true);
+        this.toggleElementVisibility(periodSelector, view !== 'planted');
+        this.toggleElementVisibility(treeCategorySelector, view === 'planted'); 
+        this.toggleElementVisibility(plantedDetails, view === 'planted'); 
 
-        const period = document.getElementById('chart-period')?.value || '30days';
-        this.chartRenderer.renderChart('main-chart', view, period);
+        // Render appropriate chart
+        if (view === 'planted') {
+            const category = treeCategorySelector?.value || 'all';
+            this.chartRenderer.renderChart('main-chart', 'planted', category);
+        } else {
+            const period = periodSelector?.value || '30days';
+            this.chartRenderer.renderChart('main-chart', view, period);
+        }
     }
 
     async handleIndicatorChange(indicatorSelector) {
@@ -551,6 +699,108 @@ class ReclamationDashboard {
         }
         
         window.dashboardInstance = null;
+    }
+
+    // Helper Methods
+    updateElement(elementId, value) {
+        const element = document.getElementById(elementId);
+        if (element) {
+            element.textContent = value;
+        } else {
+            console.warn(`Element not found: ${elementId}`);
+        }
+    }
+
+    formatNumber(num) {
+        if (num === null || num === undefined || isNaN(num)) {
+            return '0';
+        }
+        return new Intl.NumberFormat('id-ID').format(Math.round(num));
+    }
+
+    formatDecimal(num, decimals = 2) {
+        if (num === null || num === undefined || isNaN(num)) {
+            return '0';
+        }
+        return parseFloat(num).toFixed(decimals);
+    }
+
+    formatRelativeTime(dateString) {
+        if (!dateString) {
+            return '-';
+        }
+        
+        try {
+            const date = new Date(dateString);
+            const now = new Date();
+            
+            // Reset time to midnight for accurate day calculation
+            const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+            const nowOnly = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            const diffMs = nowOnly - dateOnly;
+            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+            
+            // Format based on difference
+            if (diffDays === 0) {
+                return 'Hari ini';
+            } else if (diffDays === 1) {
+                return 'Kemarin';
+            } else if (diffDays < 7) {
+                return `${diffDays} hari lalu`;
+            } else if (diffDays < 30) {
+                const weeks = Math.floor(diffDays / 7);
+                return `${weeks} minggu lalu`;
+            } else if (diffDays < 365) {
+                const months = Math.floor(diffDays / 30);
+                return `${months} bulan lalu`;
+            } else {
+                // For old dates, show actual date
+                return date.toLocaleDateString('id-ID', { 
+                    day: 'numeric', 
+                    month: 'short',
+                    year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined
+                });
+            }
+        } catch (e) {
+            console.error('Error formatting date:', dateString, e);
+            return '-';
+        }
+    }
+
+    showStatsError() {
+        const errorElements = [
+            'jumlah-blok', 'total-luas-area', 'progres-hari-ini', 'blok-selesai',
+            'total-bibit', 'area-bervegetasi', 'survival-rate',
+            'total-kompos', 'total-pupuk',
+            'total-aktivitas', 'tinggi-rata', 'persentase-area-bervegetasi', 'aktivitas-terakhir'
+        ];
+        
+        errorElements.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) {
+                el.textContent = '⚠️';
+                el.title = 'Error memuat data';
+            }
+        });
+    }
+
+    /**
+     * Setup hover interactions for progress card (show total on hover)
+     */
+    setupProgressHoverInteraction() {
+        const progressCard = document.getElementById('progres-hari-ini')?.parentElement;
+        const detailEl = document.getElementById('progres-detail');
+        
+        if (!progressCard || !detailEl) return;
+        
+        progressCard.addEventListener('mouseenter', () => {
+            detailEl.classList.remove('hidden');
+        });
+        
+        progressCard.addEventListener('mouseleave', () => {
+            detailEl.classList.add('hidden');
+        });
     }
 }
 

@@ -26,6 +26,9 @@
                 if(request('category')) {
                     $parts[] = 'Kategori: ' . e(request('category'));
                 }
+                if(request('activity')) {
+                    $parts[] = 'Jenis Aktivitas: ' . e(request('activity'));
+                }
                 if(request('hasDokumentasi')) {
                     $parts[] = 'Hanya yang ada dokumentasi';
                 }

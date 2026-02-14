@@ -5,7 +5,8 @@ export function FormProgresData(config = {}) {
         errors: config.errors || {},
         existingFiles: config.existingFiles || {},
         baseFields: config.baseFields || {},
-        data: config.data || {},
+        formData: config.data || {},
+        masterPohon: config.masterPohon || {},
         
         // Form state
         newFiles: {},
@@ -17,10 +18,52 @@ export function FormProgresData(config = {}) {
             fileType: 'image'
         },
 
+        // Monitoring survival rate state
+        monitoringHint: {
+            totalPlanted: null,
+            isLoading: false,
+            fetchedForJenisPohonId: null, 
+        },
+
+        // Field management
+        get currentFields() {
+            if (!this.kategori || !this.aktivitas) return {};
+            return this.categories[this.kategori]?.activities[this.aktivitas]?.fields || {};
+        },
+
+        get baseDateFields() {
+            const fields = this.baseFields;
+            return Object.fromEntries(
+                Object.entries(fields).filter(([key, field]) => field.type === 'date')
+            );
+        },
+
+        get baseNonDateFields() {
+            const fields = this.baseFields;
+            return Object.fromEntries(
+                Object.entries(fields).filter(([key, field]) => field.type !== 'date')
+            );
+        },
+
         // Initialize component
         init() {
+            console.log('FormProgresData initialized');
+            
             this.setupEventListeners();
             this.createModalContainer();
+
+            const allFields = { 
+                ...this.baseDateFields, 
+                ...this.baseNonDateFields 
+            };
+            
+            for (const key in allFields) {
+                if (this.formData[key] === undefined) {
+                    this.formData[key] = '';
+                }
+            }
+
+            this.setupMonitoringWatchers();
         },
 
         setupEventListeners() {
@@ -32,6 +75,30 @@ export function FormProgresData(config = {}) {
             });
         },
 
+        // Monitoring watchers
+        setupMonitoringWatchers() {
+            if (typeof this.$watch !== 'function') {
+                console.warn('Alpine.js $watch not available');
+                return;
+            }
+
+            // Watch ONLY jenis_pohon_id changes (fetch hint)
+            this.$watch('formData.jenis_pohon_id', (value, oldValue) => {
+                if (!this.isMonitoringActivity()) return;
+
+                // Fetch hint if changed
+                if (value && value !== this.monitoringHint.fetchedForJenisPohonId) {
+                    console.log('Fetching planted trees hint for:', value);
+                    this.fetchPlantedTreesHint(value);
+                } else if (!value) {
+                    // Clear hint if jenis_pohon cleared
+                    this.clearMonitoringHint();
+                }
+            });
+
+            // ✅ NO watchers for hidup/mati (backend will validate on submit)
+        },
+
         // Create modal container in DOM
         createModalContainer() {
             if (!document.getElementById('file-preview-modal')) {
@@ -40,6 +107,26 @@ export function FormProgresData(config = {}) {
                 modalContainer.style.display = 'none';
                 document.body.appendChild(modalContainer);
             }
+        },
+
+        // Helper to get tree options based on filter
+        getTreeOptions(filterKategori) {
+            // No filter, return all trees
+            if (!filterKategori) {
+                return Object.values(this.masterPohon).flat()
+                    .sort((a, b) => a.nama_pohon.localeCompare(b.nama_pohon));
+            }
+
+            // Handle Array of Strings
+            if (Array.isArray(filterKategori)) {
+                return filterKategori
+                    .flatMap(kategori => this.masterPohon[kategori] || [])
+                    .sort((a, b) => a.nama_pohon.localeCompare(b.nama_pohon));
+            }
+
+            // Handle Single String
+            return (this.masterPohon[filterKategori] || [])
+                .sort((a, b) => a.nama_pohon.localeCompare(b.nama_pohon));
         },
 
         // Error handling
@@ -252,36 +339,107 @@ export function FormProgresData(config = {}) {
                 .replace(/'/g, "&#039;");
         },
 
-        // Field management
-        get currentFields() {
-            if (!this.kategori || !this.aktivitas) return {};
-            return this.categories[this.kategori]?.activities[this.aktivitas]?.fields || {};
-        },
-
-        baseDateFields() {
-            const fields = this.baseFields;
-            return Object.fromEntries(Object.entries(fields).filter(([key, field]) => field.type === 'date'));
-        },
-
-        baseNonDateFields() {
-            const fields = this.baseFields;
-            return Object.fromEntries(Object.entries(fields).filter(([key, field]) => field.type !== 'date'));
-        },
-
         // Form validation
         validateForm() {
             // Add any client-side validation logic here
             return true;
         },
 
-        // Form submission
-        onSubmit() {
+        /**
+         * Check if current activity is monitoring
+         */
+        isMonitoringActivity() {
+            const aktivitas = this.aktivitas;
+            const monitoringActivities = [
+                'monitoring_survival_rate',
+                'monitoring_pertumbuhan'
+            ];
+            return monitoringActivities.includes(aktivitas);
+        },
+
+        /**
+         * Fetch planted trees hint (called ONCE per jenis_pohon selection)
+         */
+        async fetchPlantedTreesHint(jenisPohonId) {
+            if (!jenisPohonId || !this.isMonitoringActivity()) {
+                return;
+            }
+
+            // Skip if already fetched for this ID
+            if (jenisPohonId === this.monitoringHint.fetchedForJenisPohonId) {
+                console.log('Already fetched hint for jenis_pohon_id:', jenisPohonId);
+                return;
+            }
+
+            this.monitoringHint.isLoading = true;
+
+            try {
+                const plotId = this.getPlotIdFromUrl();
+                
+                if (!plotId) {
+                    throw new Error('Plot ID not found in URL');
+                }
+                
+                const url = `/plot/${plotId}/progres/planted-trees?jenis_pohon_id=${jenisPohonId}`;
+                
+                console.log('Fetching hint from:', url);
+                
+                const response = await fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Cache the result
+                    this.monitoringHint.totalPlanted = data.total;
+                    this.monitoringHint.fetchedForJenisPohonId = jenisPohonId;
+                    
+                    console.log(`Hint loaded: ${data.total} trees planted`);
+                } else {
+                    console.warn('Failed to fetch hint:', data.message);
+                    this.monitoringHint.totalPlanted = null;
+                }
+
+            } catch (error) {
+                console.error('Error fetching planted trees hint:', error);
+                this.monitoringHint.totalPlanted = null;
+            } finally {
+                this.monitoringHint.isLoading = false;
+            }
+        },
+
+        /**
+         * Clear monitoring hint
+         */
+        clearMonitoringHint() {
+            this.monitoringHint.totalPlanted = null;
+            this.monitoringHint.fetchedForJenisPohonId = null;
+            console.log('Monitoring hint cleared');
+        },
+
+        /**
+         * Get plot ID from URL
+         */
+        getPlotIdFromUrl() {
+            const match = window.location.pathname.match(/\/plot\/(\d+)/);
+            return match ? match[1] : null;
+        },
+
+        onSubmit(event) {
             if (!this.validateForm()) {
+                if (event) event.preventDefault();
                 return false;
             }
-            // Form will submit naturally
             return true;
-        }
+        },
     };
 }
 

@@ -27,13 +27,13 @@
                 <!-- PIC Reclamation -->
                 <div>
                     <x-lahan.info-label>PIC Reklamasi</x-lahan.info-label>
-                    <div class="truncate">{{ $lahan->pic_reklamasi }}</div>
+                    <div class="truncate">{{ $lahan->pic->name ?? 'Data Arsip Lama' }}</div>
                 </div>
                 
                 <!-- Status -->
                 <div>
-                    <x-lahan.info-label>Status Reklamasi</x-lahan.info-label>
-                    <x-lahan.status-dropdown :status="$lahan->status ?? 'Active'" :lahan="$lahan" />
+                    <x-lahan.info-label>Fase</x-lahan.info-label>
+                    <x-lahan.fase-dropdown :fase="$lahan->fase ?? 'Lahan Baru'" :lahan="$lahan" />
                 </div>
             </div>
             
@@ -71,12 +71,12 @@
             
             <div>
                 <x-lahan.info-label>PIC Reklamasi</x-lahan.info-label>
-                <x-lahan.info class="truncate">{{ $lahan->pic_reklamasi }}</x-lahan.info>
+                <x-lahan.info class="truncate">{{ $lahan->pic->name ?? 'Data Arsip Lama' }}</x-lahan.info>
             </div>
 
             <div>
-                <x-lahan.info-label>Status Reklamasi</x-lahan.info-label>
-                <x-lahan.status-dropdown :status="$lahan->status ?? 'Aktif'" :lahan="$lahan" />
+                <x-lahan.info-label>Fase</x-lahan.info-label>
+                <x-lahan.fase-dropdown :fase="$lahan->fase ?? 'Lahan Baru'" :lahan="$lahan" />
             </div>
 
             <div>

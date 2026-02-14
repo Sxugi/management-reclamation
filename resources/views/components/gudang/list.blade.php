@@ -9,13 +9,13 @@
         <table class="min-w-max w-full text-xs text-darkslategray font-outfit border-collapse table-auto">
             <thead class="border-gainsboro border-solid border-b-[1px] border-[0px]">
                 <tr>
-                    <x-main.sortable-header column="tanggal_masuk" title="Tanggal Masuk" class="h-6 py-3 border-r-[1px]"/>
-                    <x-main.sortable-header column="jenis_barang" title="Jenis" class="h-6 py-3 border-r-[1px]"/>
-                    <x-main.sortable-header column="nama_barang" title="Nama" class="h-6 py-3 border-r-[1px]"/>
+                    <x-main.sortable-header column="tanggal_masuk" title="Tanggal" class="h-6 py-3 border-r-[1px]"/>        
+                    <th class="py-3 px-6 text-center leading-5 font-bold border-gainsboro border-solid border-r whitespace-nowrap">Tipe</th>
+                    <x-main.sortable-header column="nama_barang" title="Barang" class="h-6 py-3 border-r-[1px]"/>
                     <x-main.sortable-header column="jumlah_barang" title="Jumlah" class="h-6 py-3 border-r-[1px]"/>
                     <x-main.sortable-header column="lokasi_penyimpanan" title="Lokasi" class="h-6 py-3 border-r-[1px]"/>
                     <x-main.sortable-header column="status_barang" title="Status" class="h-6 py-3 border-r-[1px]"/>
-                    <th scope="col" class="h-6 py-3 px-3 text-center leading-5 font-bold border-gainsboro border-solid border-b-[0px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
+                    <th scope="col" class="h-6 py-3 px-3 text-center leading-5 font-bold whitespace-nowrap">
                         Catatan
                     </th>
                 </tr>
@@ -25,6 +25,8 @@
                     <tr class="hover:bg-lightgray cursor-pointer" 
                         onclick="window.openInfoModal({
                             id: '{{ $data->data_gudang_id }}',
+                            jenis_transaksi: '{{ $data->jenis_transaksi }}',
+                            sku: '{{ $data->sku }}',
                             nama_barang: '{{ addslashes($data->nama_barang) }}',
                             jenis_barang: '{{ addslashes($data->jenis_barang) }}',
                             jumlah_barang: '{{ $data->jumlah_barang }}',
@@ -40,28 +42,53 @@
                             can_update: {{ auth()->user()->can('update', $data) ? 'true' : 'false' }},
                             can_delete: {{ auth()->user()->can('delete', $data) ? 'true' : 'false' }},
                         })">
-                        <td class="py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
-                            {{ \Carbon\Carbon::parse($data->tanggal_masuk)->format('d F Y') }}
+                        
+                        <td class="py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
+                            {{ \Carbon\Carbon::parse($data->tanggal_masuk)->format('d M Y') }}
                         </td>
-                        <td class="py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
-                            {{ $data->jenis_barang }}
+
+                        <td class="py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
+                            @if($data->jenis_transaksi == 'MASUK')
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-green-100 text-green-700">
+                                    ⬇️ Masuk
+                                </span>
+                            @else
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-red-100 text-red-700">
+                                    ⬆️ Keluar
+                                </span>
+                            @endif
                         </td>
-                        <td class="py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
-                            {{ $data->nama_barang }}
+
+                        <td class="px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px]">
+                            <div class="font-medium text-darkslategray">{{ $data->nama_barang }}</div>
+                            <div class="text-[10px] text-gray-400 flex gap-1 mt-0.5">
+                                @if($data->sku)
+                                    <span class="bg-slategray-100 text-white px-1 rounded border border-darkslategray mb-0.5">{{ $data->sku }}</span>
+                                @endif
+                                <span>{{ $data->jenis_barang }}</span>
+                            </div>
                         </td>
-                        <td class="py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
-                            {{ $data->jumlah_barang }}
+
+                        <td class="py-3 px-3 text-sm text-right leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap font-mono">
+                            @if($data->jenis_transaksi == 'MASUK')
+                                <span class="font-bold text-green-600">+{{ number_format($data->jumlah_barang) }}</span>
+                            @else
+                                <span class="font-bold text-red-600">-{{ number_format($data->jumlah_barang) }}</span>
+                            @endif
+                            <span class="text-xs text-gray-400 ml-0.5">{{ $data->satuan }}</span>
                         </td>
-                        <td class="py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
+
+                        <td class="py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
                             {{ $data->lokasi_penyimpanan }}
                         </td>
-                        <td class="py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
+
+                        <td class="py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                 @if($data->status_barang == 'Tersedia') 
                                     bg-green-100 text-green-800
-                                @elseif($data->status_barang == 'Kosong') 
-                                    bg-orange-100 text-orange-800
                                 @elseif($data->status_barang == 'Rusak') 
+                                    bg-orange-100 text-orange-800
+                                @elseif($data->status_barang == 'Kosong') 
                                     bg-red-100 text-red-800
                                 @elseif($data->status_barang == 'Digunakan') 
                                     bg-yellow-100 text-yellow-800
@@ -72,17 +99,17 @@
                                 {{ $data->status_barang }}
                             </span>
                         </td>
-                        <td class="py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px]">
+                        <td class="py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border-b">
                             <x-main.tooltip :content="$data->catatan" :max-length="40" position="bottom" />
                             <x-main.modal name="confirm-gudang-deletion-{{ $data->data_gudang_id }}" focusable>
                                 <form method="POST" action="{{ route('lahan.gudang.destroy', [$lahan, $data]) }}" class="p-6">
                                     @csrf
                                     @method('DELETE')
                                     <h2 class="text-lg font-medium text-gray-900">
-                                        {{ __('Are you sure you want to delete this data gudang?') }}
+                                        {{ __('Are you sure you want to delete this transaction?') }}
                                     </h2>
                                     <p class="mt-1 text-sm text-gray-600">
-                                        {{ __('Once deleted, all data related to this data gudang will be permanently lost. This action cannot be undone.') }}
+                                        {{ __('Once deleted, calculation of stock might be affected. This action cannot be undone.') }}
                                     </p>
                                     <div class="mt-6 flex justify-end font-outfit">
                                         <x-main.secondary-button @click="$dispatch('close')">
@@ -103,7 +130,7 @@
                         </tr>
                     @else
                         <tr class="border-none">
-                            <td colspan="8" class="py-6 px-3 text-center text-darkslategray">No data gudang available yet</td>
+                            <td colspan="8" class="py-6 px-3 text-center text-darkslategray">No transaction history available yet</td>
                         </tr>
                     @endif
                 @endforelse

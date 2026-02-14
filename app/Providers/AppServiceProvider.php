@@ -11,11 +11,16 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Pagination\Paginator;
 use App\Models\Lahan;
 use App\Models\User;
+use App\Models\Plot;
+use App\Observers\PlotObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        // Register model observers
+        Plot::observe(PlotObserver::class);
+
         // Global view composer to share lahan_id based on route parameters
         View::composer('*', function ($view) {
             $lahanId = null;

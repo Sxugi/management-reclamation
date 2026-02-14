@@ -176,7 +176,7 @@
                 <h2 class="text-lg font-medium text-darkslategray mb-4">Tambah Kategori</h2>
                 <div class="mb-4">
                     <x-main.input-label value="Nama Kategori" />
-                    <input type="text" name="nama_kategori" class="mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-darkslategray focus:ring-darkslategray" required>
+                    <input type="text" name="nama_kategori" placeholder="Masukkan nama kategori" class="mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-darkslategray focus:ring-darkslategray" required>
                 </div>
                 <div class="mt-6 flex justify-end gap-3">
                     <a @click="$dispatch('close')" class="bg-red-500 !text-white text-sm py-3 px-4 rounded-lg font-semibold hover:bg-red-600 transition-colors no-underline cursor-pointer">
@@ -197,7 +197,7 @@
                 <h2 class="text-lg font-medium text-darkslategray mb-4">Edit Kategori</h2>
                 <div class="mb-4">
                     <x-main.input-label value="Nama Kategori" />
-                    <input type="text" name="nama_kategori" x-model="editName" class="mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-darkslategray focus:ring-darkslategray" required>
+                    <input type="text" name="nama_kategori" placeholder="Masukkan nama kategori" x-model="editName" class="mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-darkslategray focus:ring-darkslategray" required>
                 </div>
                 <div class="mt-6 flex justify-end gap-3">
                     <a @click="$dispatch('close')" class="bg-red-500 !text-white text-sm py-3 px-4 rounded-lg font-semibold hover:bg-red-600 transition-colors no-underline cursor-pointer">

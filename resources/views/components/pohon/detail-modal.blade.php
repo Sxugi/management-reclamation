@@ -1,4 +1,4 @@
-<div id="pohonModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50">
+<div id="pohonModal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center hidden z-50">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl mx-4 max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between p-6 border-b border-gainsboro bg-gradient-to-r from-blue-50 to-indigo-50 rounded-t-2xl">
             <div class="flex items-center space-x-3">
@@ -10,10 +10,10 @@
                 </div>
                 <div>
                     <div class="flex items-center self-stretch leading-7 font-semibold text-lg text-darkslategray font-outfit">Detail Data Pohon</div>
-                    <div class="text-sm text-slategray font-outfit">Informasi lengkap data pohon</div>
+                    <div class="text-sm text-slategray font-outfit">Informasi lengkap data pohon yang ditanam</div>
                 </div>
             </div>
-            <button onclick="window.closePohonModal()" class="w-10 h-10 rounded-xl bg-white shadow-sm border border-gainsboro hover:bg-gray-500 flex items-center justify-center text-slategray hover:text-white transition-all duration-200">
+            <button onclick="window.closePohonModal()" class="w-10 h-10 rounded-xl bg-white shadow-sm border border-gainsboro hover:bg-gray-500 flex items-center justify-center text-slategray hover:text-white transition-all duration-200 cursor-pointer">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>
@@ -22,28 +22,49 @@
 
         <div class="p-6 font-outfit">
             <div id="pohonModalContent" class="space-y-6">
-                
+                <!-- Content will be injected by JavaScript -->
             </div>
         </div>
 
         <div class="flex items-center justify-end p-6 border-t border-gainsboro bg-gray-50 rounded-b-2xl">
-            <div class="flex items-center space-x-3">
-                <button onclick="window.closePohonModal()" class="bg-red-500 !text-white text-sm py-3 px-4 rounded-lg font-medium font-outfit hover:bg-red-600 transition-colors no-underline border-none">
-                    Close
-                </button>
-                <x-main.primary-button id="editPohonButton" class="py-3 px-4 gap-2 font-medium hidden">
-                    Edit
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4 13V16H7L16 7L13 4L4 13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </x-main.primary-button>
-                <x-main.primary-button id="deletePohonButton" class="py-3 px-4 gap-2 font-medium hidden">
-                    Delete
-                    <svg width="18" height="18" viewBox="0 0 15 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4.52679 1.0877L4.28571 1.5625H1.07143C0.478795 1.5625 0 2.0373 0 2.625C0 3.2127 0.478795 3.6875 1.07143 3.6875H13.9286C14.5212 3.6875 15 3.2127 15 2.625C15 2.0373 14.5212 1.5625 13.9286 1.5625H10.7143L10.4732 1.0877C10.2924 0.725781 9.92076 0.5 9.51562 0.5H5.48438C5.07924 0.5 4.70759 0.725781 4.52679 1.0877ZM13.9286 4.75H1.07143L1.78125 16.0059C1.83482 16.8459 2.53795 17.5 3.38504 17.5H11.615C12.4621 17.5 13.1652 16.8459 13.2187 16.0059L13.9286 4.75Z" fill="white"/>
-                    </svg>                   
-                </x-main.primary-button>
-            </div>
+            <button onclick="window.closePohonModal()" class="bg-red-500 !text-white text-sm py-3 px-6 rounded-lg font-medium font-outfit hover:bg-red-600 transition-colors border-none cursor-pointer">
+                Tutup
+            </button>
         </div>
     </div>
 </div>
+
+@if(isset($pohon))
+    @foreach($pohon as $data)
+        @foreach($data->dataManual ?? [] as $item)
+            <x-main.modal name="confirm-pohon-deletion-{{ $item->data_pohon_manual_id }}" focusable>
+                <form method="POST" action="{{ route('lahan.pohon.destroy', [$lahan, $data, $item]) }}" class="p-6 text-left whitespace-normal">
+                    @csrf
+                    @method('DELETE')
+                    <h2 class="text-lg font-medium text-gray-900 font-outfit">
+                        Confirmation Delete Data Pohon
+                    </h2>
+                    <p class="mt-2 text-sm text-gray-600 font-outfit">
+                        Are you sure you want to delete the tree data for <strong>{{ $data->jenisPohon->nama_pohon ?? 'this' }}</strong> for the year <strong>{{ $item->tahun }}</strong>?
+                    </p>
+                    <div class="mt-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p class="text-sm text-yellow-800 font-medium font-outfit">
+                            ⚠️ Manual data: <strong>{{ number_format($item->jumlah_batang, 0, ',', '.') }} batang</strong>
+                        </p>
+                    </div>
+                    <p class="mt-3 text-sm text-red-600 font-semibold font-outfit">
+                        Deleted data cannot be recovered.
+                    </p>
+                    <div class="mt-6 flex justify-end gap-3 font-outfit">
+                        <x-main.secondary-button @click="$dispatch('close')">
+                            Cancel
+                        </x-main.secondary-button>
+                        <x-main.danger-button type="submit">
+                            Delete
+                        </x-main.danger-button>
+                    </div>
+                </form>
+            </x-main.modal>
+        @endforeach
+    @endforeach
+@endif

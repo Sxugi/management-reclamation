@@ -1,4 +1,4 @@
-<! DOCTYPE html>
+<!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full">
     <head>
         <meta charset="utf-8">
@@ -166,14 +166,6 @@
                         
                         <!-- Mobile Sidebar Content -->
                         <div class="flex flex-col h-full pt-8 px-5 pb-5 gap-7 text-left text-sm text-white font-outfit">
-                            <!-- Close Button -->
-                            <div class="flex justify-end">
-                                <button @click="mobileMenuOpen = false" class="text-darkslategray hover:text-white hover:bg-darkslategray rounded-lg p-2 transition-colors">
-                                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                                    </svg>
-                                </button>
-                            </div>
 
                             <!-- Home Button -->
                             <div class="self-stretch flex flex-col items-start justify-start">
@@ -258,16 +250,6 @@
                                                 <div class="flex-1 relative leading-5 font-medium">Profile</div>
                                             </div>
                                         </a>
-
-                                        <!-- Admin Dashboard Link -->
-                                        <a type="button" href="{{ route('admin.dashboard') }}" class="self-stretch rounded-lg bg-darkslategray flex flex-row items-center justify-start py-2 px-3 no-underline text-white hover:bg-white hover:text-darkslategray ease-in-out">
-                                            <div class="flex-1 flex flex-row items-center justify-start gap-3">
-                                                <svg width="24" height="24" viewBox="0 0 18 18" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                                    <path fill-rule="evenodd" d="M9.00883 6.86602C8.48324 6.86602 7.99105 7.06992 7.6184 7.44258C7.2475 7.81523 7.04184 8.30742 7.04184 8.83301C7.04184 9.35859 7.2475 9.85078 7.6184 10.2234C7.99105 10.5943 8.48324 10.8 9.00883 10.8C9.53441 10.8 10.0266 10.5943 10.3993 10.2234C10.7702 9.85078 10.9758 9.35859 10.9758 8.83301C10.9758 8.30742 10.7702 7.81523 10.3993 7.44258C10.2172 7.25916 10.0006 7.11374 9.7619 7.01477C9.52321 6.91579 9.26723 6.86523 9.00883 6.86602ZM16.2563 11.0057L15.1067 10.023C15.1612 9.68906 15.1893 9.34805 15.1893 9.00879C15.1893 8.66953 15.1612 8.32676 15.1067 7.99453L16.2563 7.01191C16.3431 6.93757 16.4053 6.83855 16.4345 6.72803C16.4637 6.6175 16.4586 6.5007 16.4198 6.39316L16.4039 6.34746C16.0876 5.46274 15.6135 4.64266 15.0047 3.92695L14.9731 3.89004C14.8992 3.80312 14.8006 3.74064 14.6905 3.71083C14.5804 3.68102 14.4638 3.68528 14.3561 3.72305L12.9288 4.23105C12.4014 3.79863 11.8143 3.45762 11.178 3.22031L10.902 1.72793C10.8812 1.6155 10.8266 1.51207 10.7456 1.43138C10.6646 1.35069 10.561 1.29656 10.4485 1.27617L10.401 1.26738C9.48695 1.10215 8.52367 1.10215 7.60961 1.26738L7.56215 1.27617C7.44964 1.29656 7.346 1.35069 7.265 1.43138C7.18399 1.51207 7.12945 1.6155 7.10863 1.72793L6.8309 3.22734C6.20059 3.46653 5.61342 3.80672 5.09242 4.23457L3.65453 3.72305C3.54689 3.68498 3.43022 3.68056 3.32001 3.71039C3.2098 3.74022 3.11128 3.80288 3.03754 3.89004L3.0059 3.92695C2.3982 4.64341 1.92426 5.46329 1.60668 6.34746L1.59086 6.39316C1.51176 6.61289 1.5768 6.85898 1.75434 7.01191L2.91801 8.00508C2.86352 8.33555 2.83715 8.67305 2.83715 9.00703C2.83715 9.34453 2.86352 9.68203 2.91801 10.009L1.75785 11.0021C1.67101 11.0765 1.60885 11.1755 1.57965 11.286C1.55045 11.3966 1.55559 11.5134 1.59437 11.6209L1.6102 11.6666C1.92836 12.5508 2.3977 13.3682 3.00941 14.0871L3.04105 14.124C3.11498 14.2109 3.2135 14.2734 3.32364 14.3032C3.43379 14.333 3.55038 14.3288 3.65805 14.291L5.09594 13.7795C5.61977 14.2102 6.20336 14.5512 6.83441 14.7867L7.11215 16.2861C7.13297 16.3986 7.18751 16.502 7.26851 16.5827C7.34952 16.6634 7.45316 16.7175 7.56566 16.7379L7.61313 16.7467C8.53618 16.9128 9.48148 16.9128 10.4045 16.7467L10.452 16.7379C10.5645 16.7175 10.6681 16.6634 10.7491 16.5827C10.8301 16.502 10.8847 16.3986 10.9055 16.2861L11.1815 14.7938C11.8178 14.5547 12.4049 14.2154 12.9323 13.783L14.3596 14.291C14.4672 14.3291 14.5839 14.3335 14.6941 14.3037C14.8043 14.2738 14.9029 14.2112 14.9766 14.124L15.0082 14.0871C15.62 13.3646 16.0893 12.5508 16.4075 11.6666L16.4233 11.6209C16.4989 11.4029 16.4338 11.1586 16.2563 11.0057ZM9.00883 11.9232C7.30199 11.9232 5.91859 10.5398 5.91859 8.83301C5.91859 7.12617 7.30199 5.74277 9.00883 5.74277C10.7157 5.74277 12.0991 7.12617 12.0991 8.83301C12.0991 10.5398 10.7157 11.9232 9.00883 11.9232Z" fill="currentColor"/>
-                                                </svg>
-                                                <div class="flex-1 relative leading-5 font-medium">Admin Dashboard</div>
-                                            </div>
-                                        </a>
                                         
                                         <!-- Logout Button -->
                                         <form method="POST" action="{{ route('logout') }}" class="w-full">
@@ -292,7 +274,31 @@
                     <div class="flex-1 flex flex-col main-content">
                         <!-- Top Navigation -->
                         <div class="w-full sticky top-0 z-50">
-                            @include('layouts.admin-header')
+                            <nav x-data="{ open: false }" class="w-full bg-gainsboro border-solid border-darkslategray border-b-[1px] border-r-[0px] border-l-[0px] border-t-[0px] box-border h-[78px] flex flex-row items-center justify-between py-[19px] px-5 text-left text-xl text-white">
+                                <!-- Logo -->
+                                <div class="w-[191px] h-[37px] flex flex-row items-center justify-center">
+                                    <a href="{{ route('lahan.index') }}" class="w-[191px] h-[37px] flex">
+                                        <x-main.application-logo class="w-[41px] h-[37px] object-cover" />
+                                    </a>
+                                </div>
+
+                                <!-- Desktop Right Side Menu -->
+                                <div class="hidden lg:flex lg:items-center">
+                                    <div class="flex items-center gap-4">
+                                        <x-main.user-dropdown />
+                                    </div>
+                                </div>
+
+                                <!-- Mobile menu button -->
+                                <div class="flex items-center lg:hidden">
+                                    <button @click="mobileMenuOpen = !mobileMenuOpen" class="inline-flex items-center justify-center p-2 rounded-lg border-solid border-[1px] text-white hover:text-darkslategray bg-darkslategray hover:bg-white focus:outline-none transition duration-150 ease-in-out">
+                                        <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
+                                            <path :class="{'hidden': mobileMenuOpen, 'inline-flex': !mobileMenuOpen }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                                            <path :class="{'hidden': !mobileMenuOpen, 'inline-flex': mobileMenuOpen }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </nav>
                         </div>
 
                         @isset($header)

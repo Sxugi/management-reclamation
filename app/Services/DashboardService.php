@@ -114,11 +114,15 @@ class DashboardService
         return Cache::remember($cacheKey, $cacheTime, function () use ($lahanId, $isNew, $hasRecentActivity) {
             $stats = [
                 'jumlah_blok_lahan' => self::getJumlahBlokLahan($lahanId),
-                'total_progres_reklamasi' => self::getTotalProgresReklamasi($lahanId),
+                'total_luas_area' => self::getTotalLuasArea($lahanId),
                 'progres_hari_ini' => self::calculateDailyProgress($lahanId),
                 'progres_minggu_ini' => self::calculateWeeklyProgress($lahanId),
-                'jumlah_blok_selesai' => self::getJumlahBlokSelesai($lahanId),
+                'aktivitas_terakhir' => self::getAktivitasTerakhir($lahanId),
                 'luas_area' => self::calculateAreaStats($lahanId),
+                'revegetasi' => self::getRevgetasiStats($lahanId),
+                'input_resources' => self::getInputResourcesStats($lahanId),
+                'maintenance' => self::getMaintenanceStats($lahanId),
+                'monitoring' => self::getMonitoringStats($lahanId),
                 'is_new_lahan' => $isNew,
                 'has_recent_activity' => $hasRecentActivity,
                 'cache_info' => [
@@ -162,7 +166,8 @@ class DashboardService
             "historical_progress_{$lahanId}_1year_active",
             "historical_progress_{$lahanId}_1year_stable",
             "indicator_progress_{$lahanId}",
-            "block_historical_{$lahanId}_*"
+            "block_historical_{$lahanId}_*",
+            "planted_trees_distribution_{$lahanId}",
         ];
 
         foreach ($patterns as $pattern) {
@@ -226,15 +231,251 @@ class DashboardService
     }
 
     /**
+     * Get total luas area from actual plots (not lahan total)
+     */
+    private static function getTotalLuasArea(int $lahanId): float
+    {
+        $totalLuas = DB::table('plot')
+            ->where('lahan_id', $lahanId)
+            ->sum('luas_area');
+        
+        return (float)$totalLuas;
+    }
+
+    /**
      * Get number of completed plots (progress >= 100%)
      */
-    private static function getJumlahBlokSelesai(int $lahanId): int
+    private static function getAktivitasTerakhir(int $lahanId): ?string
     {
-        return DB::table('plot_progres')
-            ->join('plot', 'plot_progres.plot_id', '=', 'plot.plot_id')
+        // Aktivitas Terakhir
+        $aktivitasTerakhir = DB::table('progres')
+            ->join('plot', 'progres.plot_id', '=', 'plot.plot_id')
             ->where('plot.lahan_id', $lahanId)
-            ->where('plot_progres.percent', '>=', 100)
+            ->max('progres.tanggal');
+
+        return $aktivitasTerakhir;
+    }
+
+    
+    /**
+     * Get field value from progres_field_values
+     */
+    private static function getFieldValue(int $progresId, string $fieldKey): ?string
+    {
+        return DB::table('progres_field_values')
+            ->join('field_definitions', 'progres_field_values.field_definition_id', '=', 'field_definitions.field_definition_id')
+            ->where('progres_field_values.progres_id', $progresId)
+            ->where('field_definitions.field_key', $fieldKey)
+            ->value('progres_field_values.field_value');
+    }
+
+    /**
+     * Get sum of field values for specific field_key
+     */
+    private static function sumFieldValues(int $lahanId, array $jenisAktivitasFields, string $fieldKey): float
+    {
+        return DB::table('progres')
+            ->join('plot', 'progres.plot_id', '=', 'plot.plot_id')
+            ->join('jenis_aktivitas', 'progres.jenis_aktivitas_id', '=', 'jenis_aktivitas.jenis_aktivitas_id')
+            ->join('progres_field_values', 'progres.progres_id', '=', 'progres_field_values.progres_id')
+            ->join('field_definitions', 'progres_field_values.field_definition_id', '=', 'field_definitions.field_definition_id')
+            ->where('plot.lahan_id', $lahanId)
+            ->whereIn('jenis_aktivitas.field', $jenisAktivitasFields)
+            ->where('field_definitions.field_key', $fieldKey)
+            ->sum(DB::raw("CAST(progres_field_values.field_value AS NUMERIC)"));
+    }
+
+    /**
+     * Get average of field values
+     */
+    private static function avgFieldValues(int $lahanId, array $jenisAktivitasFields, string $fieldKey): ?float
+    {
+        $result = DB::table('progres')
+            ->join('plot', 'progres.plot_id', '=', 'plot.plot_id')
+            ->join('jenis_aktivitas', 'progres.jenis_aktivitas_id', '=', 'jenis_aktivitas.jenis_aktivitas_id')
+            ->join('progres_field_values', 'progres.progres_id', '=', 'progres_field_values.progres_id')
+            ->join('field_definitions', 'progres_field_values.field_definition_id', '=', 'field_definitions.field_definition_id')
+            ->where('plot.lahan_id', $lahanId)
+            ->whereIn('jenis_aktivitas.field', $jenisAktivitasFields)
+            ->where('field_definitions.field_key', $fieldKey)
+            ->avg(DB::raw("CAST(progres_field_values.field_value AS NUMERIC)"));
+        
+        return $result ? (float)$result : null;
+    }
+
+    /**
+     * Get revegetasi statistics
+     */
+    private static function getRevgetasiStats(int $lahanId): array
+    {
+        // Total Bibit Ditanam
+        $bibitProgres = self::sumFieldValues(
+            $lahanId,
+            ['penanaman_pionir', 'penanaman_lokal', 'penanaman_mpts'],
+            'jumlah_bibit'
+        );
+
+        // Total Bibit dari Data Pohon Manual
+        $bibitManual = DB::table('data_pohon_manual')
+            ->join('pohon', 'data_pohon_manual.pohon_id', '=', 'pohon.pohon_id')
+            ->where('pohon.lahan_id', $lahanId)
+            ->sum('data_pohon_manual.jumlah_batang');
+
+        // Sum both sources
+        $totalBibit = $bibitProgres + $bibitManual;
+
+        // Total Berat Benih Cover Crops (SEPARATE METRIC)
+        $totalBeratBenih = self::sumFieldValues(
+            $lahanId,
+            ['penanaman_cover_crops'],
+            'berat_benih'
+        );
+
+        // Total Area Bervegetasi and Persentase Area Bervegetasi with weighting by luas_area
+        $plots = DB::table('plot')
+            ->leftJoin('plot_progres', 'plot.plot_id', '=', 'plot.plot_id')
+            ->where('plot.lahan_id', $lahanId)
+            ->select('plot.luas_area', DB::raw('COALESCE(plot_progres.percent, 0) as percent'))
+            ->get();
+
+        $totalLuasArea = 0;
+        $areaBervegetasi = 0;
+
+        foreach ($plots as $plot) {
+            $luas = (float) $plot->luas_area;
+            $persen = min(100, max(0, (float) $plot->percent));
+            $totalLuasArea += $luas;
+            $areaBervegetasi += ($luas * ($persen / 100));
+        }
+
+        $persentaseAreaBervegetasi = $totalLuasArea > 0 
+            ? ($areaBervegetasi / $totalLuasArea) * 100 
+            : 0;
+
+        return [
+            'total_bibit_ditanam' => (int)$totalBibit,
+            'total_berat_benih_cover_crops' => round($totalBeratBenih, 2), 
+            'total_area_bervegetasi' => round((float)$areaBervegetasi, 2),
+            'persentase_area_bervegetasi' => round((float)$persentaseAreaBervegetasi, 1),
+        ];
+    }
+
+    /**
+     * Get input resources statistics
+     */
+    private static function getInputResourcesStats(int $lahanId): array
+    {
+        // Total Kompos digunakan
+        $totalKompos = self::sumFieldValues(
+            $lahanId,
+            ['aplikasi_kompos'],
+            'total_berat'
+        );
+
+        // Total Pupuk Anorganik digunakan
+        $totalPupuk = self::sumFieldValues(
+            $lahanId,
+            ['aplikasi_pupuk_dasar', 'pemupukan'],
+            'total_pupuk'
+        );
+
+        return [
+            'total_kompos' => round($totalKompos, 0),
+            'total_pupuk_anorganik' => round($totalPupuk, 0),
+        ];
+    }
+
+    /**
+     * Get maintenance statistics
+     */
+    private static function getMaintenanceStats(int $lahanId): array
+    {
+        // Total Aktivitas Pemeliharaan (count progres records)
+        $totalAktivitas = DB::table('progres')
+            ->join('plot', 'progres.plot_id', '=', 'plot.plot_id')
+            ->join('jenis_aktivitas', 'progres.jenis_aktivitas_id', '=', 'jenis_aktivitas.jenis_aktivitas_id')
+            ->where('plot.lahan_id', $lahanId)
+            ->whereIn('jenis_aktivitas.field', ['penyiangan', 'pemupukan', 'pengendalian_hama', 'penyulaman'])
             ->count();
+
+        $totalTanamanDisulam = DB::table('progres')
+            ->join('plot', 'progres.plot_id', '=', 'plot.plot_id')
+            ->join('jenis_aktivitas', 'progres.jenis_aktivitas_id', '=', 'jenis_aktivitas.jenis_aktivitas_id')
+            ->where('plot.lahan_id', $lahanId)
+            ->where('jenis_aktivitas.field', 'penyulaman')
+            ->sum(DB::raw("CAST(
+                (SELECT field_value FROM progres_field_values pfv
+                JOIN field_definitions fd ON pfv.field_definition_id = fd.field_definition_id
+                WHERE pfv.progres_id = progres.progres_id AND fd.field_key = 'jumlah_tanaman') 
+                AS NUMERIC)"));
+
+        return [
+            'total_aktivitas_pemeliharaan' => (int)$totalAktivitas,
+            'total_tanaman_disulam' => (int)$totalTanamanDisulam,
+        ];
+    }
+
+    /**
+     * Get monitoring/quality statistics
+     */
+    private static function getMonitoringStats(int $lahanId): array
+    {
+        // Calculate Survival Rate and Pertumbuhan from monitoring activities
+        $rawLogs = DB::table('progres as p')
+            ->join('plot as pl', 'p.plot_id', '=', 'pl.plot_id')
+            ->join('jenis_aktivitas as ja', 'p.jenis_aktivitas_id', '=', 'ja.jenis_aktivitas_id')
+            ->join('progres_field_values as pfv', 'p.progres_id', '=', 'pfv.progres_id')
+            ->join('field_definitions as fd', 'pfv.field_definition_id', '=', 'fd.field_definition_id')
+            ->where('pl.lahan_id', $lahanId)
+            ->whereIn('ja.field', ['monitoring_survival_rate', 'monitoring_pertumbuhan'])
+            ->select(
+                'p.progres_id',
+                'p.tanggal',
+                'ja.field as activity_type',
+                'fd.field_key',
+                'pfv.field_value'
+            )
+            ->get();
+
+        // Group logs by progres_id to reconstruct each monitoring snapshot
+        $groupedLogs = $rawLogs->groupBy('progres_id')->map(function ($rows) {
+            $first = $rows->first();
+            $fields = $rows->pluck('field_value', 'field_key');
+            return [
+                'tanggal' => $first->tanggal,
+                'type' => $first->activity_type,
+                'pohon_id' => $fields['jenis_pohon_id'] ?? 'unknown',
+                'fields' => $fields
+            ];
+        });
+
+        // Process Survival Rate (Latest snapshot per pohon)
+        $srLogs = $groupedLogs->where('type', 'monitoring_survival_rate');
+        
+        // Group by pohon_id and take the latest snapshot for each pohon to calculate survival rate per pohon, then average across pohons
+        $srPerPohon = $srLogs->groupBy('pohon_id')->map(function ($logs) {
+            $latest = $logs->sortByDesc('tanggal')->first();
+            $fields = $latest['fields'];
+            
+            $hidup = (int)($fields['jumlah_bibit_hidup'] ?? 0);
+            $mati = (int)($fields['jumlah_bibit_mati'] ?? 0);
+            $total = $hidup + $mati;
+            
+            return $total > 0 ? ($hidup / $total) * 100 : 0;
+        });
+
+        // Process Pertumbuhan (Latest snapshot per pohon)
+        $growthLogs = $groupedLogs->where('type', 'monitoring_pertumbuhan');
+
+        $heightPerPohon = $growthLogs->groupBy('pohon_id')->map(function ($logs) {
+            $latest = $logs->sortByDesc('tanggal')->first();
+            return (float)($latest['fields']['tinggi_tanaman_rata'] ?? 0);
+        });
+
+        return [
+            'survival_rate_rata' => $srPerPohon->isNotEmpty() ? round($srPerPohon->avg(), 1) : null,
+            'tinggi_tanaman_rata' => $heightPerPohon->isNotEmpty() ? round($heightPerPohon->avg(), 0) : null,
+        ];
     }
 
     /**
@@ -245,65 +486,64 @@ class DashboardService
         $today = Carbon::today();
         $yesterday = Carbon::yesterday();
 
-        // Check if there's any progress activity today
+        // Count today's activities (for context)
         $todayProgressCount = DB::table('progres')
             ->join('plot', 'progres.plot_id', '=', 'plot.plot_id')
             ->where('plot.lahan_id', $lahanId)
-            ->whereDate('progres.created_at', $today)
+            ->whereDate('progres.tanggal', $today)
             ->count();
 
-        // If no activity today, return 0% for today's progress
-        if ($todayProgressCount === 0) {
-            // Get current total progress for reference
-            $currentTotalProgress = DB::table('plot_progres')
-                ->join('plot', 'plot_progres.plot_id', '=', 'plot.plot_id')
-                ->where('plot.lahan_id', $lahanId)
-                ->avg('plot_progres.percent') ?? 0;
-
-            // Get yesterday's progress from snapshots or current progress
-            $yesterdayAvg = DB::table('progres_snapshots')
-                ->join('plot', 'progres_snapshots.plot_id', '=', 'plot.plot_id')
-                ->where('plot.lahan_id', $lahanId)
-                ->whereDate('date', $yesterday)
-                ->avg('percent');
-
-            // If no yesterday snapshot, try to get the latest snapshot
-            if ($yesterdayAvg === null) {
-                $latestSnapshot = DB::table('progres_snapshots')
-                    ->join('plot', 'progres_snapshots.plot_id', '=', 'plot.plot_id')
-                    ->where('plot.lahan_id', $lahanId)
-                    ->where('date', '<', $today)
-                    ->orderBy('date', 'desc')
-                    ->first();
-
-                $yesterdayAvg = $latestSnapshot ? $latestSnapshot->percent : $currentTotalProgress;
-            }
-
-            return [
-                'today_percent' => round($currentTotalProgress, 2), 
-                'yesterday_percent' => round($yesterdayAvg ?? 0, 2),
-                'delta' => 0.0,
-                'delta_type' => 'no_activity',
-                'is_fallback' => false,
-                'current_total_progress' => round($currentTotalProgress, 2),
-                'message' => 'Tidak ada aktivitas hari ini'
-            ];
-        }
-
-        // If there is activity today, get today's and yesterday's snapshots
+        // Get today's snapshot (always up-to-date due to auto-update)
         $todayAvg = DB::table('progres_snapshots')
             ->join('plot', 'progres_snapshots.plot_id', '=', 'plot.plot_id')
             ->where('plot.lahan_id', $lahanId)
-            ->whereDate('date', $today)
-            ->avg('percent');
+            ->whereDate('progres_snapshots.date', $today)
+            ->avg('progres_snapshots.percent');
 
+        // Get yesterday's snapshot for comparison
         $yesterdayAvg = DB::table('progres_snapshots')
             ->join('plot', 'progres_snapshots.plot_id', '=', 'plot.plot_id')
             ->where('plot.lahan_id', $lahanId)
-            ->whereDate('date', $yesterday)
-            ->avg('percent');
+            ->whereDate('progres_snapshots.date', $yesterday)
+            ->avg('progres_snapshots.percent');
 
-        // If no today snapshot but there is activity, create one
+        // Handle edge cases
+        if ($todayAvg === null && $yesterdayAvg === null) {
+            // Brand new lahan - no data yet
+            return [
+                'delta_percent' => 0,
+                'today_total' => 0,
+                'yesterday_total' => 0,
+                'delta_type' => 'no_data',
+                'has_activity_today' => false,
+                'activity_count' => 0,
+                'message' => 'Belum ada data historis'
+            ];
+        }
+
+        // Find comparison baseline if yesterday snapshot missing
+        $comparisonDate = 'kemarin';
+        if ($yesterdayAvg === null) {
+            $latestSnapshot = DB::table('progres_snapshots')
+                ->join('plot', 'progres_snapshots.plot_id', '=', 'plot.plot_id')
+                ->where('plot.lahan_id', $lahanId)
+                ->where('progres_snapshots.date', '<', $today)
+                ->orderBy('progres_snapshots.date', 'desc')
+                ->first();
+
+            if ($latestSnapshot) {
+                $yesterdayAvg = $latestSnapshot->percent;
+                $comparisonDate = Carbon::parse($latestSnapshot->date)->diffInDays($today) === 1 
+                    ? 'kemarin' 
+                    : Carbon::parse($latestSnapshot->date)->format('d M');
+            } else {
+                // No historical data - start from 0
+                $yesterdayAvg = 0;
+                $comparisonDate = 'awal';
+            }
+        }
+
+        // Fallback for today if snapshot doesn't exist yet
         if ($todayAvg === null) {
             $todayAvg = DB::table('plot_progres')
                 ->join('plot', 'plot_progres.plot_id', '=', 'plot.plot_id')
@@ -311,34 +551,29 @@ class DashboardService
                 ->avg('plot_progres.percent') ?? 0;
         }
 
-        // If no yesterday snapshot, try to find the most recent one
-        if ($yesterdayAvg === null) {
-            $latestSnapshot = DB::table('progres_snapshots')
-                ->join('plot', 'progres_snapshots.plot_id', '=', 'plot.plot_id')
-                ->where('plot.lahan_id', $lahanId)
-                ->where('date', '<', $today)
-                ->orderBy('date', 'desc')
-                ->first();
-
-            if ($latestSnapshot) {
-                $yesterdayAvg = $latestSnapshot->percent;
-            } else {
-                // If no historical data, assume yesterday was slightly lower
-                $yesterdayAvg = max(0, $todayAvg - 0.5);
-            }
-        }
-
-        $todayAvg = $todayAvg ?? 0;
-        $yesterdayAvg = $yesterdayAvg ?? 0;
+        $todayAvg = (float)$todayAvg;
+        $yesterdayAvg = (float)$yesterdayAvg;
+        
+        // Calculate the DELTA (change)
         $delta = $todayAvg - $yesterdayAvg;
 
+        // Generate contextual message
+        $message = match(true) {
+            $todayProgressCount === 0 && $delta == 0 => 'Tidak ada aktivitas hari ini',
+            $delta > 0 => abs(round($delta, 1)) . "% meningkat dari {$comparisonDate}",
+            $delta < 0 => abs(round($delta, 1)) . "% menurun dari {$comparisonDate}",
+            default => "Tidak ada perubahan dari {$comparisonDate}"
+        };
+
         return [
-            'today_percent' => round($todayAvg, 2),
-            'yesterday_percent' => round($yesterdayAvg, 2),
-            'delta' => round($delta, 2),
-            'delta_type' => $delta >= 0 ? 'increase' : 'decrease',
-            'is_fallback' => false,
-            'activity_count' => $todayProgressCount
+            'delta_percent' => round($delta, 2), 
+            'today_total' => round($todayAvg, 2),
+            'yesterday_total' => round($yesterdayAvg, 2),
+            'delta_type' => $delta > 0 ? 'increase' : ($delta < 0 ? 'decrease' : 'stable'),
+            'has_activity_today' => $todayProgressCount > 0,
+            'activity_count' => $todayProgressCount,
+            'comparison_date' => $comparisonDate,
+            'message' => $message
         ];
     }
 
@@ -1304,5 +1539,126 @@ class DashboardService
                 ];
             })
             ->toArray();
+    }
+
+    /**
+     * Get distribution of planted trees by species and category, combining data from progress logs and manual inputs, with caching for performance
+     */
+    public static function getPlantedTreesDistribution(int $lahanId): array
+    {
+        $cacheKey = "planted_trees_distribution_{$lahanId}";
+        $cacheTime = 600;
+
+        return Cache::remember($cacheKey, $cacheTime, function () use ($lahanId) {
+            
+            // Get data from two sources: progres logs and manual entries
+            $progresPohon = DB::table('progres')
+                ->join('plot', 'progres.plot_id', '=', 'plot.plot_id')
+                ->join('jenis_aktivitas', 'progres.jenis_aktivitas_id', '=', 'jenis_aktivitas.jenis_aktivitas_id')
+                ->join('progres_field_values as pfv_jenis', 'progres.progres_id', '=', 'pfv_jenis.progres_id')
+                ->join('field_definitions as fd_jenis', function($join) {
+                    $join->on('pfv_jenis.field_definition_id', '=', 'fd_jenis.field_definition_id')
+                         ->where('fd_jenis.field_key', '=', 'jenis_pohon_id');
+                })
+                ->join('jenis_pohon', DB::raw('CAST(pfv_jenis.field_value AS BIGINT)'), '=', 'jenis_pohon.jenis_pohon_id')
+                ->leftJoin('progres_field_values as pfv_jumlah', function($join) {
+                    $join->on('progres.progres_id', '=', 'pfv_jumlah.progres_id')
+                         ->join('field_definitions as fd_jumlah', function($join) {
+                             $join->on('pfv_jumlah.field_definition_id', '=', 'fd_jumlah.field_definition_id')
+                                  ->where('fd_jumlah.field_key', 'jumlah_bibit'); 
+                         });
+                })
+                ->where('plot.lahan_id', $lahanId)
+                ->whereIn('jenis_aktivitas.field', ['penanaman_pionir', 'penanaman_lokal', 'penanaman_mpts']) 
+                ->select(
+                    'jenis_pohon.jenis_pohon_id',
+                    'jenis_pohon.nama_pohon',
+                    'jenis_pohon.kategori',
+                    'pfv_jumlah.field_value as quantity'
+                )
+                ->get();
+
+            // Data from manual entries
+            $manualData = DB::table('data_pohon_manual')
+                ->join('pohon', 'data_pohon_manual.pohon_id', '=', 'pohon.pohon_id')
+                ->join('jenis_pohon', 'pohon.jenis_pohon_id', '=', 'jenis_pohon.jenis_pohon_id')
+                ->where('pohon.lahan_id', $lahanId)
+                ->select(
+                    'jenis_pohon.jenis_pohon_id',
+                    'jenis_pohon.nama_pohon',
+                    'jenis_pohon.kategori',
+                    'data_pohon_manual.jumlah_batang as quantity'
+                )
+                ->get();
+
+            // Aggregation
+            $categoryData = [];
+            $speciesData = [];
+            $totalTrees = 0;
+
+            $processRow = function($row) use (&$categoryData, &$speciesData, &$totalTrees) {
+                $qty = (float) $row->quantity;
+                if ($qty <= 0) return;
+
+                // Init Category
+                if (!isset($categoryData[$row->kategori])) {
+                    $categoryData[$row->kategori] = [
+                        'kategori' => $row->kategori,
+                        'total_trees' => 0,
+                        'species_count' => 0,
+                        'unit' => 'batang'
+                    ];
+                }
+
+                // Init Species
+                $speciesKey = "{$row->kategori}_{$row->jenis_pohon_id}";
+                if (!isset($speciesData[$speciesKey])) {
+                    $speciesData[$speciesKey] = [
+                        'jenis_pohon_id' => $row->jenis_pohon_id,
+                        'kategori' => $row->kategori,
+                        'nama' => $row->nama_pohon,
+                        'total_trees' => 0,
+                        'unit' => 'batang'
+                    ];
+                    $categoryData[$row->kategori]['species_count']++;
+                }
+
+                // Accumulate
+                $categoryData[$row->kategori]['total_trees'] += $qty;
+                $speciesData[$speciesKey]['total_trees'] += $qty;
+                $totalTrees += $qty;
+            };
+
+            // Process both data sources
+            foreach ($progresPohon as $row) $processRow($row);
+            foreach ($manualData as $row)   $processRow($row);
+
+            // Format final arrays
+            $byCategory = array_values($categoryData);
+            $bySpecies = array_values($speciesData);
+
+            usort($byCategory, function($a, $b) {
+                $order = ['PIONIR' => 1, 'LOKAL' => 2, 'MPTS' => 3, 'COVER_CROP' => 4];
+                return ($order[$a['kategori']] ?? 99) <=> ($order[$b['kategori']] ?? 99);
+            });
+
+            return [
+                'by_category' => $byCategory,
+                'by_species' => $bySpecies,
+                'summary' => [
+                    'total_trees' => $totalTrees,
+                    'total_species' => count($bySpecies),
+                    'total_categories' => count($byCategory)
+                ]
+            ];
+        });
+    }
+
+    /**
+     * Clear planted trees distribution cache when new planting data is added
+     */
+    public static function clearPlantedTreesCache(int $lahanId): void
+    {
+        Cache::forget("planted_trees_distribution_{$lahanId}");
     }
 }

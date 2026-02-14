@@ -76,6 +76,7 @@ class DashboardDataService {
         }
     }
 
+    // Specific indicator methods
     async loadSpecificIndicatorProgress(indicatorId, period = '30days') {
         const cacheKey = `specific_indicator_${this.lahanId}_${indicatorId}_${period}`;
         
@@ -119,6 +120,7 @@ class DashboardDataService {
         }
     }
 
+    // Block historical data methods
     async loadBlockHistorical(plotId, period = '30days') {
         const cacheKey = `block_historical_${plotId}_${period}`;
         
@@ -199,6 +201,30 @@ class DashboardDataService {
         } catch (error) {
             console.error('Error loading enhanced blocks for indicator:', error);
             return [];
+        }
+    }
+
+    /**
+     * Load planted trees distribution (simple count by category)
+     */
+    async loadPlantedTreesDistribution() {
+        const cacheKey = `planted_trees_${this.lahanId}`;
+        
+        if (this.cache[cacheKey]) {
+            return this.cache[cacheKey];
+        }
+
+        try {
+            const res = await fetch(`/lahan/${this.lahanId}/dashboard/planted-trees`);
+            if (!res.ok) throw new Error('Failed to load planted trees');
+            
+            const data = await res.json();
+            this.setCache(cacheKey, data, 10 * 60 * 1000);
+            
+            return data;
+        } catch (error) {
+            console.error('Error loading planted trees:', error);
+            throw error;
         }
     }
 

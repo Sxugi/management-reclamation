@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('plot', function (Blueprint $table) {
             $table->bigIncrements('plot_id');
+            $table->uuid('uuid')->unique();
             $table->string('nama_plot');
             $table->decimal('luas_area', 10, 2);
             $table->magellanPolygon('polygon', 4326)->nullable();
@@ -59,7 +60,7 @@ return new class extends Migration
                 ->cascadeOnDelete();
             $table->string('field_key');
             $table->string('field_label');
-            $table->enum('field_type', ['number', 'text', 'select', 'date', 'textarea']);
+            $table->enum('field_type', ['number', 'text', 'select', 'date', 'textarea', 'dynamic_select']);
             $table->string('satuan')->nullable();
             $table->string('indicator_key')->nullable();
             $table->timestamps();
@@ -85,6 +86,7 @@ return new class extends Migration
                 ->constrained('plot', 'plot_id')
                 ->cascadeOnDelete();
             $table->foreignId('indikator_id')
+                ->nullable()
                 ->constrained('indikator', 'indikator_id')
                 ->cascadeOnDelete();
             $table->foreignId('jenis_aktivitas_id')
@@ -155,9 +157,30 @@ return new class extends Migration
             $table->foreignId('progres_id')
                 ->constrained('progres', 'progres_id')
                 ->cascadeOnDelete();
+            $table->magellanPoint('location', 4326)->nullable();
             $table->string('image_path');
             $table->timestamps();
             $table->index(['progres_id']);
+        });
+
+        Schema::create('plot_handovers', function (Blueprint $table) {
+            $table->bigIncrements('plot_handover_id');
+            $table->foreignId('plot_id')->constrained('plot', 'plot_id')->onDelete('cascade');
+            $table->decimal('luas', 10, 2);
+            $table->string('lokasi');
+            $table->date('tanggal');
+            $table->timestamps();
+        });
+
+        Schema::create('plot_handover_files', function (Blueprint $table) {
+            $table->bigIncrements('plot_handover_file_id');
+            $table->foreignId('plot_handover_id')->constrained('plot_handovers', 'plot_handover_id')->onDelete('cascade');
+            $table->enum('type', ['surat', 'peta']);
+            $table->string('file_path');
+            $table->string('file_name');
+            $table->unsignedBigInteger('file_size')->nullable();
+            $table->string('mime_type')->nullable();
+            $table->timestamps();
         });
     }
 
@@ -166,6 +189,8 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::dropIfExists('plot_handover_files');
+        Schema::dropIfExists('plot_handovers');
         Schema::dropIfExists('progres_dokumentasi');
         Schema::dropIfExists('activity_logs');
         Schema::dropIfExists('progres_field_values');

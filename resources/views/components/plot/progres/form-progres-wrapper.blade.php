@@ -7,6 +7,7 @@
     'aktivitas' => null,
     'jenisAktivitas' => null,
     'existingFiles' => [],
+    'masterPohon' => [],
 ])
 
 @php
@@ -64,6 +65,7 @@
             :is-edit="$isEdit"
             x-bind:jenis-aktivitas-id="jenisAktivitasId"
             :existingFiles="$existingFiles"
+            :master-pohon="$masterPohon"
         />
     </template>
 </div>

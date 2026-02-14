@@ -8,6 +8,7 @@ use App\Models\Plot;
 use App\Models\IndikatorProgresReklamasi;
 use App\Models\TargetProgresReklamasi;
 use App\Models\ProgresReklamasi;
+use App\Models\JenisAktivitas;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 
@@ -74,9 +75,33 @@ class UpdateProgresReklamasiRequest extends FormRequest
             // Check target exists
             $this->validateTargetExists($validator, $plotId, $activityId);
             
-            // Check cumulative limits based on target and field type (excluding current record)
-            $this->validateCumulativeLimits($validator, $plotId, $activityId);
+            // Check if activity requires target 
+            if ($this->activityRequiresTarget($activityId)) {
+                $this->validateTargetExists($validator, $plotId, $activityId);
+                $this->validateCumulativeLimits($validator, $plotId, $activityId);
+            }
+
+            // Separate monitoring validation (NO target check)
+            $this->validateMonitoringRules($validator, $plotId, $activityId);
         });
+    }
+
+    /**
+     * Check if activity requires target (indicator-based activities)
+     */
+    private function activityRequiresTarget(int $activityId): bool
+    {
+        $jenisAktivitas = JenisAktivitas::find($activityId);
+        
+        if (!$jenisAktivitas) return false;
+        
+        // Monitoring activities DON'T require targets
+        $monitoringActivities = [
+            'monitoring_survival_rate',
+            'monitoring_pertumbuhan',
+        ];
+        
+        return !in_array($jenisAktivitas->field, $monitoringActivities);
     }
 
     /**
@@ -152,6 +177,218 @@ class UpdateProgresReklamasiRequest extends FormRequest
             if ($totalValue > $limit) {
                 $this->addLimitValidationError($validator, $fieldDef, $limit, $cumulativeValue, $totalValue, $validationType);
             }
+        }
+    }
+
+    /**
+     * Validate monitoring-specific rules (separate from target-based validation)
+     */
+    private function validateMonitoringRules($validator, $plotId, $activityId)
+    {
+        $jenisAktivitas = JenisAktivitas::find($activityId);
+        
+        if (!$jenisAktivitas) return;
+        
+        // Route to specific monitoring validation
+        switch ($jenisAktivitas->field) {
+            case 'monitoring_survival_rate':
+                $this->validateSurvivalRateMonitoring($validator, $plotId);
+                break;
+                
+            case 'monitoring_pertumbuhan':
+                $this->validateGrowthMonitoring($validator, $plotId);
+                break;
+        }
+    }
+
+    /**
+     * Validate survival rate monitoring (simplified - NO target check, NO area check)
+     */
+    private function validateSurvivalRateMonitoring($validator, $plotId)
+    {
+        $jenisPohonId = $this->input('jenis_pohon_id');
+        $metodeSampling = $this->input('metode_sampling');
+        $jumlahSurvey = (int)$this->input('jumlah_bibit_disurvey', 0);
+        $hidup = (int)$this->input('jumlah_bibit_hidup', 0);
+        $mati = (int)$this->input('jumlah_bibit_mati', 0);
+        
+        // 1. Validate jenis_pohon_id
+        if (!$jenisPohonId) {
+            $validator->errors()->add('jenis_pohon_id', 
+                'Jenis pohon wajib dipilih untuk monitoring survival rate.'
+            );
+            return;
+        }
+        
+        // 2. Validate hidup + mati = total survey
+        if (($hidup + $mati) != $jumlahSurvey) {
+            $validator->errors()->add('jumlah_bibit_disurvey', 
+                "Jumlah yang di-survey ({$jumlahSurvey}) harus sama dengan " .
+                "hidup ({$hidup}) + mati ({$mati}) = " . ($hidup + $mati)
+            );
+            return;
+        }
+        
+        // 3. Get total planted
+        $totalPlanted = $this->getTotalPlantedTrees($plotId, $jenisPohonId);
+        
+        if ($totalPlanted === 0) {
+            $validator->errors()->add('jenis_pohon_id', 
+                'Belum ada data penanaman untuk jenis pohon ini. ' .
+                'Tambahkan data penanaman terlebih dahulu sebelum melakukan monitoring.'
+            );
+            return;
+        }
+        
+        // 4. Validate based on sampling method
+        if ($metodeSampling === 'full_census') {
+            // Full census: must count ALL trees
+            if ($jumlahSurvey != $totalPlanted) {
+                $validator->errors()->add('jumlah_bibit_disurvey', 
+                    "Metode 'Sensus Lengkap' harus menghitung SEMUA pohon ({$totalPlanted} batang). " .
+                    "Anda hanya menghitung {$jumlahSurvey} pohon."
+                );
+            }
+        } else {
+            // Sampling: validate sample size
+            $this->validateSampleSize($validator, $jumlahSurvey, $totalPlanted, $metodeSampling);
+        }
+    }
+
+    /**
+     * Validate growth monitoring (simplified - NO target check)
+     */
+    private function validateGrowthMonitoring($validator, $plotId)
+    {
+        $jenisPohonId = $this->input('jenis_pohon_id');
+        $metodeSampling = $this->input('metode_sampling');
+        $jumlahSampel = (int)$this->input('jumlah_sampel_diukur', 0);
+        
+        // 1. Validate jenis_pohon_id
+        if (!$jenisPohonId) {
+            $validator->errors()->add('jenis_pohon_id', 
+                'Jenis pohon wajib dipilih untuk monitoring pertumbuhan.'
+            );
+            return;
+        }
+        
+        // 2. Get total planted trees
+        $totalPlanted = $this->getTotalPlantedTrees($plotId, $jenisPohonId);
+        
+        if ($totalPlanted === 0) {
+            $validator->errors()->add('jenis_pohon_id', 
+                'Belum ada data penanaman untuk jenis pohon ini. ' .
+                'Tambahkan data penanaman terlebih dahulu sebelum melakukan monitoring.'
+            );
+            return;
+        }
+        
+        // 3. Validate sample size based on method
+        if ($metodeSampling === 'full_census') {
+            if ($jumlahSampel != $totalPlanted) {
+                $validator->errors()->add('jumlah_sampel_diukur', 
+                    "Metode 'Sensus Lengkap' harus mengukur SEMUA pohon ({$totalPlanted} batang). " .
+                    "Anda hanya mengukur {$jumlahSampel} pohon."
+                );
+            }
+        } else {
+            // Sampling validation
+            $this->validateGrowthSampleSize($validator, $jumlahSampel, $totalPlanted, $metodeSampling);
+        }
+    }
+
+    /**
+     * Validate sample size for sampling methods
+     */
+    private function validateSampleSize($validator, int $sampleSize, int $totalPopulation, string $method)
+    {
+        // Statistical minimum sample size
+        $minSampleSize = max(30, ceil($totalPopulation * 0.05)); // Min 30 or 5%
+        $maxSampleSize = ceil($totalPopulation * 0.5); // Max 50%
+        
+        if ($sampleSize >= $totalPopulation) {
+            $validator->errors()->add('metode_sampling', 
+                "Anda menghitung {$sampleSize} dari {$totalPopulation} pohon. " .
+                "Gunakan 'Sensus Lengkap' jika menghitung semua pohon."
+            );
+            return;
+        }
+        
+        if ($sampleSize < $minSampleSize) {
+            $validator->errors()->add('jumlah_bibit_disurvey', 
+                "⚠️ Sample terlalu kecil! Minimal " . round($minSampleSize) . " pohon " .
+                "untuk hasil yang representatif (5% dari {$totalPopulation} pohon).\n\n" .
+                "📊 Rekomendasi: Tambah jumlah pohon yang di-survey untuk akurasi lebih baik."
+            );
+        }
+        
+        if ($sampleSize > $maxSampleSize) {
+            $samplingPercentage = round(($sampleSize / $totalPopulation) * 100);
+            $validator->errors()->add('jumlah_bibit_disurvey', 
+                "💡 INFO: Anda sudah menghitung {$samplingPercentage}% pohon.\n" .
+                "Pertimbangkan gunakan 'Sensus Lengkap' untuk akurasi maksimal."
+            );
+        }
+    }
+
+    /**
+     * Validate sample size for growth monitoring
+     */
+    private function validateGrowthSampleSize($validator, int $sampleSize, int $totalPopulation, string $method)
+    {
+        // For growth monitoring, smaller sample is acceptable
+        $minSampleSize = max(20, ceil($totalPopulation * 0.03)); // Min 20 or 3%
+        $maxSampleSize = ceil($totalPopulation * 0.4); // Max 40%
+        
+        if ($sampleSize >= $totalPopulation) {
+            $validator->errors()->add('metode_sampling', 
+                "Anda mengukur {$sampleSize} dari {$totalPopulation} pohon. " .
+                "Gunakan 'Sensus Lengkap' jika mengukur semua pohon."
+            );
+            return;
+        }
+        
+        if ($sampleSize < $minSampleSize) {
+            $validator->errors()->add('jumlah_sampel_diukur', 
+                "⚠️ Sampel terlalu kecil! Minimal " . round($minSampleSize) . " pohon " .
+                "untuk hasil yang representatif (3% dari {$totalPopulation} pohon).\n\n" .
+                "📊 Rekomendasi untuk monitoring pertumbuhan:\n" .
+                "• Plot Sampling: 10-20% dari total pohon\n" .
+                "• Systematic: Setiap pohon ke-N\n" .
+                "• Random: Minimal 20-30 pohon"
+            );
+        }
+        
+        if ($sampleSize > $maxSampleSize) {
+            $samplingPercentage = round(($sampleSize / $totalPopulation) * 100);
+            $validator->errors()->add('jumlah_sampel_diukur', 
+                "💡 INFO: Anda sudah mengukur {$samplingPercentage}% pohon.\n" .
+                "Pertimbangkan gunakan 'Sensus Lengkap' untuk data paling lengkap."
+            );
+        }
+    }
+
+    /**
+     * Get total planted trees for a specific jenis_pohon in a plot
+     */
+    private function getTotalPlantedTrees($plotId, $jenisPohonId): int
+    {
+        try {
+            $total = DB::table('data_pohon_realisasi as dpr')
+                ->join('pohon as p', 'dpr.pohon_id', '=', 'p.pohon_id')
+                ->where('dpr.plot_id', $plotId)
+                ->where('p.jenis_pohon_id', $jenisPohonId)
+                ->sum('dpr.jumlah_batang');
+
+            return (int)($total ?? 0);
+
+        } catch (\Exception $e) {
+            Log::error('Error getting total planted trees', [
+                'plot_id' => $plotId,
+                'jenis_pohon_id' => $jenisPohonId,
+                'error' => $e->getMessage()
+            ]);
+            return 0;
         }
     }
 
@@ -404,6 +641,10 @@ class UpdateProgresReklamasiRequest extends FormRequest
                 $rules[] = 'numeric';
                 $this->addNumericRangeRules($rules, $fieldConfig);
                 break;
+
+            case 'dynamic_select':
+                $rules[] = 'integer';
+                break;
                 
             case 'select':
                 $rules[] = 'string';
@@ -598,7 +839,7 @@ class UpdateProgresReklamasiRequest extends FormRequest
      */
     public function messages(): array
     {
-        return [
+         return [
             'jenis_aktivitas_id.required' => 'Jenis aktivitas harus dipilih.',
             'jenis_aktivitas_id.exists' => 'Jenis aktivitas tidak valid.',
             'tanggal.required' => 'Data Tanggal harus diisi.',
@@ -609,6 +850,41 @@ class UpdateProgresReklamasiRequest extends FormRequest
             'dokumentasi.*.max' => 'Ukuran gambar maksimal 5MB.',
             'removed_files.string' => 'Data file removal tidak valid.',
             '*.before_or_equal' => 'Tanggal tidak boleh lebih dari hari ini.',
+            
+            'metode_sampling.required' => 'Metode monitoring wajib dipilih.',
+            'metode_sampling.in' => 'Metode monitoring tidak valid.',
+            
+            'jumlah_bibit_disurvey.required' => 'Jumlah pohon yang di-survey wajib diisi.',
+            'jumlah_bibit_disurvey.integer' => 'Jumlah pohon harus berupa angka bulat.',
+            'jumlah_bibit_disurvey.min' => 'Jumlah pohon minimal 1.',
+            
+            'jumlah_bibit_hidup.required' => 'Jumlah tanaman hidup wajib diisi.',
+            'jumlah_bibit_hidup.integer' => 'Jumlah tanaman hidup harus berupa angka bulat.',
+            'jumlah_bibit_hidup.min' => 'Jumlah tanaman hidup tidak boleh negatif.',
+            
+            'jumlah_bibit_mati.required' => 'Jumlah tanaman mati wajib diisi.',
+            'jumlah_bibit_mati.integer' => 'Jumlah tanaman mati harus berupa angka bulat.',
+            'jumlah_bibit_mati.min' => 'Jumlah tanaman mati tidak boleh negatif.',
+            
+            'jumlah_sampel_diukur.required' => 'Jumlah sampel yang diukur wajib diisi.',
+            'jumlah_sampel_diukur.integer' => 'Jumlah sampel harus berupa angka bulat.',
+            'jumlah_sampel_diukur.min' => 'Jumlah sampel minimal 1 pohon.',
+            
+            'tinggi_tanaman_rata.required' => 'Rata-rata tinggi tanaman wajib diisi.',
+            'tinggi_tanaman_rata.numeric' => 'Tinggi tanaman harus berupa angka.',
+            'tinggi_tanaman_rata.min' => 'Tinggi tanaman tidak boleh negatif.',
+            
+            'diameter_tanaman_rata.required' => 'Rata-rata diameter batang wajib diisi.',
+            'diameter_tanaman_rata.numeric' => 'Diameter batang harus berupa angka.',
+            'diameter_tanaman_rata.min' => 'Diameter batang tidak boleh negatif.',
+            
+            'umur_tanaman_bulan.required' => 'Umur tanaman wajib diisi.',
+            'umur_tanaman_bulan.integer' => 'Umur tanaman harus berupa angka bulat.',
+            'umur_tanaman_bulan.min' => 'Umur tanaman tidak boleh negatif.',
+            
+            'persentase_pohon_sehat.numeric' => 'Persentase harus berupa angka.',
+            'persentase_pohon_sehat.min' => 'Persentase tidak boleh negatif.',
+            'persentase_pohon_sehat.max' => 'Persentase tidak boleh lebih dari 100.',
         ];
     }
 

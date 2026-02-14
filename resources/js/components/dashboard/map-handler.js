@@ -600,7 +600,9 @@ class DashboardMapHandler {
         return `
             <div class="plot-popup-content p-2 relative">
                 <button class="absolute cursor-pointer top-3 right-1 w-4 h-4 bg-transparent text-red-500 flex items-center justify-center text-lg font-bold transition-all duration-200 hover:scale-110">
-                    ×
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
                 </button>
                 <h3 class="text-lg font-bold mb-2 text-gray-800 pr-10" title="${plotName}">${truncatedName}</h3>
                 <div class="space-y-2 mb-3">

@@ -50,6 +50,7 @@
         {{-- Content --}}
         <div class="p-6 font-outfit space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {{-- Informasi Pohon --}}
                 <div class="bg-white border border-gainsboro rounded-xl p-6 shadow-sm space-y-5">
                     <div class="flex items-center gap-3 mb-4">
                         <div class="w-10 h-10 rounded-lg bg-green-100 flex items-center justify-center">
@@ -60,13 +61,23 @@
                         <h3 class="text-base font-semibold text-darkslategray">Informasi Pohon</h3>
                     </div>
                     <div class="space-y-4">
-                        <div>
-                            <div class="text-sm font-semibold text-darkslategray mb-1">Nama Jenis Pohon</div>
-                            <div class="text-lg font-bold text-darkslategray" x-text="data.nama_pohon"></div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <div class="text-sm font-semibold text-darkslategray mb-1">Nama Jenis Pohon</div>
+                                <div class="text-lg font-bold text-darkslategray" x-text="data.nama_pohon"></div>
+                            </div>
+                            <div>
+                                <div class="text-sm font-semibold text-darkslategray mb-1">Kategori</div>
+                                <div class="text-lg font-bold text-darkslategray uppercase" x-text="data.kategori"></div>
+                            </div>
                         </div>
                         <div>
                             <div class="text-sm font-semibold text-darkslategray mb-1">ID System</div>
                             <div class="text-sm text-white font-mono bg-gray-100 px-2 py-1 rounded inline-block" x-text="'#' + data.jenis_pohon_id"></div>
+                        </div>
+                        <div class="space-y-1 text-sm pt-2 border-t border-gray-200">
+                            <div><span class="font-semibold text-darkslategray">Dibuat:</span> <span class="ml-2 text-gray-600" x-text="formatDate(data.created_at)"></span></div>
+                            <div><span class="font-semibold text-darkslategray">Update:</span> <span class="ml-2 text-gray-600" x-text="formatDate(data.updated_at)"></span></div>
                         </div>
                     </div>
                 </div>
@@ -81,24 +92,39 @@
                         <h3 class="text-base font-semibold text-darkslategray">Statistik Global</h3>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="p-3 rounded-lg bg-blue-50 border border-blue-200">
-                            <div class="text-xs font-medium text-darkslategray mb-1">Total Lahan</div>
-                            <div class="text-xl font-bold text-blue-700">
-                                <span x-text="data.pohon_count"></span> <span class="text-xs font-normal text-slategray">Lahan</span>
+                    <div class="space-y-4">
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="p-3 rounded-lg bg-blue-50 border border-blue-200">
+                                <div class="text-xs font-medium text-darkslategray mb-1">Total Lahan</div>
+                                <div class="text-xl font-bold text-blue-700">
+                                    <span x-text="data.pohon_count || 0"></span> 
+                                    <span class="text-xs font-normal text-slategray">Lahan</span>
+                                </div>
                             </div>
-                        </div>
-                        
-                        <div class="p-3 rounded-lg bg-green-50 border border-green-200">
-                            <div class="text-xs font-medium text-darkslategray mb-1">Total Fisik</div>
-                            <div class="text-xl font-bold text-green-700">
-                                <span x-text="formatNumber(data.data_pohon_sum_jumlah)"></span> 
-                                <span class="text-xs font-normal text-slategray">Btg</span>
+                            
+                            <div class="p-3 rounded-lg bg-green-50 border border-green-200">
+                                <div class="text-xs font-medium text-darkslategray mb-1">Realisasi</div>
+                                <div class="text-xl font-bold text-green-700">
+                                    <span x-text="formatNumber(data.total_realisasi || 0)"></span> 
+                                    <span class="text-xs font-normal text-slategray">Btg</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="space-y-1 text-sm pt-2">
-                            <div><span class="font-semibold text-darkslategray">Dibuat:</span> <span class="ml-2 text-gray" x-text="formatDate(data.created_at)"></span></div>
-                            <div><span class="font-semibold text-darkslategray">Update:</span> <span class="ml-2 text-gray" x-text="formatDate(data.updated_at)"></span></div>
+
+                            <div class="p-3 rounded-lg bg-purple-50 border border-purple-200">
+                                <div class="text-xs font-medium text-darkslategray mb-1">Manual</div>
+                                <div class="text-xl font-bold text-purple-700">
+                                    <span x-text="formatNumber(data.total_manual || 0)"></span> 
+                                    <span class="text-xs font-normal text-slategray">Btg</span>
+                                </div>
+                            </div>
+
+                            <div class="p-3 rounded-lg bg-orange-50 border border-orange-200">
+                                <div class="text-xs font-medium text-darkslategray mb-1">Total</div>
+                                <div class="text-xl font-bold text-orange-700">
+                                    <span x-text="formatNumber(data.grand_total || 0)"></span> 
+                                    <span class="text-xs font-normal text-slategray">Btg</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -126,15 +152,26 @@
                             <thead class="text-xs text-gray-500 uppercase bg-gray-50 sticky top-0">
                                 <tr>
                                     <th class="px-4 py-2 rounded-tl-lg">Nama Lahan</th>
-                                    <th class="px-4 py-2 text-right rounded-tr-lg">Jumlah Pohon</th>
+                                    <th class="px-4 py-2 text-right">Realisasi</th>
+                                    <th class="px-4 py-2 text-right">Manual</th>
+                                    <th class="px-4 py-2 text-right rounded-tr-lg">Total</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-100">
                                 <template x-for="item in data.pohon" :key="item.pohon_id">
                                     <tr class="hover:bg-gray-50 transition-colors">
                                         <td class="px-4 py-3 font-medium text-darkslategray" x-text="item.lahan?.nama_lahan || 'Lahan dihapus'"></td>
+                                        
                                         <td class="px-4 py-3 text-right">
-                                            <span class="font-bold text-green-700" x-text="formatNumber(item.data_pohon_sum_jumlah)"></span>
+                                            <span class="font-bold text-green-700" x-text="formatNumber(item.total_realisasi || 0)"></span>
+                                        </td>
+
+                                        <td class="px-4 py-3 text-right">
+                                            <span class="font-bold text-purple-700" x-text="formatNumber(item.total_manual || 0)"></span>
+                                        </td>
+
+                                        <td class="px-4 py-3 text-right">
+                                            <span class="font-bold text-darkslategray" x-text="formatNumber((item.total_realisasi || 0) + (item.total_manual || 0))"></span>
                                             <span class="text-xs text-gray-500 ml-1">Btg</span>
                                         </td>
                                     </tr>
@@ -149,22 +186,16 @@
         {{-- Footer --}}
         <div class="flex items-center justify-end p-6 border-t border-gainsboro bg-gray-50 rounded-b-2xl">
             <div class="flex items-center space-x-3">
-                <x-main.primary-button @click="show = false" class="bg-red-500 !text-white text-sm py-3 px-4 rounded-lg font-medium hover:bg-red-600 transition-colors no-underline">
+                <button @click="show = false" 
+                        class="bg-red-500 !text-white text-sm py-3 px-4 rounded-lg font-medium hover:bg-red-600 transition-colors border-none cursor-pointer">
                     Close
-                </x-main.primary-button>
+                </button>
                 
                 <x-main.primary-button @click="show = false; $dispatch('edit-pohon', data)" class="py-3 px-4 gap-2 font-medium">
                     Edit
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M4 13V16H7L16 7L13 4L4 13Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
-                </x-main.primary-button>
-
-                <x-main.primary-button @click="show = false; setTimeout(() => $dispatch('open-modal', 'confirm-delete-' + data.jenis_pohon_id), 300)" class="py-3 px-4 gap-2 font-medium hidden">
-                    Delete
-                    <svg width="18" height="18" viewBox="0 0 15 18" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M4.52679 1.0877L4.28571 1.5625H1.07143C0.478795 1.5625 0 2.0373 0 2.625C0 3.2127 0.478795 3.6875 1.07143 3.6875H13.9286C14.5212 3.6875 15 3.2127 15 2.625C15 2.0373 14.5212 1.5625 13.9286 1.5625H10.7143L10.4732 1.0877C10.2924 0.725781 9.92076 0.5 9.51562 0.5H5.48438C5.07924 0.5 4.70759 0.725781 4.52679 1.0877ZM13.9286 4.75H1.07143L1.78125 16.0059C1.83482 16.8459 2.53795 17.5 3.38504 17.5H11.615C12.4621 17.5 13.1652 16.8459 13.2187 16.0059L13.9286 4.75Z" fill="white"/>
-                    </svg>                
                 </x-main.primary-button>
             </div>
         </div>

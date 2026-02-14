@@ -5,6 +5,7 @@
     'isEdit' => false,
     'jenis-aktivitas-id' => null,
     'existingFiles' => [],
+    'masterPohon' => [],
 ])
 
 <div class="self-stretch rounded-2xl bg-white border-gainsboro border-solid border-[1px] flex flex-col items-center">
@@ -25,7 +26,8 @@
             errors: {{ Js::from($errors->toArray() ?? []) }},
             existingFiles: {{ Js::from($existingFiles ?? []) }},
             baseFields: {{ Js::from(config('indicators.base_fields', [])) }},
-            data: {{ Js::from($data) }}
+            data: {{ Js::from($data) }},
+            masterPohon: {{ Js::from($masterPohon) }}
         })"
         @submit="onSubmit()"
     >
@@ -54,7 +56,7 @@
                             x-bind:name="key" 
                             class="flex-1 leading-5 bg-transparent text-sm" 
                             x-bind:required="field.required"
-                            x-bind:value="data[key] || ''"
+                            x-bind:value="formData[key] || ''"
                             x-on:invalid="$el.setCustomValidity(field.label + ' harus diisi')"
                             x-on:input="$el.setCustomValidity('')"
                         />
@@ -78,6 +80,81 @@
                                 <span class="text-red-500">*</span>
                             </template>
                         </div>
+
+                        {{-- Dynamic Select Field for Jenis Pohon --}}
+                        <template x-if="field.type === 'dynamic_select' && field.source === 'jenis_pohon'">
+                            <div class="w-full">
+                                <select 
+                                    x-bind:name="key" 
+                                    x-model="formData[key]"
+                                    class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit leading-5 bg-transparent"
+                                    x-bind:required="field.required"
+                                >
+                                    <option value="">Pilih Jenis Pohon</option>
+                                    <template x-for="pohon in getTreeOptions(field.filter_kategori)" :key="pohon.jenis_pohon_id">
+                                        <option 
+                                            x-bind:value="pohon.jenis_pohon_id" 
+                                            x-text="pohon.nama_pohon"
+                                            x-bind:selected="formData[key] == pohon.jenis_pohon_id"
+                                        ></option>
+                                    </template>
+                                </select>
+
+                                {{-- Show hint if monitoring activity --}}
+                                <template x-if="isMonitoringActivity()">
+                                    <div class="mt-2">
+                                        {{-- Loading state --}}
+                                        <template x-if="monitoringHint.isLoading">
+                                            <div class="p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                                                <div class="flex items-center gap-2 text-sm text-gray-600">
+                                                    <svg class="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
+                                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                                    </svg>
+                                                    <span>Memuat data penanaman...</span>
+                                                </div>
+                                            </div>
+                                        </template>
+
+                                        {{-- Info hint --}}
+                                        <template x-if="!monitoringHint.isLoading && monitoringHint.totalPlanted !== null">
+                                            <div class="p-3 rounded-lg" x-bind:class="monitoringHint.totalPlanted > 0 ? 'bg-blue-50 border border-blue-200' : 'bg-yellow-50 border border-yellow-200'">
+                                                <div class="flex items-start gap-2">
+                                                    <svg class="w-5 h-5 flex-shrink-0 mt-0.5" x-bind:class="monitoringHint.totalPlanted > 0 ? 'text-blue-600' : 'text-yellow-600'" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                                    </svg>
+                                                    <div class="flex-1">
+                                                        <template x-if="monitoringHint.totalPlanted > 0">
+                                                            <div>
+                                                                <div class="text-xs font-semibold mb-1" x-bind:class="monitoringHint.totalPlanted > 0 ? 'text-blue-800' : 'text-yellow-800'">
+                                                                    📊 Informasi Penanaman
+                                                                </div>
+                                                                <p class="text-xs" x-bind:class="monitoringHint.totalPlanted > 0 ? 'text-blue-700' : 'text-yellow-700'">
+                                                                    Total ditanam di plot ini: 
+                                                                    <span class="font-bold" x-text="monitoringHint.totalPlanted.toLocaleString('id-ID')"></span> 
+                                                                    batang
+                                                                </p>
+                                                                <p class="text-xs mt-1" x-bind:class="monitoringHint.totalPlanted > 0 ? 'text-blue-600' : 'text-yellow-600'">
+                                                                    Anda dapat melakukan sampling (monitoring sebagian area)
+                                                                </p>
+                                                            </div>
+                                                        </template>
+                                                        <template x-if="monitoringHint.totalPlanted === 0">
+                                                            <div>
+                                                                <div class="text-xs font-semibold text-yellow-800 mb-1">⚠️ Tidak Ada Data Penanaman</div>
+                                                                <p class="text-sm text-yellow-700">
+                                                                    Belum ada data penanaman untuk jenis pohon ini di plot ini.
+                                                                </p>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
+                            </div>
+                        </template>
                         
                         {{-- Select Field --}}
                         <template x-if="field.type === 'select'">
@@ -86,13 +163,27 @@
                                 class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent"
                                 x-bind:required="field.required"
                             >
-                                <option value="">- Pilih -</option>
-                                <template x-for="option in field.config.options || []" :key="option">
-                                    <option 
-                                        x-bind:value="option" 
-                                        x-text="option"
-                                        x-bind:selected="data[key] === option"
-                                    ></option>
+                                <option value="">Pilih</option>
+                                {{-- Handle associative array (key => value) --}}
+                                <template x-if="typeof Object.values(field.config?.options || {})[0] === 'string' && Object.keys(field.config?.options || {}).some(k => isNaN(k))">
+                                    <template x-for="[value, label] in Object.entries(field.config?.options || {})" :key="value">
+                                        <option 
+                                            :value="value" 
+                                            x-text="label"
+                                            x-bind:selected="formData[key] == value"
+                                        ></option>
+                                    </template>
+                                </template>
+                                
+                                {{-- Handle indexed array (backward compatibility) --}}
+                                <template x-if="Array.isArray(field.config?.options) || typeof Object.values(field.config?.options || {})[0] !== 'string'">
+                                    <template x-for="option in (field.config?.options || [])" :key="option">
+                                        <option 
+                                            x-bind:value="option" 
+                                            x-text="option"
+                                            x-bind:selected="formData[key] === option"
+                                        ></option>
+                                    </template>
                                 </template>
                             </select>
                         </template>
@@ -101,10 +192,10 @@
                         <template x-if="field.type === 'textarea'">
                             <textarea 
                                 x-bind:name="key" 
-                                class="self-stretch rounded-lg bg-white border-lightgray border-solid border-[1px] py-3 px-4 text-darkgray focus:border-blue-500 focus:ring-blue-500 min-h-[120px] resize-y" 
+                                class="self-stretch border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-0 rounded-md px-3 py-2 resize-none leading-5 bg-transparent font-outfit text-sm min-h-[120px] resize-y" 
                                 x-bind:required="field.required"
                                 x-bind:placeholder="'Enter ' + field.label.toLowerCase() + '...'"
-                                x-text="data[key] || ''"
+                                x-text="formData[key] || ''"
                             ></textarea>
                         </template>
                         
@@ -115,7 +206,7 @@
                                 x-bind:name="key" 
                                 class="self-stretch rounded-lg bg-white border-lightgray border-solid border-[1px] box-border py-2.5 px-4 text-darkgray focus:border-blue-500 focus:ring-blue-500" 
                                 x-bind:required="field.required"
-                                x-bind:value="data[key] || ''"
+                                x-bind:value="formData[key] || ''"
                             />
                         </template>
                         
@@ -127,7 +218,8 @@
                                 x-bind:name="key" 
                                 class="flex-1 leading-5 bg-transparent text-sm"
                                 x-bind:required="field.required"
-                                x-bind:value="data[key] || ''"
+                                x-bind:placeholder="field.config?.placeholder || ''"
+                                x-bind:value="formData[key] || ''"
                                 x-on:invalid="$el.setCustomValidity(field.label + ' harus diisi')"
                                 x-on:input="$el.setCustomValidity('')"
                             />
@@ -140,7 +232,8 @@
                                 x-bind:name="key" 
                                 class="flex-1 leading-5 bg-transparent text-sm" 
                                 x-bind:required="field.required"
-                                x-bind:value="data[key] || ''"
+                                x-bind:placeholder="field.config?.placeholder || ''"
+                                x-bind:value="formData[key] || ''"
                             />
                         </template>
 
@@ -280,6 +373,9 @@
                                 <div x-show="getErrorMessage(key)" class="text-tomato text-xs mt-1">
                                     <p x-text="getErrorMessage(key)"></p>
                                 </div>
+
+                                <!-- File format and size info -->
+                                <p class="text-xs text-gray-500">Dapat memasukan lebih dari satu dokumentasi</p>
                             </div>
                         </template>
                         
@@ -290,7 +386,7 @@
                                 class="self-stretch border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-0 rounded-md px-3 py-2 resize-none leading-5 bg-transparent font-outfit text-sm min-h-[120px] resize-y" 
                                 x-bind:required="field.required"
                                 placeholder="Enter a catatan..."
-                                x-text="data[key] || ''"
+                                x-text="formData[key] || ''"
                             ></textarea>
                         </template>
                         
@@ -301,7 +397,7 @@
                                 x-bind:name="key" 
                                 class="flex-1 leading-5 bg-transparent text-sm" 
                                 x-bind:required="field.required"
-                                x-bind:value="data[key] || ''"
+                                x-bind:value="formData[key] || ''"
                             />
                         </template>
 

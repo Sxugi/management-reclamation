@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Lahan;
 use App\Models\Pohon;
-use App\Models\DataPohon;
+use App\Models\DataPohonManual;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -35,9 +35,7 @@ class PohonController extends Controller
         $pohon->setCollection($pohonCollection);
 
         $tahunList = DataPohonService::getTahunList($pohonCollection, $sort, $direction);
-
         $hasFilter = DataPohonService::hasFilter($request);
-
         $jenisPohonList = DataPohonService::getJenisPohonList($lahan->lahan_id);
 
         return view('detail-lahan.pohon.index', [
@@ -73,40 +71,24 @@ class PohonController extends Controller
         $this->authorize('create', [Pohon::class, $lahan]);
 
         $validated = $request->validated();
-        $validated['lahan_id'] = $lahan->lahan_id;
         
         try {
-            $pohon = null;
-            DB::transaction(function () use ($validated, $lahan, &$pohon) {
-                $pohon = Pohon::where('lahan_id', $lahan->lahan_id)
-                            ->where('jenis_pohon_id', $validated['jenis_pohon_id'])
-                            ->first();
-
-                if (!$pohon) {
-                    $pohon = Pohon::create([
+            DB::transaction(function () use ($validated, $lahan) {
+                $pohon = Pohon::firstOrCreate(
+                    [
                         'lahan_id' => $lahan->lahan_id,
-                        'jenis_pohon_id' => $validated['jenis_pohon_id'],
-                    ]);
-                }
-
-                $exists = $pohon->dataPohon()
-                    ->where('tahun', $validated['tahun'])
-                    ->exists();
-
-                if ($exists) {
-                    throw new \Exception("Data untuk tahun {$validated['tahun']} sudah ada.");
-                }
-
-                $pohon->dataPohon()->create([
+                        'jenis_pohon_id' => $validated['jenis_pohon_id']
+                    ]
+                );
+                DataPohonManual::create([
+                    'pohon_id' => $pohon->pohon_id,
                     'tahun' => $validated['tahun'],
-                    'jumlah' => $validated['jumlah'],
+                    'jumlah_batang' => $validated['jumlah_batang'],
                 ]);
             });
 
-            $namaPohon = $pohon->jenis->nama_pohon ?? 'Unknown';
-
-            return redirect()->route('lahan.pohon.index', $pohon->lahan_id)
-                ->with('success', 'Data pohon ' . $namaPohon . ' tahun ' . $validated['tahun'] . ' berhasil ditambahkan.');
+            return redirect()->route('lahan.pohon.index', $lahan->lahan_id)
+                ->with('success', 'Data pohon berhasil ditambahkan.');
         } catch (\Exception $e) {
             \Log::error('Error creating data pohon', [
                 'user' => Auth::user()->username,
@@ -123,7 +105,7 @@ class PohonController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Lahan $lahan, Pohon $pohon, DataPohon $dataPohon)
+    public function edit(Lahan $lahan, Pohon $pohon, DataPohonManual $dataPohonManual)
     {
         // Safety Check
         if ($pohon->lahan_id !== $lahan->lahan_id) {
@@ -131,7 +113,7 @@ class PohonController extends Controller
         }
         
         // Verify that the DataPohon belongs to the Pohon
-        if ($dataPohon->pohon_id !== $pohon->pohon_id) {
+        if ($dataPohonManual->pohon_id !== $pohon->pohon_id) {
             abort(404, 'Data detail pohon tidak sesuai.');
         }
 
@@ -143,14 +125,14 @@ class PohonController extends Controller
             'lahan' => $lahan,
             'pohon' => $pohon,
             'jenisPohonList' => $jenisPohonList,
-            'dataPohon' => $dataPohon
+            'dataPohon' => $dataPohonManual
         ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePohonRequest $request, Lahan $lahan, Pohon $pohon, DataPohon $dataPohon)
+    public function update(UpdatePohonRequest $request, Lahan $lahan, Pohon $pohon, DataPohonManual $dataPohonManual)
     {
         // Safety Check
         if ($pohon->lahan_id !== $lahan->lahan_id) {
@@ -158,29 +140,25 @@ class PohonController extends Controller
         }
 
         $this->authorize('update', $pohon);
-
         $validated = $request->validated();
-        $validated['lahan_id'] = $lahan->lahan_id;
         
         try {
-            DB::transaction(function () use ($pohon, $dataPohon, $validated) {
+            DB::transaction(function () use ($pohon, $dataPohon, $validated, $lahan) {
                 if ($pohon->jenis_pohon_id != $validated['jenis_pohon_id']) {
-                    $pohon->update([
-                        'jenis_pohon_id' => $validated['jenis_pohon_id'],
+                    $newParent = Pohon::firstOrCreate([
+                        'lahan_id' => $lahan->lahan_id,
+                        'jenis_pohon_id' => $validated['jenis_pohon_id']
                     ]);
+                    $dataPohonManual->pohon_id = $newParent->pohon_id;
                 }
 
-                $dataPohon->update([
-                    'tahun' => $validated['tahun'],
-                    'jumlah' => $validated['jumlah'],
-                ]);
+                $dataPohonManual->tahun = $validated['tahun'];
+                $dataPohonManual->jumlah_batang = $validated['jumlah_batang'];
+                $dataPohonManual->save();
             });
 
-            $pohon->load('jenis'); 
-            $namaPohon = $pohon->jenis->nama_pohon ?? 'Unknown';
-
-            return redirect()->route('lahan.pohon.index', $pohon->lahan_id)
-                            ->with('success', 'Data pohon ' . $namaPohon . ' tahun ' . $validated['tahun'] . ' berhasil diperbarui.');
+            return redirect()->route('lahan.pohon.index', $lahan->lahan_id)
+                            ->with('success', 'Data pohon berhasil diperbarui.');
         } catch (\Exception $e) {
             \Log::error('Error updating data pohon', [
                 'user' => Auth::user()->username,
@@ -197,36 +175,31 @@ class PohonController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Lahan $lahan, Pohon $pohon, $tahun)
+    public function destroy(Lahan $lahan, Pohon $pohon, DataPohonManual $dataPohonManual)
     {
         // Safety Check
         if ($pohon->lahan_id !== $lahan->lahan_id) {
             abort(404, 'Data pohon tidak ditemukan untuk lahan ini.');
         }
 
-        $this->authorize('delete', $pohon);
-
-        $dataPohon = $pohon->dataPohon()->where('tahun', $tahun)->first();
-
-        if (!$dataPohon) {
-            return back()->with('error', 'Data tahun tersebut tidak ditemukan.');
+        if ($dataPohonManual->pohon_id !== $pohon->pohon_id) {
+            abort(404, 'Data tidak sesuai.');
         }
+
+        $this->authorize('delete', $pohon);
         
-        DB::beginTransaction();
         try {
-            $namaPohon = $pohon->jenis->nama_pohon ?? 'Unknown';
-
-            $dataPohon->delete();
-
-            DB::commit();
+            $jenisPohon = $pohon->jenisPohon->nama_pohon ?? 'Pohon';
+            $tahun = $dataPohonManual->tahun;
             
+            $dataPohonManual->delete();
+
             return redirect()->route('lahan.pohon.index', $lahan)
-                ->with('success', "Data pohon $namaPohon tahun $tahun berhasil dihapus.");
+                ->with('success', "Data {$jenisPohon} tahun {$tahun} berhasil dihapus.");
+
         } catch (\Exception $e) {
-            DB::rollBack();
             \Log::error('Error deleting data pohon', [
-                'pohon_id' => $pohon->pohon_id,
-                'tahun' => $tahun,
+                'data_pohon_manual_id' => $dataPohonManual->data_pohon_manual_id,
                 'error' => $e->getMessage()
             ]);
 

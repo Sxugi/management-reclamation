@@ -19,16 +19,30 @@
                         <select id="chart-view-filter" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit flex-1 leading-5 bg-white">
                             <option value="overall">Overall</option>
                             <option value="indicator">Indikator</option>
+                            <option value="planted">Sebaran Pohon</option> 
                         </select>
                     </div>
 
-                    <div>
+                    <!-- Period Selector -->
+                    <div id="period-selector-container">
                         <x-main.input-label for="chart-period-filter" class="block text-sm font-medium text-gray-700 mb-1">Periode Waktu</x-main.input-label>
                         <select id="chart-period-filter" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit flex-1 leading-5 bg-white">
                             <option value="7days">7 Hari</option>
                             <option value="30days" selected>30 Hari</option>
                             <option value="90days">90 Hari</option>
                             <option value="1year">1 Tahun</option>
+                        </select>
+                    </div>
+
+                    <!-- Tree Category Selector (only for planted view) -->
+                    <div id="tree-category-container" class="hidden">
+                        <x-main.input-label for="tree-category-filter" class="block text-sm font-medium text-gray-700 mb-1">Kategori Pohon</x-main.input-label>
+                        <select id="tree-category-filter" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md shadow-sm px-3 py-2 box-border font-outfit flex-1 leading-5 bg-white">
+                            <option value="all">Semua Kategori</option>
+                            <option value="pionir">Pohon Pionir</option>
+                            <option value="lokal">Pohon Lokal</option>
+                            <option value="mpts">MPTS</option>
+                            <option value="cover_crop">Cover Crops</option>
                         </select>
                     </div>
                 </div>
@@ -81,6 +95,11 @@
                         <p class="text-xs text-gray-500 mt-1">Menampilkan progres indikator untuk spesifik blok</p>
                     </div>
                 </div>
+            </div>
+
+            <div id="planted-controls" class="bg-yellow-50 rounded-lg p-3 hidden">
+                <h4 class="text-sm font-medium text-darkslategray mb-3">Sebaran Pohon Settings</h4>
+                <p class="text-xs text-gray-500">Pilih kategori pohon untuk melihat sebaran penanaman per jenis tanaman</p>
             </div>
 
             <!-- Action Buttons -->

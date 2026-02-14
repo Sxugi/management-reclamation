@@ -121,9 +121,9 @@
                                         'edit_url' => route('admin.users.edit', $user),
                                         'delete_url' => route('admin.users.destroy', $user),
                                         'stats' => [
-                                            'total_lahan' => $user->lahan()->count(),
-                                            'owned_lahan' => $user->lahan()->wherePivot('role', 'owner')->count(),
-                                            'team_member' => $user->lahan()->wherePivot('role', '!=', 'owner')->count(),
+                                            'total_lahan' => $user->lahans()->count(),
+                                            'owned_lahan' => $user->lahans()->wherePivot('role', 'owner')->count(),
+                                            'team_member' => $user->lahans()->wherePivot('role', '!=', 'owner')->count(),
                                         ]
                                     ];
                                 @endphp

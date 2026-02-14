@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\Lahan;
 use App\Models\Plot;
+use App\Models\PlotHandover;
 use App\Models\ProgresReklamasi;
 use App\Models\TargetProgresReklamasi;
 use App\Models\AnggaranReklamasi;
@@ -14,6 +15,7 @@ use App\Models\Dokumentasi;
 use App\Models\ReklamasiFile;
 use App\Policies\LahanPolicy;
 use App\Policies\PlotPolicy;
+use App\Policies\PlotHandoverPolicy;
 use App\Policies\ProgresReklamasiPolicy;
 use App\Policies\TargetProgresReklamasiPolicy;
 use App\Policies\AnggaranReklamasiPolicy;
@@ -35,6 +37,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         Lahan::class => LahanPolicy::class,
         Plot::class => PlotPolicy::class, 
+        PlotHandover::class => PlotHandoverPolicy::class,
         ProgresReklamasi::class => ProgresReklamasiPolicy::class,
         TargetProgresReklamasi::class => TargetProgresReklamasiPolicy::class,
         AnggaranReklamasi::class => AnggaranReklamasiPolicy::class,

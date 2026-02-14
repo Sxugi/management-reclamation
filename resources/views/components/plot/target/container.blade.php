@@ -4,7 +4,7 @@
             ? $target
             : collect($target ? [$target] : []);
     @endphp    
-    <div class="px-6 py-4 border-[0px] border-b-[1px] border-gainsboro border-solid flex justify-between items-center">
+    <div class="px-6 py-4 border-0 border-b-1 border-gainsboro border-solid flex justify-between items-center">
         <div class="font-bold text-base font-outfit">
             Target Reklamasi Blok {{ $plot->nama_plot }}
         </div>
@@ -22,7 +22,7 @@
             </button>
         @endif
     </div>
-    <div class="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-10 gap-3 p-4 pt-0">
+    <div class="grid grid-cols-2 sm:grid-cols-5 md:grid-cols-4 lg:grid-cols-6 gap-3 p-4 pt-0">
         @forelse($list as $t)
         <div class="flex flex-col items-center">
             <div class="text-xs font-medium text-gray-700 text-center leading-tight h-8 flex items-center justify-center px-1">

@@ -1,4 +1,4 @@
-@props(['lahan', 'pohon', 'dataPohon' => null, 'jenisPohonList' => []])
+@props(['lahan', 'pohon' => null, 'dataPohon' => null, 'jenisPohonList' => []])
 
 <form method="POST" action="{{ $dataPohon ? route('lahan.pohon.update', [$lahan, $pohon, $dataPohon]) : route('lahan.pohon.store', $lahan) }}">
     @csrf
@@ -9,7 +9,7 @@
     <div class="w-full relative rounded-2xl bg-white border-gainsboro border-solid border-[1px] box-border flex flex-col items-center justify-start text-left text-base text-gray font-outfit">
         <div class="self-stretch border-gainsboro border-solid border-b-[1px] border-[0px] flex flex-row items-start justify-start py-5 px-6">
             <div class="flex flex-col items-start justify-start">
-                <div class="relative leading-6 font-medium">Informasi Pohon</div>
+                <div class="relative leading-6 font-medium">Informasi Data Pohon</div>
             </div>
         </div>
         
@@ -34,20 +34,21 @@
                                 {{ $item->nama_pohon }}
                             </option>
                         @endforeach
-                    </select> 
+                    </select>
                 </div>
                 <x-main.input-error :messages="$errors->get('jenis_pohon_id')" data-turbo-temporary />
             </div>
 
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                <x-main.input-label class="relative leading-5 font-medium">Tahun
+                <x-main.input-label class="relative leading-5 font-medium">Tahun Tanam
                     <span class="text-red-500">*</span>
                 </x-main.input-label>
                 <x-main.text-input 
                     type="number" 
                     name="tahun"
                     value="{{ old('tahun', $dataPohon?->tahun) }}"
-                    min="1900" max="2100"
+                    min="1900" 
+                    max="{{ date('Y') + 1 }}"
                     placeholder="Masukkan tahun"
                     class="flex-1 leading-5 bg-transparent text-sm"
                     required
@@ -58,24 +59,47 @@
             </div>
 
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">
-                <x-main.input-label class="relative leading-5 font-medium">Jumlah
-                    <span class="text-red-500">*</span>
-                </x-main.input-label>
+                <div class="flex justify-between items-center w-full">
+                    <x-main.input-label class="relative leading-5 font-medium">Jumlah Batang
+                        <span class="text-red-500">*</span>
+                    </x-main.input-label>
+                    <span class="text-xs text-gray-400 italic">Input manual (stok lahan-wide)</span>
+                </div>
+                
                 <x-main.text-input 
                     type="number" 
-                    name="jumlah"
-                    value="{{ old('jumlah', $dataPohon?->jumlah) }}"
+                    name="jumlah_batang"
+                    value="{{ old('jumlah_batang', $dataPohon?->jumlah_batang) }}"
                     min="1"
-                    placeholder="Masukkan jumlah pohon"
+                    max="1000000"
+                    placeholder="Masukkan jumlah batang"
                     class="flex-1 leading-5 bg-transparent text-sm"
                     required
-                    oninvalid="this.setCustomValidity('Jumlah harus diisi')"
+                    oninvalid="this.setCustomValidity('Jumlah batang harus diisi')"
                     oninput="this.setCustomValidity('')"
                 />
-                <x-main.input-error :messages="$errors->get('jumlah')" data-turbo-temporary />
+                <p class="text-xs text-gray-500 mt-1">
+                    Minimal 1 batang. Data ini tidak terikat ke plot tertentu.
+                </p>
+                <x-main.input-error :messages="$errors->get('jumlah_batang')" data-turbo-temporary />
             </div>
 
-            <div class="self-stretch flex flex-row items-center justify-end gap-3">
+            @if($dataPohon)
+                <div class="self-stretch flex flex-col items-start justify-start gap-1.5 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <div class="text-sm font-semibold text-blue-800">Edit Input Data Manual</div>
+                    </div>
+                    <div class="text-xs text-blue-700">
+                        Anda sedang mengedit data pohon yang di-input manual (tidak terikat ke plot). 
+                        Data realisasi dari progres harian akan ditampilkan terpisah di detail modal.
+                    </div>
+                </div>
+            @endif
+
+            <div class="self-stretch flex flex-row items-center justify-end gap-3 mt-4">
                 <a href="{{ route('lahan.pohon.index', $lahan) }}" 
                    class="bg-red-500 !text-white text-sm py-3 px-4 rounded-lg font-semibold hover:bg-red-600 transition-colors no-underline cursor-pointer">
                     Cancel

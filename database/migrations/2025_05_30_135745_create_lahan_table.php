@@ -15,11 +15,13 @@ return new class extends Migration
             $table->bigIncrements('lahan_id');
             $table->string('nama_lahan');
             $table->decimal('luas_lahan', 10, 2);
+            $table->decimal('luas_lahan_original', 10, 2);
             $table->year('tahun_awal');
             $table->year('tahun_akhir');
-            $table->string('pic_reklamasi');
+            $table->unsignedBigInteger('pic_id')->nullable();
+            $table->foreign('pic_id')->references('user_id')->on('users')->onDelete('restrict');
             $table->magellanPoint('location', 4326);
-            $table->string('status')->default('Active');
+            $table->string('fase')->default('Lahan Baru');
             $table->timestamps();
         });
     }

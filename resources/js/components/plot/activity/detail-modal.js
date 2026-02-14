@@ -248,7 +248,7 @@ document.addEventListener("turbo:load", () => {
                         <tbody>
                             <!-- Loading Spinner Row -->
                             <tr class="border-gainsboro border-b">
-                                <td colspan="5" class="py-8 text-center">
+                                <td colspan="6" class="py-8 text-center">
                                     <div class="flex justify-center items-center space-x-2">
                                         <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>

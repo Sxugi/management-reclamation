@@ -201,4 +201,32 @@ class DashboardController extends Controller
             return response()->json(['error' => 'Internal server error'], 500);
         }
     }
+
+    /**
+     * Get planted trees distribution (planting-based)
+     */
+    public function getPlantedTreesDistribution(Lahan $lahan)
+    {
+        try {
+            // Use policy authorization
+            $this->authorize('view', $lahan);
+
+            $data = DashboardService::getPlantedTreesDistribution($lahan->lahan_id);
+
+            return response()->json($data);
+            
+        } catch (\Exception $e) {
+            Log::error("Dashboard getPlantedTreesDistribution error: " . $e->getMessage());
+            return response()->json([
+                'error' => 'Failed to load planted trees data',
+                'by_category' => [],
+                'by_species' => [],
+                'summary' => [
+                    'total_trees' => 0, 
+                    'total_benih_kg' => 0,
+                    'total_species' => 0
+                ]
+            ], 500);
+        }
+    }
 }

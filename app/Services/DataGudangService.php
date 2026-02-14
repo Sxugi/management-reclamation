@@ -37,6 +37,9 @@ class DataGudangService
         } elseif ($request->filled('endDate')) {
             $query->whereDate('tanggal_masuk', '<=', $request->endDate);
         }
+        if ($request->filled('namaBarang')) {
+            $query->where('nama_barang', $request->namaBarang);
+        }
         if ($request->filled('jenisBarang')) {
             $query->where('jenis_barang', $request->jenisBarang);
         }
@@ -57,6 +60,43 @@ class DataGudangService
     }
 
     /**
+     * Get Stock Summary
+     */
+    public static function getStockSummary(Lahan $lahan)
+    {
+        return DataGudang::where('lahan_id', $lahan->lahan_id)
+            ->select('nama_barang', 'jenis_barang', 'satuan')
+            
+            ->selectRaw("
+                SUM(CASE 
+                    WHEN jenis_transaksi = 'MASUK' THEN jumlah_barang 
+                    ELSE 0 
+                END) as total_masuk
+            ")
+            
+            ->selectRaw("
+                SUM(CASE 
+                    WHEN jenis_transaksi = 'MASUK' THEN jumlah_barang 
+                    WHEN jenis_transaksi = 'KELUAR' THEN -jumlah_barang 
+                    ELSE 0 
+                END) as total_sisa
+            ")
+            
+            ->groupBy('nama_barang', 'jenis_barang', 'satuan')
+            
+            // Hanya tampilkan barang yang pernah masuk (termasuk yang stoknya sekarang 0)
+            ->havingRaw("
+                SUM(CASE 
+                    WHEN jenis_transaksi = 'MASUK' THEN jumlah_barang 
+                    ELSE 0 
+                END) > 0
+            ")
+            
+            ->orderBy('nama_barang')
+            ->get();
+    }
+
+    /**
      * Export Data Gudang to Excel
      */
     public static function exportExcel(Lahan $lahan)
@@ -73,9 +113,9 @@ class DataGudangService
             ->orderBy('tanggal_masuk', 'desc')
             ->get();
 
-        // Setup Column Headers
-        $headers = ['No', 'Tanggal Masuk', 'Jenis Barang', 'Nama Barang', 'Jumlah', 'Lokasi Penyimpanan', 'Status'];
-        $endCol = 'G'; 
+        // Header Columns
+        $headers = ['No', 'Tanggal', 'Jenis Transaksi', 'SKU', 'Kategori', 'Nama Barang', 'Jumlah', 'Satuan', 'Lokasi', 'Kondisi'];
+        $endCol = 'J'; 
 
         // --- TITLE (Row 1) ---
         $lahanName = strtoupper($lahan->nama_lahan);
@@ -111,8 +151,12 @@ class DataGudangService
                 'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'CCCCCC']]]
             ]);
             
-            foreach (range('A', $endCol) as $col) $sheet->getColumnDimension($col)->setWidth(15);
-            $sheet->getColumnDimension('D')->setWidth(35);
+            // Set column widths
+            foreach (range('A', $endCol) as $col) {
+                $sheet->getColumnDimension($col)->setWidth(15);
+            }
+            $sheet->getColumnDimension('F')->setWidth(35);
+            $sheet->getColumnDimension('I')->setWidth(25);
 
             return self::outputStream($spreadsheet, $lahan);
         }
@@ -124,32 +168,41 @@ class DataGudangService
         foreach ($dataGudang as $item) {
             $sheet->setCellValue('A' . $row, $no++);
             $sheet->setCellValue('B' . $row, $item->tanggal_masuk ? \Carbon\Carbon::parse($item->tanggal_masuk)->format('d-m-Y') : '-');
-            $sheet->setCellValue('C' . $row, $item->jenis_barang);
-            $sheet->setCellValue('D' . $row, $item->nama_barang);
-            $sheet->setCellValue('E' . $row, $item->jumlah_barang);
-            $sheet->setCellValue('F' . $row, $item->lokasi_penyimpanan);
-            $sheet->setCellValue('G' . $row, ucfirst($item->status_barang));
-
-            // Styling Baris
+            
+            $sheet->setCellValue('C' . $row, $item->jenis_transaksi);
+            $sheet->setCellValue('D' . $row, $item->sku ?: '-');
+            $sheet->setCellValue('E' . $row, $item->jenis_barang);
+            $sheet->setCellValue('F' . $row, $item->nama_barang);
+            $sheet->setCellValue('G' . $row, $item->jumlah_barang);
+            $sheet->setCellValue('H' . $row, $item->satuan);
+            $sheet->setCellValue('I' . $row, $item->lokasi_penyimpanan);
+            $sheet->setCellValue('J' . $row, ucfirst($item->status_barang));
             $sheet->getStyle("A{$row}:{$endCol}{$row}")->applyFromArray([
                 'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
                 'alignment' => ['vertical' => Alignment::VERTICAL_TOP]
             ]);
             
             // Alignment
-            $sheet->getStyle("A{$row}:B{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle("E{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle("G{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-            $sheet->getStyle("C{$row}:D{$row}")->getAlignment()->setIndent(1);
-            $sheet->getStyle("F{$row}")->getAlignment()->setIndent(1);
+            $sheet->getStyle("A{$row}:D{$row}")->getAlignment()->setHorizontal(Alignment:: HORIZONTAL_CENTER);
+            $sheet->getStyle("G{$row}:H{$row}")->getAlignment()->setHorizontal(Alignment:: HORIZONTAL_CENTER);
+            $sheet->getStyle("J{$row}")->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+            $sheet->getStyle("E{$row}:F{$row}")->getAlignment()->setIndent(1);
+            $sheet->getStyle("I{$row}")->getAlignment()->setIndent(1);
 
             $row++;
         }
 
         // Auto Width
-        foreach (range('A', $endCol) as $col) $sheet->getColumnDimension($col)->setAutoSize(true);
-        $sheet->getColumnDimension('D')->setAutoSize(false); $sheet->getColumnDimension('D')->setWidth(35);
-        $sheet->getColumnDimension('F')->setAutoSize(false); $sheet->getColumnDimension('F')->setWidth(25);
+        foreach (range('A', $endCol) as $col) {
+            $sheet->getColumnDimension($col)->setAutoSize(true);
+        }
+        
+        // Override specific columns
+        $sheet->getColumnDimension('F')->setAutoSize(false);
+        $sheet->getColumnDimension('F')->setWidth(35);
+        
+        $sheet->getColumnDimension('I')->setAutoSize(false);
+        $sheet->getColumnDimension('I')->setWidth(25);
 
         return self::outputStream($spreadsheet, $lahan);
     }

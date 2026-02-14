@@ -84,7 +84,8 @@ class DashboardChartFilter {
             { filterId: 'chart-period-filter', mainId: 'chart-period', handler: this.handlePeriodChange.bind(this) },
             { filterId: 'show-individual-blocks-filter', mainId: 'show-individual-blocks', handler: this.handleIndividualBlocksChange.bind(this), type: 'checkbox' },
             { filterId: 'indicator-selector-filter', mainId: 'indicator-selector', handler: this.handleIndicatorChange.bind(this) },
-            { filterId: 'block-selector-filter', mainId: 'block-selector', handler: this.handleBlockChange.bind(this) }
+            { filterId: 'block-selector-filter', mainId: 'block-selector', handler: this.handleBlockChange.bind(this) },
+            { filterId: 'tree-category-filter', mainId: 'tree-category', handler: this.handleTreeCategoryChange.bind(this) } 
         ];
 
         eventMappings.forEach(({ filterId, handler }) => {
@@ -96,6 +97,13 @@ class DashboardChartFilter {
         });
 
         console.log('Event listeners bound for', this.eventHandlers.size, 'elements');
+    }
+
+    handleTreeCategoryChange(e) {
+        const category = e.target.value;
+        console.log('Tree category changed to:', category);
+        
+        this.updateMainControl('tree-category', category);
     }
 
     clearEventHandlers() {
@@ -274,14 +282,28 @@ class DashboardChartFilter {
     toggleConditionalControls(view) {
         const overallControls = document.getElementById('overall-controls');
         const indicatorControls = document.getElementById('indicator-controls');
+        const plantedControls = document.getElementById('planted-controls');
+        const periodContainer = document.getElementById('period-selector-container');
+        const treeCategoryContainer = document.getElementById('tree-category-container');
 
+        // Hide all first
+        overallControls?.classList.add('hidden');
+        indicatorControls?.classList.add('hidden');
+        plantedControls?.classList.add('hidden');
+        periodContainer?.classList.add('hidden');
+        treeCategoryContainer?.classList.add('hidden');
+
+        // Show based on view
         if (view === 'overall') {
             overallControls?.classList.remove('hidden');
-            indicatorControls?.classList.add('hidden');
+            periodContainer?.classList.remove('hidden');
         } else if (view === 'indicator') {
-            overallControls?.classList.add('hidden');
             indicatorControls?.classList.remove('hidden');
-        }
+            periodContainer?.classList.remove('hidden');
+        } else if (view === 'planted') {
+            plantedControls?.classList.remove('hidden');
+            treeCategoryContainer?.classList.remove('hidden'); 
+        } 
     }
 
     toggleBlockSelector(indicatorId) {

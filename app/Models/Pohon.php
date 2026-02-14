@@ -51,16 +51,24 @@ class Pohon extends Model
     /**
      * Get the jenis pohon that owns the pohon.
      */
-    public function jenis(): BelongsTo
+    public function jenisPohon() 
     {
         return $this->belongsTo(JenisPohon::class, 'jenis_pohon_id', 'jenis_pohon_id');
     }
 
     /**
-     * Get the data pohon associated with the pohon.
+     * Get the data pohon realisasi associated with the pohon.
      */
-    public function dataPohon(): HasMany
+    public function dataRealisasi(): HasMany
     {
-        return $this->hasMany(DataPohon::class, 'pohon_id', 'pohon_id');
+        return $this->hasMany(DataPohonRealisasi::class, 'pohon_id', 'pohon_id');
+    }
+
+    /**
+     * Get the data pohon manual associated with the pohon.
+     */
+    public function dataManual(): HasMany
+    {
+        return $this->hasMany(DataPohonManual::class, 'pohon_id', 'pohon_id');
     }
 }

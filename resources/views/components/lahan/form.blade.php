@@ -11,7 +11,7 @@
         @endif
         
         <div class="p-4 sm:p-6 flex flex-col gap-3 lg:gap-6 justify-between">
-            <x-lahan.form-fields :lahan="$lahan ?? null" />
+            <x-lahan.form-fields :lahan="$lahan ?? null" :users="$users ?? []" />
 
             <!-- Hidden Coordinate Fields with PostGIS handling -->
             @php

@@ -59,36 +59,6 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Relasi many-to-many dengan Lahan
-     */
-    public function lahan()
-    {
-        return $this->belongsToMany(Lahan::class, 'lahan_user', 'user_id', 'lahan_id')
-                    ->withPivot('role')
-                    ->withTimestamps();
-    }
-
-    /**
-     * Get lahan yang dimiliki user (sebagai owner)
-     */
-    public function ownedLahan()
-    {
-        return $this->belongsToMany(Lahan:: class, 'lahan_user', 'user_id', 'lahan_id')
-                    ->wherePivot('role', 'owner')
-                    ->withTimestamps();
-    }
-
-    /**
-     * Get lahan dimana user adalah team member (bukan owner)
-     */
-    public function teamMemberLahan()
-    {
-        return $this->belongsToMany(Lahan::class, 'lahan_user', 'user_id', 'lahan_id')
-                    ->wherePivot('role', '!=', 'owner')
-                    ->withTimestamps();
-    }
-
-    /**
      * Get all lahan assigned to this user (many-to-many)
      * 
      * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany

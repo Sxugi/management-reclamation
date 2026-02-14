@@ -3,8 +3,11 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LahanController;
 use App\Http\Controllers\LahanTeamController;
+use App\Http\Controllers\GuideController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PlotController;
+use App\Http\Controllers\PlotHandoverController;
+use App\Http\Controllers\PublicScanController;
 use App\Http\Controllers\TargetProgresReklamasiController;
 use App\Http\Controllers\ProgresReklamasiController;
 use App\Http\Controllers\AnggaranReklamasiController;
@@ -40,12 +43,20 @@ Route::middleware(['auth'])->group(function () {
         ->name('profile.destroy');
 });
 
+// Route for guide
+Route::middleware(['auth'])->group(function () {
+    Route::get('/guide', [GuideController::class, 'index'])
+        ->name('guide.index');
+});
+
 // Route for lahan management
 Route::middleware(['auth'])->group(function () {
     Route::get('/lahan', [LahanController::class, 'index'])
         ->name('lahan.index');
-    Route::patch('lahan/{lahan}/status', [LahanController::class, 'updateStatus'])
-        ->name('lahan.update-status');
+    Route::patch('lahan/{lahan}/fase', [LahanController::class, 'updateFase'])
+        ->name('lahan.update-fase');
+    Route::get('/lahan/{lahan}/monitoring-trend', [LahanController::class, 'getMonitoringTrend'])
+        ->name('lahan.monitoring-trend');
     Route::resource('lahan', LahanController::class);
 
     Route::prefix('lahan/{lahan}/team')->name('lahan.team.')->group(function () {
@@ -92,20 +103,28 @@ Route::middleware(['auth'])->group(function () {
             ->name('enhanced');
         Route::get('/blocks', [DashboardController::class, 'getEnhancedBlocksForIndicator'])
             ->name('blocks');
+        Route::get('/planted-trees', [DashboardController::class, 'getPlantedTreesDistribution'])
+            ->name('planted-trees');
     });
 
     // Plot and related resources
     Route::resource('lahan.plot', PlotController::class)
         ->shallow();
     Route::prefix('plot')->name('plot.')->group(function () {
+        Route::resource('{plot}/handover', PlotHandoverController::class)
+            ->parameters(['handover' => 'handover'])
+            ->except('index', 'create', 'edit', 'show');
+        Route::delete('{plot}/handover/{handover}/file/{file}', [PlotHandoverController::class, 'deleteFile'])
+            ->name('handover.file.delete');
         Route::post('{plot}/target', [TargetProgresReklamasiController::class, 'store'])
             ->name('target.store');
         Route::resource('{plot}/progres', ProgresReklamasiController::class)
             ->parameters(['progres' => 'progres']) 
             ->except('index', 'show');
+        Route::get('{plot}/progres/planted-trees', [ProgresReklamasiController::class, 'getPlantedTrees'])
+            ->name('progres.planted-trees');
         Route::get('{plot}/progres/export', [ProgresReklamasiController::class, 'export'])
             ->name('progres.export');
-        Route::get('{plot}/activity-logs', [PlotController::class, 'getActivityLogs']);
     });
 
     // Anggaran Reklamasi routes
@@ -120,11 +139,11 @@ Route::middleware(['auth'])->group(function () {
             ->parameters(['' => 'pohon'])
             ->only(['index', 'create', 'store']);
 
-        Route::get('{pohon}/data-pohon/{dataPohon}/edit', [PohonController::class, 'edit'])
+        Route::get('{pohon}/data-pohon/{dataPohonManual}/edit', [PohonController::class, 'edit'])
             ->name('edit');
-        Route::put('{pohon}/data-pohon/{dataPohon}', [PohonController::class, 'update'])
+        Route::put('{pohon}/data-pohon/{dataPohonManual}', [PohonController::class, 'update'])
             ->name('update');
-        Route::delete('{pohon}/tahun/{tahun}', [PohonController::class, 'destroy'])
+        Route::delete('{pohon}/data-pohon/{dataPohonManual}', [PohonController::class, 'destroy'])
             ->name('destroy');
         Route::get('export', [PohonController::class, 'export'])
             ->name('export');
@@ -135,6 +154,8 @@ Route::middleware(['auth'])->group(function () {
         ->except('show');
     Route::get('lahan/{lahan}/gudang/export', [DataGudangController::class, 'export'])
         ->name('lahan.gudang.export');
+    Route::get('/lahan/{lahan}/gudang/check-stock', [DataGudangController::class, 'checkStock'])
+        ->name('lahan.gudang.check-stock');
 });
 
 // Route for administration
@@ -192,6 +213,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('lahan/{lahan}/file-laporan/preview', [FileLaporanController::class, 'preview'])
         ->name('lahan.file-laporan.preview');
 });
+
+// Public scan route for plots
+Route::get('/scan/plot/{uuid}', [PublicScanController::class, 'show'])
+    ->name('public.plot.scan');
+Route::get('plot/{plot}/activity-logs', [PlotController::class, 'getActivityLogs']);
 
 require __DIR__.'/auth.php';
 require __DIR__.'/admin.php';

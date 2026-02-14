@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Pohon;
 use App\Models\JenisPohon;
+use App\Models\DataPohonRealisasi;
+use App\Models\DataPohonManual;
 use Illuminate\Http\Request;
 use App\Models\Lahan; 
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
@@ -25,12 +27,18 @@ class DataPohonService
 
     public static function getFilteredData(Request $request, Lahan $lahan)
     {
-        $query = Pohon::with('jenis')->where('lahan_id', $lahan->lahan_id);
+        // Load relations WITHOUT filter first
+        $query = Pohon::with([
+                'jenisPohon'
+            ])
+            ->where('lahan_id', $lahan->lahan_id);
 
+        // Filter by jenis pohon
         if ($request->filled('pohonType')) {
             $query->where('jenis_pohon_id', $request->pohonType);
         }
 
+        // Build filter closure
         $relationFilter = function ($q) use ($request) {
             if ($request->filled('year')) {
                 $q->where('tahun', $request->year);
@@ -50,19 +58,24 @@ class DataPohonService
             }
 
             if ($request->filled('minQuantity')) {
-                $q->where('jumlah', '>=', $request->minQuantity);
+                $q->where('jumlah_batang', '>=', $request->minQuantity);
             }
         };
 
-        $query->whereHas('dataPohon', function($q) use ($relationFilter) {
-            $relationFilter($q);
+        // Only show pohon that has matching data
+        $query->where(function($q) use ($relationFilter) {
+            $q->whereHas('dataRealisasi', $relationFilter)
+              ->orWhereHas('dataManual', $relationFilter);
         });
 
-        // Eager load filtered relation
-        $query->whereHas('dataPohon', function($q) use ($relationFilter) {
-            $relationFilter($q);
-        });
+        // Eager load WITH filter applied
+        $query->with([
+            'dataRealisasi' => $relationFilter,
+            'dataRealisasi.plot',
+            'dataManual' => $relationFilter
+        ]);
 
+        // Sorting
         $sort = $request->get('tableSortColumn');
         $direction = $request->get('tableSortDirection');
 
@@ -72,44 +85,65 @@ class DataPohonService
                   ->orderBy('jenis_pohon.nama_pohon', $direction)
                   ->select('pohon.*');
             } elseif ($sort === 'total') {
-                $query->withCount(['dataPohon as total' => function($q) use ($relationFilter) {
-                    $relationFilter($q);
-                    $q->select(\DB::raw('COALESCE(SUM(jumlah), 0)'));
-                }])->orderBy('total', $direction);
-            } else {
-                $query->with(['dataPohon' => function($q) use ($sort, $direction) {
-                    $q->orderBy($sort, $direction);
-                }]);
+                $query->withSum('dataRealisasi as total_realisasi', 'jumlah_batang')
+                      ->withSum('dataManual as total_manual', 'jumlah_batang')
+                      ->orderByRaw('COALESCE(total_realisasi, 0) + COALESCE(total_manual, 0) ' . $direction);
             }
         }
-
-        $query->with('jenis');
 
         return $query->paginate(8)->appends($request->query());
     }
 
     public static function mapDataPohonByTahun($pohonCollection, $sortDirection = 'asc')
     {
-        // If paginator passed, transform its collection externally; caller typically passes getCollection()
         foreach ($pohonCollection as $pohon) {
-            // Ensure relation exists
-            $dataPohon = $pohon->dataPohon ?? collect();
+            // Combine both realisasi and manual
+            $allData = collect();
 
-            // sort relation by tahun
-            $sortedDataPohon = $sortDirection === 'desc'
-                ? $dataPohon->sortByDesc('tahun')
-                : $dataPohon->sortBy('tahun');
-
-            $tahunMap = [];
-            foreach ($sortedDataPohon as $dp) {
-                $tahunMap[(int)$dp->tahun] = $dp;
+            // Process realisasi
+            foreach ($pohon->dataRealisasi as $realisasi) {
+                $allData->push((object)[
+                    'tahun' => $realisasi->tahun,
+                    'tipe' => 'realisasi',
+                    'plot_name' => $realisasi->plot?->nama_plot,
+                    'realisasi_progres' => $realisasi->jumlah_batang,
+                    'stok_manual' => 0,
+                    'total' => $realisasi->jumlah_batang,
+                    'model' => $realisasi,
+                ]);
             }
-            $pohon->dataPohonByTahun = $tahunMap;
 
-            // Compute SUM total jumlah across all loaded dataPohon for this jenis pohon
-            $pohon->SUM = (int) $dataPohon->sum(function ($r) {
-                return (int) ($r->jumlah ?? 0);
+            // Process manual
+            foreach ($pohon->dataManual as $manual) {
+                $allData->push((object)[
+                    'tahun' => $manual->tahun,
+                    'tipe' => 'manual',
+                    'plot_name' => null,
+                    'realisasi_progres' => 0,
+                    'stok_manual' => $manual->jumlah_batang,
+                    'total' => $manual->jumlah_batang,
+                    'model' => $manual,
+                ]);
+            }
+
+            // Group by tahun
+            $groupedByYear = $allData->groupBy('tahun')->map(function ($items) {
+                $first = $items->first();
+                $totalVal = $items->sum('total');
+                
+                $first->total_display = $totalVal; 
+                return $first;
             });
+
+            // Sort by tahun
+            $sortedGrouped = $sortDirection === 'desc'
+                ? $groupedByYear->sortByDesc('tahun')
+                : $groupedByYear->sortBy('tahun');
+
+            $pohon->dataPohonByTahun = $sortedGrouped->all();
+
+            // Calculate SUM (only from filtered data)
+            $pohon->SUM = $allData->sum('total');
         }
 
         return $pohonCollection;
@@ -162,59 +196,75 @@ class DataPohonService
         $sheet = $spreadsheet->getActiveSheet();
         $sheet->setTitle('Data Pohon');
 
-        // Fetch Data Pohon with related DataPohon
-        $dataPohonRaw = Pohon::with(['jenis', 'dataPohon' => function($q) {
-                $q->orderBy('tahun', 'asc');
-            }])
+        // Fetch with new relations
+        $dataPohonRaw = Pohon::with([
+                'jenisPohon',
+                'dataRealisasi',
+                'dataManual'
+            ])
             ->where('lahan_id', $lahan->lahan_id)
             ->join('jenis_pohon', 'pohon.jenis_pohon_id', '=', 'jenis_pohon.jenis_pohon_id')
             ->orderBy('jenis_pohon.nama_pohon', 'asc')
             ->select('pohon.*')
             ->get();
 
-        // Determine Unique Years
+        // Use separate array instead of model property
+        $mappedDataByPohon = [];
         $allYears = [];
+        
         foreach ($dataPohonRaw as $pohon) {
-            foreach ($pohon->dataPohon as $dp) {
-                $allYears[] = $dp->tahun;
+            $pohonId = $pohon->pohon_id;
+            $mappedDataByPohon[$pohonId] = [];
+            
+            // Process realisasi
+            foreach ($pohon->dataRealisasi as $dr) {
+                $allYears[] = $dr->tahun;
+                if (!isset($mappedDataByPohon[$pohonId][$dr->tahun])) {
+                    $mappedDataByPohon[$pohonId][$dr->tahun] = 0;
+                }
+                $mappedDataByPohon[$pohonId][$dr->tahun] += $dr->jumlah_batang;
+            }
+
+            // Process manual
+            foreach ($pohon->dataManual as $dm) {
+                $allYears[] = $dm->tahun;
+                if (!isset($mappedDataByPohon[$pohonId][$dm->tahun])) {
+                    $mappedDataByPohon[$pohonId][$dm->tahun] = 0;
+                }
+                $mappedDataByPohon[$pohonId][$dm->tahun] += $dm->jumlah_batang;
             }
         }
+
         $uniqueYears = array_unique($allYears);
         sort($uniqueYears);
 
-        // Logic Empty State
+        // Empty state
         $isEmptyData = empty($uniqueYears);
         if ($isEmptyData) {
-            // If empty, use current year as dummy header to maintain table structure
             $uniqueYears = [date('Y')]; 
         }
 
-        // --- CALCULATE COLUMN POSITIONS ---
-        $yearStartColIndex = 2; // Column B
+        // Column positions
+        $yearStartColIndex = 2;
         $totalYears = count($uniqueYears);
         $totalColIndex = $yearStartColIndex + $totalYears; 
         $totalColString = Coordinate::stringFromColumnIndex($totalColIndex);
         $lastYearColString = Coordinate::stringFromColumnIndex($totalColIndex - 1);
 
-        // --- TITLE (Row 1) ---
+        // TITLE
         $lahanName = strtoupper($lahan->nama_lahan);
         $sheet->setCellValue('A1', "DATA INVENTARISASI POHON - {$lahanName}");
         $sheet->mergeCells("A1:{$totalColString}1");
-        
         $sheet->getStyle('A1')->applyFromArray([
             'font' => ['bold' => true, 'size' => 14],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
         ]);
-        $sheet->getRowDimension('1')->setRowHeight(30);
 
-        // --- HEADER TABLE (Row 2 & 3) ---
-        // Labels
+        // HEADERS
         $sheet->setCellValue('A2', 'Jenis Pohon');
         $sheet->mergeCells('A2:A3');
-
         $sheet->setCellValue('B2', 'Tahun');
         $sheet->mergeCells("B2:{$lastYearColString}2");
-
         $sheet->setCellValue($totalColString . '2', 'Total');
         $sheet->mergeCells("{$totalColString}2:{$totalColString}3");
 
@@ -222,62 +272,44 @@ class DataPohonService
         $colIndex = $yearStartColIndex;
         foreach ($uniqueYears as $year) {
             $colString = Coordinate::stringFromColumnIndex($colIndex);
-            // If empty data, show '-' instead of year
             $sheet->setCellValue($colString . '3', $isEmptyData ? '-' : $year);
             $colIndex++;
         }
 
-        // Styling Headers
-        $headerRange = "A2:{$totalColString}3";
-        $sheet->getStyle($headerRange)->applyFromArray([
+        // Styling
+        $sheet->getStyle("A2:{$totalColString}3")->applyFromArray([
             'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
             'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
             'font' => ['bold' => true]
         ]);
+        $sheet->getStyle("B3:{$lastYearColString}3")->getFill()
+            ->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('92D050');
 
-        $sheet->getStyle("B2:{$lastYearColString}2")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('E7E6E6');
-        $sheet->getStyle("B3:{$lastYearColString}3")->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('92D050'); 
-
-        // --- EMPTY STATE ---
+        // Empty state
         if ($isEmptyData) {
-            $sheet->mergeCells("A4:{$totalColString}6");
             $sheet->setCellValue('A4', "BELUM ADA DATA POHON");
-            
-            $sheet->getStyle('A4')->applyFromArray([
-                'font' => ['italic' => true, 'color' => ['rgb' => '777777'], 'size' => 12],
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
-                'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'F2F2F2']],
-                'borders' => ['outline' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'CCCCCC']]]
-            ]);
-            
-            // Width Adjust
-            $sheet->getColumnDimension('A')->setWidth(25);
-            $sheet->getColumnDimension('B')->setWidth(15);
-            
+            $sheet->mergeCells("A4:{$totalColString}4");
             return $this->outputStream($spreadsheet, $lahan);
         }
 
-        // --- DATA CONTENT (Row 4 onwards) ---
+        // DATA CONTENT
         $row = 4;
         $grandTotal = 0;
 
         foreach ($dataPohonRaw as $pohon) {
-            $namaPohon = $pohon->jenis ? $pohon->jenis->nama_pohon : '-';
-
+            $pohonId = $pohon->pohon_id;
+            $namaPohon = $pohon->jenisPohon->nama_pohon ?? '-';
             $sheet->setCellValue('A' . $row, $namaPohon);
-
-            $pohonByYear = [];
-            foreach ($pohon->dataPohon as $dp) {
-                $pohonByYear[$dp->tahun] = $dp->jumlah;
-            }
 
             $colIndex = 2;
             $rowTotal = 0;
 
             foreach ($uniqueYears as $year) {
                 $colString = Coordinate::stringFromColumnIndex($colIndex);
-                if (isset($pohonByYear[$year])) {
-                    $val = $pohonByYear[$year];
+                // Use separate array instead of model property
+                $val = $mappedDataByPohon[$pohonId][$year] ?? 0;
+                
+                if ($val > 0) {
                     $sheet->setCellValue($colString . $row, $val);
                     $rowTotal += $val;
                 } else {
@@ -288,39 +320,21 @@ class DataPohonService
 
             $sheet->setCellValue($totalColString . $row, $rowTotal);
             $grandTotal += $rowTotal;
-
-            // Styling Baris
-            $sheet->getStyle("A{$row}:{$totalColString}{$row}")->applyFromArray([
-                'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
-                'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]
-            ]);
-            
-            $sheet->getStyle('A' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT)->setIndent(1);
-
             $row++;
         }
 
-        // --- FOOTER (TOTAL) ---
-        $footerRow = $row;
-        $sheet->mergeCells("A{$footerRow}:{$lastYearColString}{$footerRow}");
-        $sheet->setCellValue("A{$footerRow}", "Total Keseluruhan Tanaman");
-        $sheet->setCellValue($totalColString . $footerRow, $grandTotal);
+        // FOOTER
+        $sheet->setCellValue("A{$row}", "Total Keseluruhan");
+        $sheet->mergeCells("A{$row}:{$lastYearColString}{$row}");
+        $sheet->setCellValue($totalColString . $row, $grandTotal);
+        
+        $sheet->getStyle("A4:{$totalColString}{$row}")
+            ->getBorders()->getAllBorders()->setBorderStyle(Border::BORDER_THIN);
+        $sheet->getStyle("A{$row}:{$totalColString}{$row}")->getFont()->setBold(true);
 
-        $footerRange = "A{$footerRow}:{$totalColString}{$footerRow}";
-        $sheet->getStyle($footerRange)->applyFromArray([
-            'borders' => ['allBorders' => ['borderStyle' => Border::BORDER_THIN]],
-            'font' => ['bold' => true],
-            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER]
-        ]);
-
-        $sheet->getStyle($totalColString . $footerRow)->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB('548235');
-        $sheet->getStyle($totalColString . $footerRow)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color(\PhpOffice\PhpSpreadsheet\Style\Color::COLOR_WHITE));
-
-        // Auto Width
         foreach (range('A', $totalColString) as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
-        $sheet->getColumnDimension('A')->setAutoSize(false); $sheet->getColumnDimension('A')->setWidth(25);
 
         return $this->outputStream($spreadsheet, $lahan);
     }
@@ -335,7 +349,6 @@ class DataPohonService
         }, 200, [
             'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'Content-Disposition' => 'attachment;filename="' . $fileName . '"',
-            'Cache-Control' => 'max-age=0',
         ]);
     }
 }

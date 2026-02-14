@@ -12,7 +12,7 @@
         </div>
     </x-slot>
 
-    <div class="self-stretch flex flex-row items-center justify-between text-sm font-outfit">
+    <div class="self-stretch flex flex-col md:flex-row items-center justify-between text-sm font-outfit gap-2">
         <x-anggaran-reklamasi.tab-category :lahan="$lahan" :tab_aktif="$tab_aktif"/>
         <div class="flex flex-row gap-2">
             <x-anggaran-reklamasi.filter-button :lahan="$lahan" :tab_aktif="$tab_aktif" :kategoriAnggaranList="$kategoriAnggaranList"/>

@@ -23,7 +23,7 @@ class UpdateLahanRequest extends FormRequest
         return [
             'nama_lahan' => ['required', 'string', 'max:255', Rule::unique('lahan', 'nama_lahan')->ignore($this->route('lahan'), 'lahan_id')],
             'luas_lahan' => 'required|numeric|min:0.01',
-            'tahun_awal' => 'required|integer|min:' . (date('Y') - 5) . '|max:' . (date('Y') + 5),
+            'tahun_awal' => 'required|integer',
             'tahun_akhir' => [
                 'required',
                 'integer',
@@ -36,7 +36,7 @@ class UpdateLahanRequest extends FormRequest
                     }
                 }
             ],
-            'pic_reklamasi' => 'required|string|max:255',
+            'pic_id' => 'nullable|exists:users,user_id',
             'longitude' => 'required|numeric|between:-180,180',
             'latitude' => 'required|numeric|between:-90,90',
         ];
@@ -52,7 +52,7 @@ class UpdateLahanRequest extends FormRequest
             'luas_lahan' => 'Luas Lahan',
             'tahun_awal' => 'Tahun Awal',
             'tahun_akhir' => 'Tahun Akhir',
-            'pic_reklamasi' => 'PIC Reklamasi',
+            'pic_id' => 'PIC Reklamasi',
             'longitude' => 'Koordinat Bujur',
             'latitude' => 'Koordinat Lintang',
         ];
@@ -70,7 +70,28 @@ class UpdateLahanRequest extends FormRequest
             'luas_lahan.required' => 'Luas Lahan wajib diisi.',
             'tahun_awal.required' => 'Tahun Awal wajib diisi.',
             'tahun_akhir.required' => 'Tahun Akhir wajib diisi.',
-            'pic_reklamasi.required' => 'PIC Reklamasi wajib diisi.',
+            'pic_id.exists' => 'PIC Reklamasi tidak ditemukan.',
         ];
+    }
+
+    protected function prepareForValidation(): void
+    {
+        // Get pic_id from request
+        $picId = $this->input('pic_id');
+
+        // Handle 'null' string to actual null
+        if ($picId === 'null' || $picId === '') {
+            $picId = null;
+        }
+
+        // Determine fase based on pic_id
+        if ($this->has('pic_id')) {
+            $fase = $picId === null ? 'Selesai' : 'Lahan Baru';
+            
+            $this->merge([
+                'pic_id' => $picId,
+                'fase'   => $fase
+            ]);
+        }
     }
 }

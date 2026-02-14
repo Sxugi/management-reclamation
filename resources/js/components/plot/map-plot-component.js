@@ -1,3 +1,5 @@
+import PhotoMarkersHandler from './photo-markers-handler.js';
+
 document.addEventListener('alpine:init', () => {
     // Register the map component with polygon support
     Alpine.data('mapPlotComponent', (initialData = {}) => ({
@@ -14,6 +16,8 @@ document.addEventListener('alpine:init', () => {
         activePopup: null,
         isSwitchingSelection: false, 
         selectedPolygonId: null,
+        photoMarkers: initialData.photoMarkers || [],
+        photoMarkersLayer: [],
 
         // Initialize the map when the component loads
         init() {
@@ -69,6 +73,7 @@ document.addEventListener('alpine:init', () => {
             this.map.on('load', () => {
                 this.initDrawTools();
                 this.loadExistingPolygons();
+                this.addPhotoMarkers();
             });
 
             // Listen for manual coordinate changes from input fields
@@ -92,6 +97,160 @@ document.addEventListener('alpine:init', () => {
                     }
                 }
             });
+        },
+
+        // Add photo markers with 2-level grouping
+        addPhotoMarkers() {
+            if (!this.photoMarkers || this.photoMarkers.length === 0) {
+                console.log('No photo markers to display');
+                return;
+            }
+            
+            const maplibregl = window.maplibregl;
+                        
+            // Use handler module
+            const progresGroups = PhotoMarkersHandler.groupByProgresId(this.photoMarkers);
+            
+            const locationClusters = PhotoMarkersHandler.clusterByLocation(progresGroups, 0.00001);
+            
+            // Render markers
+            locationClusters.forEach(cluster => {
+                const progresCount = cluster.progres_items.length;
+                const totalPhotos = cluster.progres_items.reduce((sum, p) => sum + p.photos.length, 0);
+                
+                // Create marker element
+                const markerEl = document.createElement('div');
+                markerEl.className = 'photo-marker';
+                markerEl.innerHTML = `
+                    <div class="photo-marker-circle"></div>
+                    ${progresCount > 1 ? `
+                        <div class="absolute -top-1 -right-1 w-4 h-4 bg-blue-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow">
+                            ${progresCount}
+                        </div>
+                    ` : totalPhotos > 1 ? `
+                        <div class="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold shadow">
+                            ${totalPhotos}
+                        </div>
+                    ` : ''}
+                `;
+                
+                // Create popup content using handler
+                const popupNode = document.createElement('div');
+                
+                if (progresCount === 1 && totalPhotos === 1) {
+                    const progres = cluster.progres_items[0];
+                    const photo = progres.photos[0];
+                    const kategoriLabel = PhotoMarkersHandler.formatKategoriLabel(progres.kategori);
+                    const aktivitasLabel = PhotoMarkersHandler.formatAktivitasLabel(progres.jenis_aktivitas);
+                    
+                    let detailInfoHtml = '';
+                    if (progres.detail_info && progres.detail_info.length > 0) {
+                        detailInfoHtml = `<div class="grid grid-cols-2 gap-x-2 gap-y-1 text-xs">`;
+                        progres.detail_info.forEach(item => {
+                            detailInfoHtml += `
+                                <div class="text-gray-500 truncate">${item.label}:</div>
+                                <div class="font-medium text-gray-700 text-right truncate">${item.value}</div>
+                            `;
+                        });
+                        detailInfoHtml += `</div>`;
+                    }
+                    
+                    popupNode.innerHTML = PhotoMarkersHandler.buildSinglePhotoPopup(
+                        photo, kategoriLabel, aktivitasLabel, detailInfoHtml, progres.tanggal_kegiatan
+                    );
+                } else {
+                    popupNode.innerHTML = PhotoMarkersHandler.buildClusterPopup(
+                        cluster,
+                        PhotoMarkersHandler.formatKategoriLabel,
+                        PhotoMarkersHandler.formatAktivitasLabel
+                    );
+                }
+                
+                // Create popup
+                const popup = new maplibregl.Popup({
+                    offset: 15,
+                    closeButton: false,
+                    closeOnClick: true,
+                    maxWidth: '280px',
+                    className: 'photo-marker-popup'
+                })
+                .setDOMContent(popupNode);
+                
+                // Attach close button
+                const closeBtn = popupNode.querySelector('.btn-close-popup-photo');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', (ev) => {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        popup.remove();
+                    });
+                }
+                
+                // Create marker
+                const marker = new maplibregl.Marker({
+                    element: markerEl,
+                    anchor: 'center'
+                })
+                .setLngLat([cluster.longitude, cluster.latitude])
+                .setPopup(popup)
+                .addTo(this.map);
+                
+                popup.on('open', () => {
+                    if (this.activePopup && this.activePopup !== popup) {
+                        this.activePopup.remove();
+                        this.selectedPolygonId = null;
+                        this.updateMapStyles();
+                    }
+                    this.activePhotoPopup = popup;
+                    
+                    // Initialize navigation using handler
+                    if (progresCount > 1 || totalPhotos > 1) {
+                        PhotoMarkersHandler.initClusterNavigation(popupNode, cluster, this.activePhotoPopup);
+                    }
+                });
+                
+                popup.on('close', () => {
+                    if (this.activePhotoPopup === popup) {
+                        this.activePhotoPopup = null;
+                    }
+                });
+                
+                this.photoMarkersLayer.push(marker);
+            });
+            
+            // Fit bounds
+            if (this.photoMarkers.length > 0 && !this.polygonData.length) {
+                this.fitMapToPhotoMarkers();
+            }
+        },
+
+        // Fit map to show all photo markers
+        fitMapToPhotoMarkers() {
+            if (!this.photoMarkers || this.photoMarkers.length === 0) return;
+            
+            const maplibregl = window.maplibregl;
+            const bounds = new maplibregl.LngLatBounds();
+            
+            this.photoMarkers.forEach(photo => {
+                bounds.extend([photo.longitude, photo.latitude]);
+            });
+            
+            if (this.polygonData && this.polygonData.length > 0) {
+                this.polygonData.forEach(plot => {
+                    if (plot.polygon && plot.polygon.coordinates && Array.isArray(plot.polygon.coordinates[0])) {
+                        plot.polygon.coordinates[0].forEach(coord => {
+                            bounds.extend([coord[0], coord[1]]);
+                        });
+                    }
+                });
+            }
+            
+            if (!bounds.isEmpty()) {
+                this.map.fitBounds(bounds, { 
+                    padding: { top: 80, bottom: 80, left: 80, right: 80 },
+                    maxZoom: 16
+                });
+            }
         },
         
         // Initialize drawing tools
@@ -281,6 +440,13 @@ document.addEventListener('alpine:init', () => {
 
                 // Listen for clicks on the 'plots-fill' layer
                 this.map.on('click', 'plots-fill', (e) => {
+                    // Check if click was on a photo marker
+                    const clickedOnMarker = e.originalEvent.target.closest('.photo-marker');
+                    if (clickedOnMarker) {
+                        // Clicked on a photo marker, ignore polygon click
+                        return;
+                    }
+
                     // Check if a polygon was actually clicked
                     if (e.features.length > 0) {
                         const feature = e.features[0];
@@ -315,7 +481,9 @@ document.addEventListener('alpine:init', () => {
                         popupNode.innerHTML = `
                             <div class="plot-popup-content p-2 relative">
                                 <button class="btn-close-popup absolute cursor-pointer top-3 right-1 w-4 h-4 text-red-500 flex items-center justify-center text-lg font-bold transition-all duration-200 hover:scale-110">
-                                    ×
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M6 18L18 6M6 6l12 12"/>
+                                    </svg>
                                 </button>
 
                                 <h3 class="text-lg font-bold mb-2 pr-10" title="${plotName}">${truncatedName}</h3>
@@ -634,12 +802,17 @@ document.addEventListener('alpine:init', () => {
             const center = this.map.getCenter();
             const zoom = this.map.getZoom();
             const features = this.draw ? this.draw.getAll() : null;
+
+            // Remove existing photo markers
+            this.photoMarkersLayer.forEach(marker => marker.remove());
+            this.photoMarkersLayer = [];
             
             // Handle ArcGIS Hybrid specially
             if (basemapId === 'arcgis_hybrid') {
                 this.map.setStyle(this.getHybridStyle());
                 this.currentBasemap = 'arcgis_hybrid';
                 this.loadExistingPolygons();
+                this.addPhotoMarkers();
             } else if (basemapId === 'osm') {
                 // OpenStreetMap
                 const osmStyle = {
@@ -663,6 +836,7 @@ document.addEventListener('alpine:init', () => {
                 this.map.setStyle(osmStyle);
                 this.currentBasemap = 'osm';
                 this.loadExistingPolygons();
+                this.addPhotoMarkers();
             }
             
             // Restore view state and features when style is loaded
@@ -680,6 +854,8 @@ document.addEventListener('alpine:init', () => {
                 }));
                 
                 this.initDrawTools();
+                this.loadExistingPolygons();
+                this.addPhotoMarkers();
                 
                 // Restore features if available
                 if (features && features.features.length > 0) {

@@ -18,7 +18,7 @@
                 <x-lahan.map :longitude="$point->getX() ?? null" :latitude="$point->getY() ?? null" />
 
                 <!-- Form Column -->
-                <x-lahan.form :lahan="$lahan" />
+                <x-lahan.form :lahan="$lahan" :users="$users ?? []" />
             </div>
         </div>
     </div>

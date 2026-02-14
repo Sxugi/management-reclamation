@@ -96,6 +96,15 @@ class PlotController extends Controller
             'lahan',
             'target.indikator', 
             'activityLogs',
+            'handover',
+            'progres' => function ($query) {
+                $query->with([
+                    'dokumentasi',
+                    'jenisAktivitas.kategoriAktivitas',
+                    'indikator',
+                    'fieldValues.fieldDefinition'
+                ]);
+            }
         ]);
 
         // Get progres data with pagination
@@ -104,12 +113,16 @@ class PlotController extends Controller
 
         // Get kategori aktivitas options and filter status
         $kategori = ProgresReklamasiService::getKategoriAktivitasOptions();
+        $aktivitas = ProgresReklamasiService::getJenisAktivitasOptions();
         $hasFilter = ProgresReklamasiService::hasFilter($request);
 
         // Get progress percentage
         $plotProgress = PlotProgres::where('plot_id', $plot->plot_id)->first();
         $progressPercent = $plotProgress ? $plotProgress->percent : 0;
         $progresDelta = ProgresReklamasiService::getProgresDelta($plot);
+
+        // Collect progres dokumentasi
+        $photoMarkersData = PlotService::getPhotoMarkerData($plot);
 
         return view('detail-lahan.plot.show', [
             'plot' => $plot,
@@ -118,9 +131,12 @@ class PlotController extends Controller
             'progres' => $progresData,
             'activityLogs' => $plot->activityLogs,
             'kategori' => $kategori,
+            'jenisAktivitas' => $aktivitas,
             'hasFilter' => $hasFilter,
             'progressPercent' => $progressPercent,
             'progresDelta' => $progresDelta,
+            'handover' => $plot->handover,
+            'photoMarkersData' => $photoMarkersData,
         ]);
     }
 
@@ -220,9 +236,6 @@ class PlotController extends Controller
      */
     public function getActivityLogs(Request $request, Plot $plot)
     {
-        // Check if user can view this plot
-        $this->authorize('view', $plot);
-
         $validated = $request->validate([
             'sort' => 'nullable|in:asc,desc',
             'per_page' => 'nullable|integer|min:5|max:50',

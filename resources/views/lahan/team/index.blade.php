@@ -219,7 +219,7 @@
                                                 </div>
 
                                                 <div class="flex justify-end gap-3 font-outfit">
-                                                    <a @click="$dispatch('close')" class="bg-red-500 !text-white text-sm py-3 px-4 rounded-lg font-medium hover:bg-red-600 transition-colors no-underline">
+                                                    <a @click="$dispatch('close')" class="bg-red-500 !text-white text-sm py-3 px-4 rounded-lg font-medium hover:bg-red-600 transition-colors no-underline cursor-pointer">
                                                         Cancel
                                                     </a>
                                                     <x-main.primary-button type="submit" class="py-3 px-4 gap-2 font-medium">
@@ -377,7 +377,7 @@
                 </div>
 
                 <div class="mt-6 flex justify-end gap-3 font-outfit">
-                    <a @click="$dispatch('close')" class="bg-red-500 !text-white text-sm py-3 px-4 rounded-lg font-medium hover:bg-red-600 transition-colors no-underline">
+                    <a @click="$dispatch('close')" class="bg-red-500 !text-white text-sm py-3 px-4 rounded-lg font-medium hover:bg-red-600 transition-colors no-underline cursor-pointer">
                         Cancel
                     </a>
                     <x-main.primary-button type="submit" class="py-3 px-4 gap-2 font-medium">

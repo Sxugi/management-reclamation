@@ -24,31 +24,37 @@ class UpdatePohonRequest extends FormRequest
     {
         $lahan = $this->route('lahan');
         $pohon = $this->route('pohon');
-        $dataPohon = $this->route('dataPohon');
+        $dataPohonManual = $this->route('dataPohonManual');
 
         return [
             'jenis_pohon_id' => [
                 'required',
                 'exists:jenis_pohon,jenis_pohon_id',
-                Rule::unique('pohon', 'jenis_pohon_id')
-                    ->where(fn ($query) => $query->where('lahan_id', $lahan->lahan_id))
-                    ->ignore($pohon?->pohon_id, 'pohon_id'),
             ],
             'tahun' => [
                 'required',
                 'integer',
-                function ($attribute, $value, $fail) use ($pohon, $dataPohon) {
-                    $exists = \App\Models\DataPohon::where('pohon_id', $pohon->pohon_id)
+                'min:1900',
+                'max:' . (date('Y') + 1),
+                function ($attribute, $value, $fail) use ($pohon, $dataPohonManual, $lahan) {
+                    $jenisPohonId = request('jenis_pohon_id');
+                    $targetPohon = \App\Models\Pohon::where('lahan_id', $lahan->lahan_id)
+                        ->where('jenis_pohon_id', $jenisPohonId)
+                        ->first();
+
+                    if (!$targetPohon) return;
+
+                    $exists = \App\Models\DataPohonManual::where('pohon_id', $targetPohon->pohon_id)
                         ->where('tahun', $value)
-                        ->when($dataPohon, fn ($q) => $q->where('data_pohon_id', '!=', $dataPohon->data_pohon_id))
+                        ->where('data_pohon_manual_id', '!=', $dataPohonManual->data_pohon_manual_id)
                         ->exists();
 
                     if ($exists) {
-                        $fail("Data untuk tahun {$value} sudah ada untuk pohon ini.");
+                        $fail("Data tahun {$value} sudah ada untuk jenis pohon ini.");
                     }
                 },
             ],
-            'jumlah' => 'required|integer|min:1',
+            'jumlah_batang' => 'required|integer|min:1|max:1000000', 
         ];
     }
 
@@ -57,13 +63,17 @@ class UpdatePohonRequest extends FormRequest
      */
     public function messages(): array
     {
-        return [
+         return [
             'jenis_pohon_id.required' => 'Jenis pohon wajib dipilih.',
             'jenis_pohon_id.exists' => 'Jenis pohon tidak valid.',
-            'jenis_pohon_id.unique' => 'Jenis pohon ini sudah ada di lahan ini.',
             'tahun.required' => 'Tahun wajib diisi.',
-            'jumlah.required' => 'Jumlah wajib diisi.',
-            'jumlah.min' => 'Jumlah minimal 1.',
+            'tahun.integer' => 'Tahun harus berupa angka.',
+            'tahun.min' => 'Tahun tidak valid.',
+            'tahun.max' => 'Tahun tidak boleh lebih dari tahun depan.',
+            'jumlah_batang.required' => 'Jumlah batang wajib diisi.', 
+            'jumlah_batang.integer' => 'Jumlah batang harus berupa angka.',
+            'jumlah_batang.min' => 'Jumlah batang minimal 1.', 
+            'jumlah_batang.max' => 'Jumlah batang terlalu besar.',
         ];
     }
 }

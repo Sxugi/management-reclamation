@@ -5,7 +5,7 @@
 <div class="flex flex-row items-center justify-between gap-2 text-white">
     <div class="rounded-lg bg-darkslategray-300 overflow-hidden flex flex-row items-center justify-center gap-2">
         <button type="button" x-on:click="window.location.href='{{ route('lahan.pohon.export', $lahan->lahan_id) }}'" class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" @disabled(!auth()->user()->can('view', $lahan))>
-            <span class="relative leading-5 font-medium">Export Excel</span>
+            <span class="relative leading-5 font-medium">Export</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                 <polyline points="7 10 12 15 17 10"></polyline>

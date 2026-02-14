@@ -7,6 +7,7 @@ use App\Http\Requests\ProgresReklamasi\UpdateProgresReklamasiRequest;
 use App\Models\Plot;
 use App\Models\ProgresReklamasi;
 use App\Models\JenisAktivitas;
+use App\Models\JenisPohon;
 use App\Services\ProgresReklamasiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -37,6 +38,8 @@ class ProgresReklamasiController extends Controller
         // Check authorization
         $this->authorize('create', [ProgresReklamasi::class, $plot]);
 
+        $masterPohon = JenisPohon::orderBy('nama_pohon')->get()->groupBy('kategori');
+
         // Get kategori & aktivitas from query params if available
         $kategori = $request->query('kategori');
         $aktivitas = $request->query('aktivitas');
@@ -56,6 +59,7 @@ class ProgresReklamasiController extends Controller
             'jenisAktivitas' => $jenisAktivitas,
             'data' => [],
             'isEdit' => false,
+            'masterPohon' => $masterPohon,
         ]);
     }
 
@@ -112,6 +116,7 @@ class ProgresReklamasiController extends Controller
         $jenisAktivitas = $progres->jenisAktivitas;
         $kategori = $jenisAktivitas?->kategoriAktivitas?->field;
         $aktivitas = $jenisAktivitas?->field;
+        $masterPohon = JenisPohon::orderBy('nama_pohon')->get()->groupBy('kategori');
 
         // Prefill existing field values
         $data = [];
@@ -140,6 +145,7 @@ class ProgresReklamasiController extends Controller
             'data' => $data,
             'isEdit' => true,
             'existingFiles' => $existingFiles,
+            'masterPohon' => $masterPohon,
         ]);
     }
 
@@ -216,6 +222,58 @@ class ProgresReklamasiController extends Controller
             return redirect()
                 ->route('plot.show', $plot)
                 ->with('error', 'Gagal menghapus progres: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Get total planted trees for monitoring validation
+     * 
+     * @param Plot $plot
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getPlantedTrees(Plot $plot, Request $request)
+    {
+        // Check authorization
+        $this->authorize('view', $plot);
+
+        $jenisPohonId = $request->input('jenis_pohon_id');
+        
+        if (!$jenisPohonId) {
+            return response()->json([
+                'success' => false,
+                'total' => 0,
+                'message' => 'Jenis pohon ID is required'
+            ], 400);
+        }
+
+        try {
+            $total = DB::table('data_pohon_realisasi as dpr')
+                ->join('pohon as p', 'dpr.pohon_id', '=', 'p.pohon_id')
+                ->where('dpr.plot_id', $plot->plot_id)
+                ->where('p.jenis_pohon_id', $jenisPohonId)
+                ->sum('dpr.jumlah_batang');
+
+            return response()->json([
+                'success' => true,
+                'total' => (int)($total ?? 0),
+                'plot_id' => $plot->plot_id,
+                'plot_name' => $plot->nama_plot,
+                'jenis_pohon_id' => $jenisPohonId,
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error getting planted trees for monitoring', [
+                'plot_id' => $plot->plot_id,
+                'jenis_pohon_id' => $jenisPohonId,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'total' => 0,
+                'message' => 'Failed to fetch planted trees data'
+            ], 500);
         }
     }
 

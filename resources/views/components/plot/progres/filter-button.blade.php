@@ -1,4 +1,4 @@
-@props(['plot', 'kategori' => []])
+@props(['plot', 'kategori' => [], 'jenisAktivitas' => []])
 
 <div class="relative inline-block gap-2">
     <a class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200 cursor-pointer"
@@ -44,6 +44,18 @@
                     <option value="">Pilih Kategori</option>
                     @foreach($kategori as $id => $label)
                         <option value="{{ $label }}" @selected(request('category') == $label)>
+                            {{ $label }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <x-main.input-label for="activity" class="block text-sm font-medium text-gray-700 mb-1">Jenis Aktivitas</x-main.input-label>
+                <select id="activity" name="activity" class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
+                    <option value="">Pilih Jenis Aktivitas</option>
+                    @foreach($jenisAktivitas as $id => $label)
+                        <option value="{{ $label }}" @selected(request('activity') == $label)>
                             {{ $label }}
                         </option>
                     @endforeach

@@ -13,7 +13,7 @@
     </x-slot>
 
     <div class="py-6">
-        <div class="self-stretch mx-auto">
+        <div class="self-stretch mx-auto flex flex-col gap-2">
             {{-- Success/Error Messages --}}
             @if(session('success'))
                 <div data-turbo-temporary class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">

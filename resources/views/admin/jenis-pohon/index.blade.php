@@ -19,9 +19,11 @@
          x-data="{ 
             editUrl: '', 
             editName: '',
+            editKategori: '',
             handleEditEvent(detail) {
                 this.editUrl = `{{ route('admin.jenis-pohon.index') }}/${detail.jenis_pohon_id}`;
                 this.editName = detail.nama_pohon;
+                this.editKategori = detail.kategori;
                 $dispatch('open-modal', 'edit-pohon-modal');
             }
          }"
@@ -45,6 +47,15 @@
                     <x-main.input-label for="search" class="block text-sm font-medium text-darkslategray mb-2">Search</x-main.input-label>
                     <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Cari nama pohon..."
                         class="text-sm block w-full border-solid border-[1px] border-gray-300 focus:border-darkslategray focus:ring-darkslategray rounded-md px-3 py-2 box-border font-outfit flex-1 leading-5 bg-transparent">
+                </div>
+                <div class="flex-1">
+                    <x-main.input-label for="kategori" class="block text-sm font-medium text-darkslategray mb-2">Kategori</x-main.input-label>
+                    <select name="kategori" class="mt-1 block w-full text-sm border-gray-300 rounded-md focus:border-darkslategray focus:ring-darkslategray" required>
+                        <option value="" disabled selected>Pilih Kategori</option>
+                        @foreach(\App\Models\JenisPohon::KATEGORI as $key => $label)
+                            <option value="{{ $key }}" {{ request('kategori') == $key ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 <div class="flex items-end gap-2">
                     <button type="submit" 
@@ -75,6 +86,7 @@
                             <tr>
                                 <th class="py-3 px-6 text-center font-bold border-r border-gainsboro w-16">No</th>
                                 <th class="py-3 px-6 text-left font-bold border-r border-gainsboro">Nama Jenis Pohon</th>
+                                <th class="py-3 px-6 text-left font-bold border-r border-gainsboro">Kategori</th>
                                 <th class="py-3 px-6 text-center font-bold border-r border-gainsboro">Digunakan Di</th>
                                 <th class="py-3 px-6 text-center font-bold border-r border-gainsboro">Total Pohon</th> 
                                 <th class="py-3 px-6 text-center font-bold border-gainsboro">Dibuat</th>
@@ -92,6 +104,22 @@
                                     <td class="py-3 px-6 border-r border-gainsboro font-semibold text-darkslategray">
                                         {{ $item->nama_pohon }}
                                     </td>
+
+                                    <td class="py-3 px-6 border-r border-gainsboro text-darkslategray">
+                                        @php
+                                            $kategoriLabel = \App\Models\JenisPohon::KATEGORI[$item->kategori] ?? '-';
+                                            $badgeColor = match($item->kategori) {
+                                                'PIONIR' => 'bg-yellow-100 text-yellow-800',
+                                                'MPTS' => 'bg-green-100 text-green-800',
+                                                'LOKAL' => 'bg-blue-100 text-blue-800',
+                                                'COVER_CROP' => 'bg-purple-100 text-purple-800',
+                                                default => 'bg-gray-100 text-gray-800'
+                                            };
+                                        @endphp
+                                        <span class="px-3 py-1 rounded-full text-xs font-semibold {{ $badgeColor }}">
+                                            {{ $kategoriLabel }}
+                                        </span>
+                                    </td>
                                     
                                     <td class="py-3 px-6 text-center border-r border-gainsboro">
                                         <span class="px-3 py-1 rounded-full text-xs font-semibold border bg-blue-100 text-blue-800 border-blue-200">
@@ -101,7 +129,7 @@
 
                                     <td class="py-3 px-6 text-center border-r border-gainsboro">
                                         <span class="font-bold text-darkslategray">
-                                            {{ number_format($item->data_pohon_sum_jumlah ?? 0, 0, ',', '.') }}
+                                            {{ number_format($item->grand_total ?? 0, 0, ',', '.') }}
                                         </span>
                                         <span class="text-xs text-slategray ml-1">Btg</span>
                                     </td>
@@ -136,7 +164,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="py-12 text-center">
+                                    <td colspan="6" class="py-12 text-center">
                                         <div class="flex flex-col items-center justify-center gap-3 text-slategray">
                                             <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center">
                                                 <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -166,7 +194,7 @@
                             <div class="text-xs text-slategray font-medium">Total Penggunaan</div>
                         </div>
                         <div>
-                            <div class="text-2xl font-bold text-green-600">{{ number_format($data->sum('data_pohon_sum_jumlah'), 0, ',', '.') }}</div>
+                            <div class="text-2xl font-bold text-green-600">{{ number_format($data->sum('grand_total'), 0, ',', '.') }}</div>
                             <div class="text-xs text-slategray font-medium">Total Batang Pohon</div>
                         </div>
                     </div>
@@ -188,6 +216,15 @@
                     <x-main.input-label value="Nama Pohon" />
                     <input type="text" name="nama_pohon" class="mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-darkslategray focus:ring-darkslategray" required placeholder="Contoh: Jati, Mahoni...">
                 </div>
+                <div class="mb-4">
+                    <x-main.input-label value="Kategori" />
+                    <select name="kategori" class="mt-1 block w-full text-sm border-gray-300 rounded-md focus:border-darkslategray focus:ring-darkslategray" required>
+                        <option value="" disabled selected>Pilih Kategori</option>
+                        @foreach(\App\Models\JenisPohon::KATEGORI as $key => $label)
+                            <option value="{{ $key }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
+                </div>
                 <div class="mt-6 flex justify-end gap-3">
                     <a @click="$dispatch('close')" class="bg-red-500 !text-white text-sm py-3 px-4 rounded-lg font-semibold hover:bg-red-600 transition-colors no-underline cursor-pointer">
                         Cancel
@@ -208,6 +245,15 @@
                 <div class="mb-4">
                     <x-main.input-label value="Nama Pohon" />
                     <input type="text" name="nama_pohon" x-model="editName" class="mt-1 block w-full text-sm border-gray-300 rounded-md shadow-sm focus:border-darkslategray focus:ring-darkslategray" required>
+                </div>
+                <div class="mb-4">
+                    <x-main.input-label value="Kategori" />
+                    <select name="kategori" x-model="editKategori" class="mt-1 block w-full text-sm border-gray-300 rounded-md focus:border-darkslategray focus:ring-darkslategray" required>
+                        <option value="" disabled>Pilih Kategori</option>
+                        @foreach(\App\Models\JenisPohon::KATEGORI as $key => $label)
+                            <option value="{{ $key }}">{{ $label }}</option>
+                        @endforeach
+                    </select>
                 </div>
                 <div class="mt-6 flex justify-end gap-3">
                     <a @click="$dispatch('close')" class="bg-red-500 !text-white text-sm py-3 px-4 rounded-lg font-semibold hover:bg-red-600 transition-colors no-underline cursor-pointer">

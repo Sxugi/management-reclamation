@@ -34,14 +34,16 @@
         @endif
 
         <x-plot.metrics :plot="$plot" :activityLogs="$activityLogs" :progres="$progres" :progressPercent="$progressPercent" :progresDelta="$progresDelta"/>
+        <x-plot.scan.qrcode-row :plot="$plot" />
+        <x-plot.handover.container :plot="$plot" :handover="$handover ?? null"/>
         <x-plot.target.container :plot="$plot" :target="$target"/>
-        <x-plot.progres.list :plot="$plot" :lahan="$lahan" :progres="$progres" :kategori="$kategori" :hasFilter="$hasFilter" />
+        <x-plot.progres.list :plot="$plot" :lahan="$lahan" :progres="$progres" :kategori="$kategori" :jenisAktivitas="$jenisAktivitas" :hasFilter="$hasFilter" />
         <div class="bg-white overflow-hidden shadow-md rounded-lg sm:rounded-lg">
             <div class="p-6 font-outfit">
                 <div class="self-stretch flex flex-row items-center justify-start gap-1 mb-6">
                     <div class="flex-1 flex flex-col items-start justify-start gap-1 text-lg text-gray">
                         <div class="self-stretch relative leading-7 font-semibold">Area Lahan Reklamasi</div>
-                        <div class="self-stretch relative text-sm leading-5 text-slategray">Plot lahan menjadi beberapa bagian.</div>
+                        <div class="self-stretch relative text-sm leading-5 text-slategray">Plot Area Lahan Reklamasi.</div>
                     </div>
                     <button type="button" x-on:click="window.location.href='{{ route('plot.edit', [$plot->plot_id]) }}'" class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" @disabled(!auth()->user()->can('update', [\App\Models\Plot::class, $plot]))>
                         <span class="relative leading-5 font-medium">Edit</span>
@@ -51,7 +53,7 @@
                         </svg>
                     </button>
                 </div>
-                <x-plot.map-controls :plot="$plot" :lahan="$lahan" :enableDraw="false"/>
+                <x-plot.map-controls :plot="$plot" :lahan="$lahan" :photoMarkersData="$photoMarkersData" :enableDraw="false"/>
             </div>
         </div>
     </div>

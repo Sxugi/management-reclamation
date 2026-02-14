@@ -4,10 +4,10 @@
             Laporan Harian
         </div>
         <div class="flex gap-3">
-            <x-plot.progres.filter-button :plot="$plot" :kategori="$kategori"/>
+            <x-plot.progres.filter-button :plot="$plot" :kategori="$kategori" :jenisAktivitas="$jenisAktivitas" />
             <div class="rounded-lg bg-darkslategray-300 overflow-hidden flex flex-row items-center justify-center gap-2">
                 <button type="button" x-on:click="window.location.href='{{ route('plot.progres.export', $plot->plot_id) }}'" class="rounded-lg bg-darkslategray overflow-hidden flex flex-row items-center justify-center py-3 px-4 gap-2 !text-white no-underline hover:bg-slategray-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed" @disabled(!auth()->user()->can('view', $plot))>
-                    <span class="relative leading-5 font-medium">Export Excel</span>
+                    <span class="relative leading-5 font-medium">Export</span>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
                         <polyline points="7 10 12 15 17 10"></polyline>
@@ -32,6 +32,7 @@
                     <tr>
                         <x-main.sortable-header column="tanggal" title="Tanggal" class="h-6 py-3 border-r"/>
                         <x-main.sortable-header column="kategori" title="Kategori" class="h-6 py-3 border-r"/>
+                        <th class="py-3 px-6 text-center font-bold border-gainsboro border-r whitespace-nowrap">Jenis Aktivitas</th>
                         <th class="py-3 px-6 text-center font-bold border-gainsboro border-r whitespace-nowrap">Data Input</th>
                         <th class="py-3 px-6 text-center font-bold border-gainsboro whitespace-nowrap">Catatan</th>
                     </tr>
@@ -42,6 +43,9 @@
                             <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-t border-r whitespace-nowrap">{{ $report->tanggal->format('d F Y') }}</td>
                             <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-t border-r whitespace-nowrap">
                                 {{ $report->jenisAktivitas?->kategoriAktivitas?->label ?? 'Unknown' }}
+                            </td>
+                            <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-t border-r whitespace-nowrap">
+                                {{ $report->jenisAktivitas?->label ?? 'Unknown' }}
                             </td>
                             <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-t border-r whitespace-nowrap">
                                 @if($report->fieldValues->count() > 0)
@@ -96,11 +100,11 @@
                     @empty
                         @if($hasFilter)
                             <tr class="border-none">
-                                <td colspan="4"><x-plot.progres.empty-state :hasFilter="true" /></td>
+                                <td colspan="5"><x-plot.progres.empty-state :hasFilter="true" /></td>
                             </tr>
                         @else
                             <tr>
-                                <td colspan="4" class="py-6 px-6 text-center text-gray-400">No data progress available yet</td>
+                                <td colspan="5" class="py-6 px-6 text-center text-gray-400">No data progress available yet</td>
                             </tr>
                         @endif
                     @endforelse
