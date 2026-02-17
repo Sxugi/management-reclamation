@@ -291,7 +291,7 @@
                         </div>
                     </div>
 
-                    <div id="planted-details-container" class="hidden lg:col-span-1 bg-gray-50/50 border border-0 border-l border-gainsboro flex-col h-full overflow-hidden transition-all duration-300">
+                    <div id="planted-details-container" class="hidden lg:col-span-1 bg-gray-50/50 border border-gainsboro flex-col h-full overflow-hidden transition-all duration-300">
                         <div class="p-4 border-b border-gainsboro bg-gray-50 flex items-center justify-between">
                             <h4 class="font-bold text-gray-700 text-sm">Rincian Kategori</h4>
                             <span class="text-[10px] text-gray-400 uppercase tracking-wider">Scroll untuk detail</span>

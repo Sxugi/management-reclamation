@@ -341,16 +341,16 @@ class DashboardChartRenderer {
      * Helper to get Tailwind class colors for UI elements
      */
     getCategoryColor(categoryName) {
-        if (!categoryName) return 'bg-gray-500';
+        if (!categoryName) return 'text-gray-500';
         
         const tailwindMap = {
-            'PIONIR': 'bg-emerald-500',
-            'LOKAL': 'bg-blue-500',
-            'MPTS': 'bg-amber-500',
-            'COVER_CROP': 'bg-purple-500'
+            'PIONIR': 'text-emerald-500',
+            'LOKAL': 'text-blue-500',
+            'MPTS': 'text-amber-500',
+            'COVER_CROP': 'text-purple-500'
         };
         
-        return tailwindMap[categoryName.toUpperCase()] || 'bg-gray-500';
+        return tailwindMap[categoryName.toUpperCase()] || 'text-gray-500';
     }
 
     /**
@@ -522,16 +522,16 @@ class DashboardChartRenderer {
             const catKey = category.kategori.toLowerCase();
 
             listHtml += `
-                <div class="group bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-all hover:shadow-md mb-3">
+                <div class="group bg-white rounded-xl border border-gainsboro shadow-sm overflow-hidden transition-all hover:shadow-md mb-3">
                     <button class="w-full p-3 flex items-center justify-between bg-white hover:bg-gray-50 transition-colors"
                             onclick="togglePlantedCategory('${catKey}')">
                         
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-[10px] font-bold ${catBgClass}">
+                            <div class="w-8 h-8 rounded-full bg-almostgray flex items-center justify-center text-[10px] font-bold ${catBgClass}">
                                 ${category.kategori.substring(0, 2)}
                             </div>
                             <div class="text-left">
-                                <div class="font-bold text-gray-700 text-xs">${category.kategori}</div>
+                                <div class="font-bold text-gray-700 text-xs">${this.formatLabel(category.kategori)}</div>
                                 <div class="text-[10px] text-gray-400">${category.species_count} Species</div>
                             </div>
                         </div>
@@ -551,7 +551,7 @@ class DashboardChartRenderer {
                     </button>
                     
                     <div id="${catKey}-detail" 
-                        class="${isExpanded ? '' : 'hidden'} bg-gray-50 border-t border-gray-100 p-2 space-y-1">
+                        class="${isExpanded ? '' : 'hidden'} bg-gray-50 border-t border-gainsboro p-2 space-y-1">
                         
                         ${species.length > 0 ? species.map(s => `
                             <div class="flex items-center justify-between py-1.5 px-2 rounded hover:bg-white transition-colors border border-transparent hover:border-gray-200">
