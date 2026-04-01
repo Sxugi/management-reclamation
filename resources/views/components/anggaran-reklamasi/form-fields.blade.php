@@ -79,7 +79,7 @@
                         @endforeach
                     </select>
                 </div>
-                <x-main.input-error :messages="$errors->get('kategori_anggaran')" data-turbo-temporary />
+                <x-main.input-error :messages="$errors->get('kategori_anggaran_id')" data-turbo-temporary />
             </div>
 
             <div class="self-stretch flex flex-col items-start justify-start gap-1.5">

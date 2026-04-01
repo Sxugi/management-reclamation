@@ -50,13 +50,27 @@
                             <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-t border-r whitespace-nowrap">
                                 @if($report->fieldValues->count() > 0)
                                     @php
+                                        // Get all JenisPohon records and key them by ID for easy lookup
+                                        $jenisPohonMap = \App\Models\JenisPohon::all()->keyBy('jenis_pohon_id');
+
                                         // Build user-friendly field values using already loaded data
-                                        $fieldData = $report->fieldValues->map(function($fieldValue) {
+                                        $fieldData = $report->fieldValues->map(function($fieldValue) use ($jenisPohonMap) {
                                             $fieldDef = $fieldValue->fieldDefinition;
+                                            $fieldKey = $fieldDef->field_key ?? null;
                                             $fieldLabel = $fieldDef->field_label ?? 'Unknown';
                                             $value = $fieldValue->field_value;
                                             $satuan = $fieldDef->satuan ?? '';
                                             
+                                            // Special handling for certain field keys to replace IDs with names
+                                            if ($fieldKey === 'jenis_pohon_id' && isset($jenisPohonMap[$value])) {
+                                                // Jika key-nya jenis_pohon_id, timpa $value (yang aslinya ID) dengan nama pohon
+                                                $value = $jenisPohonMap[$value]->nama_pohon;
+                                                // Hilangkan satuan (opsional, karena satuan 'id' tidak relevan untuk nama)
+                                                $satuan = ''; 
+                                            } elseif ($fieldKey === 'metode_sampling') {
+                                                $value = ucwords(str_replace('_', ' ', $value));
+                                            }
+
                                             // Format value with unit if available
                                             $formattedValue = $value . ($satuan ? ' ' . $satuan : '');
                                             return $fieldLabel . ': ' . $formattedValue;

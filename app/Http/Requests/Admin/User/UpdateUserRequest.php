@@ -54,12 +54,10 @@ class UpdateUserRequest extends FormRequest
             'password' => [
                 'nullable',
                 'string',
+                'required',
                 Password::min(8)
                     ->letters()
-                    ->mixedCase()
-                    ->numbers()
-                    ->symbols()
-                    ->uncompromised(),
+                    ->numbers(),
                 'confirmed',
             ],
             'role' => [
@@ -137,10 +135,7 @@ class UpdateUserRequest extends FormRequest
             'password.min' => 'Password minimal :min karakter.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
             'password.letters' => 'Password harus mengandung huruf.',
-            'password. mixed_case' => 'Password harus mengandung huruf besar dan kecil.',
             'password.numbers' => 'Password harus mengandung angka.',
-            'password.symbols' => 'Password harus mengandung simbol.',
-            'password.uncompromised' => 'Password ini pernah bocor dalam data breach. Silakan gunakan password lain.',
 
             // Role
             'role.required' => 'Role wajib dipilih.',

@@ -35,6 +35,11 @@ class FileRencanaController extends Controller
 
         $validated = $request->validate([
             'file' => 'required|file|mimes:pdf|max:10240',
+        ], $messages = [
+            'file.required' => 'File rencana harus diunggah.',
+            'file.file' => 'File yang diunggah harus berupa file.',
+            'file.mimes' => 'File rencana harus berformat PDF.',
+            'file.max' => 'Ukuran file rencana tidak boleh lebih dari 10MB.',
         ]);
 
         DB::beginTransaction();

@@ -41,6 +41,13 @@ class FileLaporanController extends Controller
         $validated = $request->validate([
             'file' => 'required|file|mimes:pdf|max:10240',
             'tahun' => 'required|integer'
+        ], $messages = [
+            'file.required' => 'File laporan harus diunggah.',
+            'file.file' => 'File yang diunggah harus berupa file.',
+            'file.mimes' => 'File laporan harus berformat PDF.',
+            'file.max' => 'Ukuran file laporan tidak boleh lebih dari 10MB.',
+            'tahun.required' => 'Tahun laporan harus diisi.',
+            'tahun.integer' => 'Tahun laporan harus berupa angka.'
         ]);
 
         DB::beginTransaction();

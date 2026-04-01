@@ -12,6 +12,10 @@ class PublicScanController extends Controller
 {
     public function show($uuid)
     {
+        if (!$this->isValidUuid($uuid)) {
+            abort(404, 'Invalid QR code format.');
+        }
+
         $plot = Plot::where('uuid', $uuid)
             ->with([
                 'lahan',
@@ -45,5 +49,14 @@ class PublicScanController extends Controller
             'photoMarkersData' => $photoMarkersData,
             'technicalSummary' => $technicalSummary,
         ]);
+    }
+
+    /**
+     * Validate UUID format (v4)
+     */
+    private function isValidUuid($uuid)
+    {
+        $pattern = '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i';
+        return preg_match($pattern, $uuid) === 1;
     }
 }

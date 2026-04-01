@@ -24,7 +24,7 @@ class UpdateDokumentasiRequest extends FormRequest
         return [
             'nama' => 'required|string|max:255',
             'deskripsi' => 'nullable|string|max:1000',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:10240', // Maksimal 10MB
         ];
     }
 
@@ -38,7 +38,7 @@ class UpdateDokumentasiRequest extends FormRequest
             'deskripsi.max' => 'Deskripsi tidak boleh lebih dari 1000 karakter.',
             'image.image' => 'File yang diunggah harus berupa gambar.',
             'image.mimes' => 'Gambar harus berformat jpeg, png, atau jpg.',
-            'image.max' => 'Ukuran gambar tidak boleh lebih dari 5MB.',
+            'image.max' => 'Ukuran gambar tidak boleh lebih dari 10MB.',
         ];
     }   
 }

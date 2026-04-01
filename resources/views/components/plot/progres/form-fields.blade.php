@@ -369,11 +369,6 @@
                                     <input type="hidden" x-bind:name="'remove_' + key + '[]'" x-bind:value="removedFile" />
                                 </template>
 
-                                <!-- Error message -->
-                                <div x-show="getErrorMessage(key)" class="text-tomato text-xs mt-1">
-                                    <p x-text="getErrorMessage(key)"></p>
-                                </div>
-
                                 <!-- File format and size info -->
                                 <p class="text-xs text-gray-500">Dapat memasukan lebih dari satu dokumentasi</p>
                             </div>

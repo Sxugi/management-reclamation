@@ -69,6 +69,17 @@ class DataGudang extends Model
     }
 
     /**
+     * Auto-update status if not provided or empty
+     */
+    public function autoUpdateStatusIfEmpty(): void
+    {
+        // If status is not set or empty, calculate it automatically
+        if (empty($this->status_barang)) {
+            $this->autoCorrectStatus();
+        }
+    }
+
+    /**
      * Auto-correct status based on stock calculation
      */
     public function autoCorrectStatus(): void

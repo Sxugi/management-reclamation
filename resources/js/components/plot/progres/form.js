@@ -131,7 +131,25 @@ export function FormProgresData(config = {}) {
 
         // Error handling
         getErrorMessage(fieldKey) {
-            return this.errors && this.errors[fieldKey] ? this.errors[fieldKey][0] : '';
+            if (this.errors && this.errors[fieldKey]) {
+                return Array.isArray(this.errors[fieldKey]) 
+                    ? this.errors[fieldKey][0] 
+                    : this.errors[fieldKey];
+            }
+            
+            if (this.errors) {
+                const nestedErrors = Object.keys(this.errors)
+                    .filter(errorKey => errorKey.startsWith(fieldKey + '.'))
+                    .map(errorKey => this.errors[errorKey]);
+                
+                if (nestedErrors.length > 0) {
+                    return Array.isArray(nestedErrors[0]) 
+                        ? nestedErrors[0][0] 
+                        : nestedErrors[0];
+                }
+            }
+            
+            return '';
         },
 
         // File handling methods

@@ -36,7 +36,7 @@ class StoreProgresReklamasiRequest extends FormRequest
             ],
             'catatan' => 'nullable|string|max:500',
             'dokumentasi' => 'nullable|array',
-            'dokumentasi.*' => 'nullable|image|max:5120', // 5MB per image
+            'dokumentasi.*' => 'nullable|image|max:10240', // 10MB per image
         ];
 
         // Add dynamic field validation rules with plot area limits
@@ -619,7 +619,7 @@ class StoreProgresReklamasiRequest extends FormRequest
                     $rules = ['nullable', 'array'];
                 } else {
                     $rules[] = 'file';
-                    $rules[] = 'max:5120'; // 5MB default
+                    $rules[] = 'max:10240'; // 10MB default
                 }
                 break;
                 
@@ -796,7 +796,7 @@ class StoreProgresReklamasiRequest extends FormRequest
             'tanggal.before_or_equal' => 'Tanggal tidak boleh mendahului dari hari ini.',
             'catatan.max' => 'Catatan maksimal 500 karakter.',
             'dokumentasi.*.image' => 'File dokumentasi harus berupa gambar.',
-            'dokumentasi.*.max' => 'Ukuran gambar maksimal 5MB.',
+            'dokumentasi.*.max' => 'Ukuran gambar maksimal 10MB.',
             '*.before_or_equal' => 'Tanggal tidak boleh lebih dari hari ini.',
             
             'metode_sampling.required' => 'Metode monitoring wajib dipilih.',

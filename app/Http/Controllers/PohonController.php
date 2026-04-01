@@ -143,7 +143,7 @@ class PohonController extends Controller
         $validated = $request->validated();
         
         try {
-            DB::transaction(function () use ($pohon, $dataPohon, $validated, $lahan) {
+            DB::transaction(function () use ($pohon, $dataPohonManual, $validated, $lahan) {
                 if ($pohon->jenis_pohon_id != $validated['jenis_pohon_id']) {
                     $newParent = Pohon::firstOrCreate([
                         'lahan_id' => $lahan->lahan_id,
