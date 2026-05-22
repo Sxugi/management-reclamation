@@ -18,8 +18,8 @@
             <tbody>
                 @forelse($plot ?? [] as $plot)
                     <tr>
-                        <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-t border-r">{{ $plot->nama_plot }}</td>
-                        <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-t border-r">{{ $plot->luas_area }}</td>
+                        <td class="py-3 px-6 text-sm text-left text-gray leading-5 border-gainsboro border-t border-r">{{ $plot->nama_plot }}</td>
+                        <td class="py-3 px-6 text-sm text-left text-gray leading-5 border-gainsboro border-t border-r">{{ $plot->luas_area }}</td>
                         <td class="py-3 px-6 border-gainsboro border-t border-l">
                             <div class="flex flex-row items-center justify-center gap-3">
                                 <button 

@@ -84,10 +84,21 @@ class DataPohonService
                 $query->join('jenis_pohon', 'pohon.jenis_pohon_id', '=', 'jenis_pohon.jenis_pohon_id')
                   ->orderBy('jenis_pohon.nama_pohon', $direction)
                   ->select('pohon.*');
-            } elseif ($sort === 'total') {
-                $query->withSum('dataRealisasi as total_realisasi', 'jumlah_batang')
-                      ->withSum('dataManual as total_manual', 'jumlah_batang')
-                      ->orderByRaw('COALESCE(total_realisasi, 0) + COALESCE(total_manual, 0) ' . $direction);
+            } 
+            elseif ($sort === 'total') {
+                $query->leftJoin('data_pohon_realisasi', 'pohon.pohon_id', '=', 'data_pohon_realisasi.pohon_id')
+                    ->leftJoin('data_pohon_manual', 'pohon.pohon_id', '=', 'data_pohon_manual.pohon_id')
+                    ->select('pohon.*', \DB::raw('SUM(COALESCE(data_pohon_realisasi.jumlah_batang, 0)) + SUM(COALESCE(data_pohon_manual.jumlah_batang, 0)) as total_trees'))
+                    ->groupBy('pohon.pohon_id')
+                    ->orderBy('total_trees', $direction);
+            }
+            elseif ($sort === 'tahun') {
+                $query->selectRaw('pohon.*, 
+                        MAX(COALESCE(dpr.tahun, dpm.tahun)) as latest_tahun')
+                    ->leftJoin('data_pohon_realisasi as dpr', 'pohon.pohon_id', '=', 'dpr.pohon_id')
+                    ->leftJoin('data_pohon_manual as dpm', 'pohon.pohon_id', '=', 'dpm.pohon_id')
+                    ->groupBy('pohon.pohon_id')
+                    ->orderBy('latest_tahun', $direction);
             }
         }
 

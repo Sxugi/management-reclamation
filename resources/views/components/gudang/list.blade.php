@@ -43,7 +43,7 @@
                             can_delete: {{ auth()->user()->can('delete', $data) ? 'true' : 'false' }},
                         })">
                         
-                        <td class="py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
+                        <td class="py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
                             {{ \Carbon\Carbon::parse($data->tanggal_masuk)->format('d M Y') }}
                         </td>
 
@@ -78,7 +78,7 @@
                             <span class="text-xs text-gray-400 ml-0.5">{{ $data->satuan }}</span>
                         </td>
 
-                        <td class="py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
+                        <td class="py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border-b-[1px] border-t-[0px] border-r-[1px] border-l-[0px] whitespace-nowrap">
                             {{ $data->lokasi_penyimpanan }}
                         </td>
 

@@ -96,11 +96,11 @@
                     <tr class="cursor-pointer hover:bg-lightgray transition-colors"
                         onclick="window.openPohonModal({{ $modalPayloadJson }})">
                         
-                        <td class="py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border border-l-0 whitespace-nowrap">
+                        <td class="py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border border-l-0 whitespace-nowrap">
                             {{ $data->jenisPohon->nama_pohon ?? '-' }}
                         </td>
 
-                        <td class="py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border whitespace-nowrap">
+                        <td class="py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border whitespace-nowrap">
                             @php
                                 $kategori = strtoupper($data->jenisPohon->kategori ?? '-');
                                 $badgeClass = match($kategori) {
@@ -116,7 +116,7 @@
                             </span>
                         </td>
 
-                        <td class="py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border whitespace-nowrap">
+                        <td class="py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border whitespace-nowrap">
                             @php
                                 $years = $sortedDataPohon->pluck('tahun')->unique();
                                 $count = $years->count();
@@ -135,7 +135,7 @@
                             @endif
                         </td>
 
-                        <td class="py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border border-r-0 whitespace-nowrap font-semibold">
+                        <td class="py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border border-r-0 whitespace-nowrap font-semibold">
                             {{ number_format($data->SUM ?? 0, 0, ',', '.') }}
                         </td>
                     </tr>

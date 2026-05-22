@@ -1014,18 +1014,21 @@ class DashboardService
      */
     public static function getBlockHistorical(int $plotId, string $period = '30days'): array
     {
-        // Get lahan_id for this plot
-        $lahanId = DB::table('plot')->where('plot_id', $plotId)->value('lahan_id');
-        
-        // Check for recent activity on this specific plot
+        // Check if there's recent activity in this plot to determine caching strategy
         $hasRecentActivity = DB::table('progres')
             ->where('plot_id', $plotId)
             ->where('created_at', '>=', Carbon::now()->subDay())
             ->exists();
 
-        $cacheKey = "block_historical_{$plotId}_{$period}" . ($hasRecentActivity ? '_active' : '_stable');
-        $cacheTime = $hasRecentActivity ? 120 : 600; // 2 minutes vs 10 minutes
+        // Cache key includes activity status to allow more frequent updates for active plots
+        $cacheKey = "block_historical_{$plotId}_{$period}";
+        if ($hasRecentActivity) {
+            $cacheKey .= '_active';
+        }
+        
+        $cacheTime = $hasRecentActivity ? 120 : 600;
 
+        // For active plots, we want fresher data, so we cache for a shorter time. For inactive plots, we can cache longer since data won't change often.
         return Cache::remember($cacheKey, $cacheTime, function () use ($plotId, $period) {
             $days = match ($period) {
                 '7days' => 7,
@@ -1035,24 +1038,45 @@ class DashboardService
                 default => 30,
             };
 
+            $startDate = now()->subDays($days - 1)->toDateString();
+            $endDate = now()->toDateString();
+
+            // Get the LAST value BEFORE this period starts
+            $previousPercent = DB::table('progres_snapshots')
+                ->where('plot_id', $plotId)
+                ->where('date', '<', $startDate)
+                ->selectRaw('MAX(percent) as max_percent')
+                ->value('max_percent');
+            
+            $lastKnownPercent = $previousPercent ? round((float)$previousPercent, 2) : 0.0;
+
+            // Get snapshots within the period
             $rows = DB::table('progres_snapshots')
                 ->where('plot_id', $plotId)
-                ->whereBetween('date', [now()->subDays($days - 1)->toDateString(), now()->toDateString()])
-                ->selectRaw('DATE(date) as date, AVG(percent) as percent')
+                ->whereBetween('date', [$startDate, $endDate])
+                ->selectRaw('DATE(date) as date, MAX(percent) as max_percent')
                 ->groupByRaw('DATE(date)')
                 ->orderBy('date')
                 ->get();
 
-            if ($rows->isEmpty()) {
-                return [];
-            }
+            $dataMap = $rows->keyBy('date')
+                ->map(fn($r) => round((float)$r->max_percent, 2))
+                ->toArray();
 
+            // Fill complete date range
             $result = [];
-            $map = $rows->keyBy('date')->map(fn($r) => round((float)$r->percent, 2))->toArray();
-            
+
             for ($i = $days - 1; $i >= 0; $i--) {
-                $d = now()->subDays($i)->format('Y-m-d');
-                $result[] = ['date' => $d, 'percent' => $map[$d] ?? 0.0];
+                $currentDate = now()->subDays($i)->format('Y-m-d');
+                
+                if (isset($dataMap[$currentDate])) {
+                    $lastKnownPercent = max($dataMap[$currentDate], $lastKnownPercent);
+                }
+                
+                $result[] = [
+                    'date' => $currentDate,
+                    'percent' => $lastKnownPercent
+                ];
             }
 
             return $result;

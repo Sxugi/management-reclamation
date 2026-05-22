@@ -40,14 +40,14 @@
                 <tbody>
                     @forelse($progres as $report)
                         <tr class="hover:bg-lightgray cursor-pointer border-gainsboro border-b" onclick='openDetailModal(@json($report->modal_data))'>
-                            <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-t border-r whitespace-nowrap">{{ $report->tanggal->format('d F Y') }}</td>
-                            <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-t border-r whitespace-nowrap">
+                            <td class="py-3 px-6 text-sm text-left text-gray leading-5 border-gainsboro border-t border-r whitespace-nowrap">{{ $report->tanggal->format('d F Y') }}</td>
+                            <td class="py-3 px-6 text-sm text-left text-gray leading-5 border-gainsboro border-t border-r whitespace-nowrap">
                                 {{ $report->jenisAktivitas?->kategoriAktivitas?->label ?? 'Unknown' }}
                             </td>
-                            <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-t border-r whitespace-nowrap">
+                            <td class="py-3 px-6 text-sm text-left text-gray leading-5 border-gainsboro border-t border-r whitespace-nowrap">
                                 {{ $report->jenisAktivitas?->label ?? 'Unknown' }}
                             </td>
-                            <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-t border-r whitespace-nowrap">
+                            <td class="py-3 px-6 text-sm text-left text-gray leading-5 border-gainsboro border-t border-r whitespace-nowrap">
                                 @if($report->fieldValues->count() > 0)
                                     @php
                                         // Get all JenisPohon records and key them by ID for easy lookup
@@ -107,7 +107,7 @@
                                     </form>
                                 </x-main.modal>
                             </td>
-                            <td class="py-3 px-6 text-sm text-center text-gray leading-5 border-gainsboro border-t">
+                            <td class="py-3 px-6 text-sm text-left text-gray leading-5 border-gainsboro border-t">
                                 <x-main.tooltip :content="$report->catatan" :max-length="30" position="bottom" /> 
                             </td>
                         </tr>

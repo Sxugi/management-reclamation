@@ -361,7 +361,7 @@
     <div class="flex justify-end gap-3 pt-4 border-t">
         <button 
             type="button" 
-            x-on:click="$dispatch('close')"
+            x-on:click="$dispatch('close-modal', 'form-handover')"
             class="bg-red-500 !text-white text-sm py-3 px-4 rounded-lg font-medium hover:bg-red-600 transition-colors no-underline"
         >
             Cancel

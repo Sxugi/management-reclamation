@@ -115,12 +115,12 @@
                             </td>
                         @endif
 
-                        <td class="bulan-cell py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border-r-[1px] border-b-[1px] border-[0px] whitespace-nowrap cursor-pointer"
+                        <td class="bulan-cell py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border-r-[1px] border-b-[1px] border-[0px] whitespace-nowrap cursor-pointer"
                             onclick="window.openAnggaranModal({{ ($groupItems->toJson()) }})">
                             {{ ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'][$row->bulan-1] ?? $row->bulan }}
                         </td>
 
-                        <td class="nominal-cell py-3 px-3 text-sm text-center text-gray leading-5 border-gainsboro border-solid border-r-[1px] border-b-[1px] border-[0px] whitespace-nowrap cursor-pointer"
+                        <td class="nominal-cell py-3 px-3 text-sm text-left text-gray leading-5 border-gainsboro border-solid border-r-[1px] border-b-[1px] border-[0px] whitespace-nowrap cursor-pointer"
                             onclick="window.openAnggaranModal({{ ($groupItems->toJson()) }})">
                             Rp.{{ number_format($row->nominal, 0, ',', '.') }}
 
