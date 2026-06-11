@@ -105,22 +105,28 @@
 
                                     <td class="py-3 px-6 text-center border-r border-gainsboro text-gray-500">
                                         {{ $item->created_at->format('d F Y') }}
-                                    </td>
 
-                                    <x-main.modal name="confirm-delete-{{ $item->kategori_anggaran_id }}" focusable>
-                                        <form method="POST" action="{{ route('admin.kategori-anggaran.destroy', $item) }}" class="p-6 text-left" onclick="event.stopPropagation()">
-                                            @csrf @method('DELETE')
-                                            <h2 class="text-lg font-medium text-gray-900">Hapus Kategori?</h2>
-                                            <p class="mt-1 text-sm text-gray-600">
-                                                Yakin hapus <strong>{{ $item->nama_kategori }}</strong>?
-                                                <br>Data tidak bisa dihapus jika sedang digunakan di anggaran.
-                                            </p>
-                                            <div class="mt-6 flex justify-end gap-3">
-                                                <x-main.secondary-button @click="$dispatch('close')">Batal</x-main.secondary-button>
-                                                <x-main.danger-button type="submit">Hapus</x-main.danger-button>
-                                            </div>
-                                        </form>
-                                    </x-main.modal>
+                                        <x-main.modal name="confirm-delete-{{ $item->kategori_anggaran_id }}" focusable>
+                                            <form method="POST" action="{{ route('admin.kategori-anggaran.destroy', $item) }}" class="p-6 text-left" onclick="event.stopPropagation()">
+                                                @csrf 
+                                                @method('DELETE')
+                                                <h2 class="text-lg font-medium text-gray-900">
+                                                    {{ __('Are you sure you want to delete this Category ' . $item->nama_kategori . '?') }}
+                                                </h2>
+                                                <p class="mt-1 text-sm text-gray-600">
+                                                    {{ __('Once deleted, all data related to this category will be permanently lost. This action cannot be undone.') }}
+                                                </p>
+                                                <div class="mt-6 flex justify-end font-outfit">
+                                                    <x-main.secondary-button @click="$dispatch('close')">
+                                                        {{ __('Cancel') }}
+                                                    </x-main.secondary-button>
+                                                    <x-main.danger-button type="submit" class="ml-3">
+                                                        {{ __('Delete') }}
+                                                    </x-main.danger-button>
+                                                </div>
+                                            </form>
+                                        </x-main.modal>
+                                    </td>
                                 </tr>
                             @empty
                                 <tr>

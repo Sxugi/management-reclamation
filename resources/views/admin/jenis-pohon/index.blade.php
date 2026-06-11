@@ -150,11 +150,11 @@
                                                     {{ __('Once deleted, all data related to this jenis pohon will be permanently lost.This action cannot be undone. Data cannot be deleted if it is currently used in any lahan.') }}
                                                 </p>
 
-                                                <div class="mt-6 flex justify-end gap-3 font-outfit">
+                                                <div class="mt-6 flex justify-end font-outfit">
                                                     <x-main.secondary-button @click="$dispatch('close')">
                                                         {{ __('Cancel') }}
                                                     </x-main.secondary-button>
-                                                    <x-main.danger-button type="submit">
+                                                    <x-main.danger-button type="submit" class="ml-3">
                                                         {{ __('Delete') }}
                                                     </x-main.danger-button>
                                                 </div>
